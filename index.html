@@ -1016,7 +1016,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   let currentVendor=null, vendorCategory='Todas', vendorSearchTerm='';
   let vendorRefreshTimer=null, hideOutOfStock=false, modalProduct=null;
   // Order form state
-  let orderProduct=null, orderQty=1, orderMetodoPago='contraentrega';
+ let orderProduct=null, orderQty=1, orderMetodoPago='contraentrega', orderVendorName=null;
 
   const $=sel=>document.querySelector(sel);
   function esc(str){const d=document.createElement('div');d.textContent=str==null?'':String(str);return d.innerHTML;}
@@ -1067,6 +1067,13 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
       return;
     }
     orderProduct=data;
+     orderVendorName=null;
+    if(vendorId){
+      try{
+        const{data:vData}=await db.from('vendors').select('name').eq('id',vendorId).single();
+        if(vData) orderVendorName=vData.name;
+      }catch(e){}
+    }
     orderQty=1;
     orderMetodoPago='contraentrega';
     renderOrderBanner();
@@ -1168,7 +1175,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
         product_id:   orderProduct.id,
         product_name: orderProduct.name,
         vendor_id:    orderVendorId||null,
-        vendor_name:  null,
+        vendor_name:  orderVendorName||null,
         nombre, telefono, correo, ciudad, direccion, nota,
         cantidad:     orderQty,
         precio_unitario: prices.publicPrice,
@@ -1411,6 +1418,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
         <div>
           <div class="pedido-nombre">${esc(p.nombre)}</div>
           <div class="pedido-meta">${esc(p.product_name)} · Cant. ${p.cantidad} · ${esc(p.ciudad)} · ${fecha}</div>
+          <div class="pedido-meta">🛍️ Vendedor: ${p.vendor_name?esc(p.vendor_name):'<span style="opacity:.5">Venta directa</span>'}</div>
           <div class="pedido-meta">${esc(p.telefono)} · ${esc(p.correo)}</div>
           ${p.direccion?`<div class="pedido-meta">📍 ${esc(p.direccion)}</div>`:''}
           ${p.nota?`<div class="pedido-meta">📝 ${esc(p.nota)}</div>`:''}
