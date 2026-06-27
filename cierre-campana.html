@@ -83,6 +83,12 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .badge-estado-entregado{background:rgba(30,180,80,.15);color:#1a9e4a;}
 .badge-estado-cancelado{background:rgba(255,69,58,.1);color:var(--warn);}
 
+.pc-actions{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);}
+.btn-sm{font-size:12.5px;padding:8px 14px;}
+.btn-wa{background:#25D366;color:#fff;box-shadow:0 2px 8px rgba(37,211,102,.3);}
+.btn-wa:hover{opacity:.9;}
+.pc-nophone{font-size:11.5px;color:var(--muted);font-style:italic;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);}
+
 .empty{text-align:center;padding:50px 20px;color:var(--muted);}
 .empty-icon{font-size:42px;margin-bottom:12px;}
 
@@ -182,7 +188,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
     cancelado:  {label:'Cancelado',   icon:'🔴'},
   };
 
-  let currentVendor=null, vendors=[];
+  let currentVendor=null, vendors=[], currentPedidos=[];
 
   async function init(){
     try{
@@ -244,6 +250,27 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
     }
   });
 
+  function cleanPhone(tel){
+    let digits=(tel||'').replace(/\D/g,'');
+    digits=digits.replace(/^0+/,'');
+    if(digits.length===10) digits='57'+digits; // celular colombiano sin código de país
+    return digits;
+  }
+
+  function buildRecordatorioMsg(p){
+    const cant=Number(p.cantidad)||1;
+    const total=(Number(p.precio_publico)||0)*cant;
+    const primerNombre=(p.nombre||'').trim().split(' ')[0]||p.nombre||'';
+    return `Hola ${primerNombre} 👋 Te escribimos de *Saravi* sobre tu pedido de la campaña.\n\n`+
+      `🛍️ *Producto:* ${p.product_name}\n`+
+      `📦 *Cantidad:* ${cant}\n`+
+      `📍 *Ciudad:* ${p.ciudad||''}\n`+
+      `💰 *Total a pagar:* ${currency.format(total)}\n\n`+
+      `Para despachar tu pedido de inmediato, te recordamos *cancelar* (realizar el pago) lo antes posible. `+
+      `En cuanto confirmemos tu pago, lo despachamos con *Interrapidísimo* y llega en *2 a 3 días hábiles* desde el momento en que se gestiona el pago.\n\n`+
+      `¿Nos cuentas cuándo puedes realizar el pago? Quedamos atentos 🙌`;
+  }
+
   function renderReport(pedidos){
     if(!pedidos.length){
       $('#resultsArea').style.display='none';
@@ -252,6 +279,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
     }
     $('#emptyState').style.display='none';
     $('#resultsArea').style.display='block';
+    currentPedidos=pedidos;
 
     let totalVendido=0, totalDebe=0, totalGanancia=0;
     const list=$('#pedidosList');list.innerHTML='';
@@ -286,7 +314,8 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
         <div class="pc-badges">
           <span class="badge badge-pago">${metodoTxt}</span>
           <span class="badge badge-estado-${estado}">${eInfo.icon} ${eInfo.label}</span>
-        </div>`;
+        </div>
+        ${p.telefono?`<div class="pc-actions"><button class="btn btn-wa btn-sm" data-wa-id="${esc(p.id)}">📲 Recordar pago por WhatsApp</button></div>`:`<div class="pc-nophone">Sin teléfono registrado — no se puede enviar recordatorio.</div>`}`;
       list.appendChild(card);
     });
 
@@ -295,6 +324,18 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
     $('#sDebe').textContent=currency.format(totalDebe);
     $('#sGanancia').textContent=currency.format(totalGanancia);
   }
+
+  $('#pedidosList').addEventListener('click', e=>{
+    const btn=e.target.closest('[data-wa-id]');
+    if(!btn) return;
+    const id=btn.getAttribute('data-wa-id');
+    const p=currentPedidos.find(x=>String(x.id)===String(id));
+    if(!p) return;
+    const phone=cleanPhone(p.telefono);
+    if(!phone){alert('Número de teléfono inválido.');return;}
+    const msg=buildRecordatorioMsg(p);
+    window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank');
+  });
 
   $('#printBtn').addEventListener('click',()=>window.print());
 
