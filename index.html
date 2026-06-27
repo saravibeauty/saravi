@@ -307,7 +307,40 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 .anuncio-texto{font-size:14px;color:var(--ink2);line-height:1.6;}
 .no-anuncios{text-align:center;padding:50px 20px;color:var(--muted);}
 .na-icon{font-size:40px;margin-bottom:10px;}
-.vendor-nav{position:sticky;top:0;z-index:100;background:rgba(245,245,247,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,0,0,.06);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;}
+
+/* ── VENDOR NAV ── */
+.vendor-nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(245,245,247,.88);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(0,0,0,.06);
+  padding:0 20px;height:56px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:10px;
+}
+
+/* ── WALLET CHIP (navbar) ── */
+.wallet-chip{
+  display:flex;align-items:center;gap:8px;
+  background:linear-gradient(135deg,rgba(48,209,88,.12),rgba(48,209,88,.06));
+  border:1.5px solid rgba(48,209,88,.28);
+  border-radius:50px;
+  padding:6px 14px 6px 10px;
+  transition:box-shadow var(--transition);
+  cursor:default;
+  user-select:none;
+}
+.wallet-chip:hover{box-shadow:0 0 0 4px rgba(48,209,88,.12);}
+.wallet-icon{
+  width:26px;height:26px;border-radius:50%;
+  background:var(--accent2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;flex-shrink:0;
+}
+.wallet-info{display:flex;flex-direction:column;line-height:1.2;}
+.wallet-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--accent2);opacity:.8;}
+.wallet-amount{font-size:14px;font-weight:800;color:var(--accent2);font-variant-numeric:tabular-nums;letter-spacing:-.3px;}
+.wallet-loading{font-size:12px;color:var(--muted);animation:pulse 1s ease-in-out infinite;}
+
 .v-categories{display:flex;gap:8px;overflow-x:auto;padding-bottom:12px;margin-bottom:18px;-webkit-overflow-scrolling:touch;}
 .v-categories::-webkit-scrollbar{display:none;}
 .chip{flex-shrink:0;padding:8px 16px;border-radius:50px;background:var(--surface);border:1.5px solid var(--line);font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:all var(--transition);white-space:nowrap;}
@@ -354,6 +387,8 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   .vendor-bottom-nav button .vbn-icon{font-size:20px;}
   .vendor-bottom-nav button.vsnav-active{color:var(--accent);}
   .vpanel{padding:18px 16px 80px;}
+  .wallet-amount{font-size:13px;}
+  .wallet-chip{padding:5px 10px 5px 8px;}
 }
 @media(min-width:601px){.vendor-bottom-nav{display:none;}}
 
@@ -404,10 +439,8 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 .order-divider::before,.order-divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);}
 .order-gem{width:6px;height:6px;background:#c084fc;border-radius:50%;box-shadow:0 0 8px #c084fc;}
 
-/* Tipo tag en el formulario del cliente */
 .order-tipo-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(10,132,255,.18);border:1px solid rgba(10,132,255,.3);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:#5eb8ff;letter-spacing:.08em;text-transform:uppercase;margin-bottom:1rem;}
 
-/* Producto info banner */
 .product-banner{
   background:rgba(192,132,252,0.1);
   border:1px solid rgba(192,132,252,0.25);
@@ -428,7 +461,6 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 .product-banner-price{font-size:20px;font-weight:700;color:#c084fc;font-variant-numeric:tabular-nums;}
 .product-banner-per{font-size:12px;color:rgba(255,255,255,.5);}
 
-/* Form fields dark */
 .ofield{margin-bottom:1rem;}
 .ofield label{display:block;font-size:.72rem;font-weight:600;color:rgba(255,255,255,.7);letter-spacing:.05em;text-transform:uppercase;margin-bottom:5px;}
 .ofield input,.ofield select,.ofield textarea{
@@ -458,13 +490,11 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 .ofield-error.vis{display:block;}
 .ofield input.ferr,.ofield select.ferr{border-color:rgba(255,100,100,.5)!important;}
 
-/* Cantidad */
 .qty-control{display:flex;align-items:center;gap:0;border:1px solid rgba(255,255,255,.2);border-radius:10px;overflow:hidden;background:rgba(255,255,255,.07);}
 .qty-btn{width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:#fff;font-size:22px;cursor:pointer;transition:background .2s;flex-shrink:0;}
 .qty-btn:hover{background:rgba(192,132,252,.2);}
 .qty-num{flex:1;text-align:center;font-size:18px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;}
 
-/* Pago */
 .opago-group{display:flex;gap:.6rem;margin-bottom:1.2rem;}
 .opago-btn{
   flex:1;padding:.75rem .5rem;
@@ -476,7 +506,6 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 .opago-btn:hover{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.1);color:#fff;}
 .opago-btn.active{border-color:#c084fc;background:rgba(192,132,252,.18);color:#fff;box-shadow:0 0 14px rgba(192,132,252,.25);}
 
-/* Resumen de pago */
 .order-resumen{
   background:rgba(255,255,255,.05);
   border:1px solid rgba(255,255,255,.12);
@@ -500,7 +529,6 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 .btn-order:active{transform:translateY(0);}
 .btn-order:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 
-/* Success */
 .order-success{display:none;text-align:center;padding:2rem 0;}
 .order-success-icon{
   width:72px;height:72px;border-radius:50%;
@@ -819,6 +847,16 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
       <span class="dot" style="width:9px;height:9px;background:var(--accent);border-radius:50%;display:inline-block;"></span>
       <b style="font-size:16px;letter-spacing:-.3px;">Saravi</b>
     </div>
+
+    <!-- BILLETERA CHIP -->
+    <div class="wallet-chip" id="walletChip" title="Ganancia acumulada de pedidos entregados">
+      <div class="wallet-icon">💰</div>
+      <div class="wallet-info">
+        <span class="wallet-label">Mis ganancias</span>
+        <span class="wallet-amount" id="walletAmount"><span class="wallet-loading">…</span></span>
+      </div>
+    </div>
+
     <div style="display:flex;align-items:center;gap:8px;">
       <span id="vendorUpdated" style="font-size:12px;color:var(--muted);"></span>
       <button class="btn btn-ghost btn-sm" id="vendorRefreshBtn">⟳</button>
@@ -905,12 +943,9 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;">Copy de venta</div>
       <div id="modalCopy" style="background:rgba(191,90,242,.05);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:12px 14px;font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word;margin-bottom:16px;"></div>
 
-      <!-- ACTION BUTTONS -->
       <div style="display:flex;flex-direction:column;gap:8px;">
         <button id="modalShareBtn" class="btn btn-green btn-full" style="font-size:15px;padding:14px;">📲 Compartir creativo + copy</button>
-        <!-- Entrega Inmediata -->
         <button id="modalSendOrderBtn" class="btn btn-wa btn-full" style="font-size:14px;padding:12px;">🚀 Link Pedido Entrega Inmediata</button>
-        <!-- Cierre de Campaña -->
         <button id="modalSendCampanaBtn" class="btn btn-primary btn-full" style="font-size:14px;padding:12px;">📅 Link Pedido Cierre de Campaña</button>
         <button id="modalCopyBtn" class="btn btn-secondary btn-full">📋 Copiar solo el copy</button>
       </div>
@@ -938,7 +973,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   </div>
 </div>
 
-<!-- =============== ORDER SCREEN (cliente) - PEDIDO ENTREGA INMEDIATA =============== -->
+<!-- =============== ORDER SCREEN (cliente) =============== -->
 <div id="orderScreen" style="display:none;">
   <div class="order-particles" id="orderParticles"></div>
   <div class="order-card">
@@ -948,22 +983,18 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     </div>
     <div class="order-divider"><div class="order-gem"></div></div>
 
-    <!-- Cargando producto -->
     <div id="orderLoading" style="text-align:center;padding:30px 0;">
       <div class="spinner" style="margin:0 auto 12px;"></div>
       <p style="color:rgba(255,255,255,.5);font-size:14px;">Cargando producto…</p>
     </div>
 
-    <!-- Error -->
     <div id="orderError" style="display:none;text-align:center;padding:24px 0;">
       <div style="font-size:40px;margin-bottom:10px;">😕</div>
       <p style="color:rgba(255,255,255,.7);font-size:15px;">Producto no encontrado.<br>Contacta a tu vendedor.</p>
     </div>
 
-    <!-- Formulario -->
     <div id="orderFormContent" style="display:none;">
       <div class="order-tipo-tag">🚀 Entrega Inmediata</div>
-      <!-- Banner del producto -->
       <div class="product-banner" id="productBanner"></div>
 
       <p class="osection-title" style="margin-top:0;">Tus datos</p>
@@ -1015,7 +1046,6 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
       </div>
       <input type="hidden" id="oMetodoPago" value="contraentrega">
 
-      <!-- Resumen -->
       <div class="order-resumen" id="orderResumen">
         <div class="order-res-row"><span>Precio unitario</span><span id="resUnitario">—</span></div>
         <div class="order-res-row"><span>Cantidad</span><span id="resCantidad">1</span></div>
@@ -1028,29 +1058,16 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
       <div class="order-shipping-badge">📦 Envío por Interrapidísimo a todo Colombia</div>
     </div>
 
-    <!-- Success -->
     <div class="order-success" id="orderSuccess">
       <div class="order-success-icon" id="orderSuccessIcon">✓</div>
       <div class="order-success-title" id="orderSuccessTitle">¡Pedido confirmado!</div>
-
-      <!-- Contraentrega -->
       <div class="order-success-box" id="successContraentrega" style="display:none;">
         <h4>📦 Pago contraentrega</h4>
-        <p>
-          Gracias <strong id="successNombreCE"></strong>, tu pedido está siendo despachado 🚀<br><br>
-          En breve recibirás el <strong>código de guía</strong> para rastrear tu envío.<br><br>
-          ⚠️ <strong>Recuerda tener el dinero en efectivo listo</strong> cuando llegue el mensajero de Interrapidísimo para no generar novedades en la entrega.
-        </p>
+        <p>Gracias <strong id="successNombreCE"></strong>, tu pedido está siendo despachado 🚀<br><br>En breve recibirás el <strong>código de guía</strong> para rastrear tu envío.<br><br>⚠️ <strong>Recuerda tener el dinero en efectivo listo</strong> cuando llegue el mensajero de Interrapidísimo para no generar novedades en la entrega.</p>
       </div>
-
-      <!-- Contado -->
       <div class="order-success-box" id="successContado" style="display:none;">
         <h4>💳 Pago por transferencia</h4>
-        <p>
-          ¡Gracias <strong id="successNombreC"></strong> por tu compra! 🎉<br><br>
-          En un instante te enviamos los <strong>medios de pago disponibles</strong> (Nequi, Daviplata, transferencia bancaria) para que elijas el que más te convenga.<br><br>
-          📸 <strong>Recuerda enviar el comprobante de pago</strong> para que podamos generar tu código de guía y despachar tu pedido.
-        </p>
+        <p>¡Gracias <strong id="successNombreC"></strong> por tu compra! 🎉<br><br>En un instante te enviamos los <strong>medios de pago disponibles</strong> (Nequi, Daviplata, transferencia bancaria) para que elijas el que más te convenga.<br><br>📸 <strong>Recuerda enviar el comprobante de pago</strong> para que podamos generar tu código de guía y despachar tu pedido.</p>
       </div>
     </div>
   </div>
@@ -1060,9 +1077,6 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 
 <script>
 (function(){
-  // ============================================================
-  // SUPABASE CONFIG
-  // ============================================================
   const SUPABASE_URL  = 'https://dwkuidvxqegdblablwst.supabase.co';
   const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3a3VpZHZ4cWVnZGJsYWJsd3N0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NzQ5NzcsImV4cCI6MjA5ODA1MDk3N30.6onUCOak6BHdKlCglFJQhJx0VnnjHaB3vsooNR6l8dk';
   const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -1070,9 +1084,6 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   const FLETE = 20000;
   const currency = new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0});
 
-  // ============================================================
-  // STATE
-  // ============================================================
   let products=[], vendors=[], anuncios=[], pedidos=[];
   let adminPin='1234';
   let editingId=null, pendingImageData=null, deleteConfirmId=null;
@@ -1091,7 +1102,6 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   function setLoading(show){$('#appLoading').style.display=show?'flex':'none';}
   function setSaving(show){$('#savingIndicator').style.display=show?'block':'none';$('#saveBtn').disabled=show;}
 
-  // Estado labels & colors
   const ESTADO_LABELS = {
     reservado:  {label:'Reservado',   icon:'🟣'},
     nuevo:      {label:'Nuevo',       icon:'🔵'},
@@ -1106,7 +1116,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   }
 
   // ============================================================
-  // DETECT MODE (URL param ?order=PRODUCT_ID)
+  // DETECT MODE
   // ============================================================
   const urlParams=new URLSearchParams(window.location.search);
   const orderProductId=urlParams.get('order');
@@ -1119,7 +1129,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   }
 
   // ============================================================
-  // ORDER SCREEN - ENTREGA INMEDIATA
+  // ORDER SCREEN
   // ============================================================
   async function initOrderScreen(productId, vendorId){
     setLoading(false);
@@ -1240,6 +1250,28 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   }
 
   // ============================================================
+  // BILLETERA — carga ganancias del vendedor (solo entregados)
+  // ============================================================
+  async function loadVendorWallet(){
+    if(!currentVendor) return;
+    const walletEl=$('#walletAmount');
+    walletEl.innerHTML='<span class="wallet-loading">…</span>';
+    try{
+      const{data,error}=await db
+        .from('pedidos')
+        .select('ganancia_vendedor,cantidad')
+        .eq('vendor_id', currentVendor.id)
+        .eq('estado','entregado');
+      if(error) throw error;
+      const total=(data||[]).reduce((sum,p)=>sum+(Number(p.ganancia_vendedor)||0),0);
+      walletEl.textContent=currency.format(total);
+    }catch(err){
+      console.error('wallet error:',err);
+      walletEl.textContent='—';
+    }
+  }
+
+  // ============================================================
   // INIT
   // ============================================================
   async function init(){
@@ -1257,6 +1289,8 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     $('#gateRoles').style.display='flex';$('#adminLoginForm').style.display='none';$('#vendorLoginForm').style.display='none';
     $('#adminPinInput').value='';$('#vendorNameInput').value='';$('#vendorPinInput').value='';
     $('#adminPinError').style.display='none';$('#vendorLoginError').style.display='none';
+    // Reset wallet
+    $('#walletAmount').innerHTML='<span class="wallet-loading">…</span>';
   }
 
   document.querySelectorAll('.role-btn').forEach(btn=>btn.addEventListener('click',()=>{
@@ -1287,7 +1321,9 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     $('#gateScreen').style.display='none';$('#vendorScreen').style.display='flex';
     $('#sidebarVendorName').textContent=currentVendor?currentVendor.name:'';
     $('#vendorGreeting').textContent='Hola, '+currentVendor.name+' 👋';
-    setLoading(true);await Promise.all([loadProducts(),loadAnuncios()]);setLoading(false);
+    setLoading(true);
+    await Promise.all([loadProducts(),loadAnuncios(),loadVendorWallet()]);
+    setLoading(false);
     renderVendorAnuncios();switchVendorPanel('inicio');
     vendorCategory='Todas';vendorSearchTerm='';$('#vendorSearchInput').value='';
     renderVendorCategories();renderVendorGrid();updateVendorTimestamp();startVendorAutoRefresh();
@@ -1337,7 +1373,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   $('#saveAdminPinBtn').addEventListener('click',async()=>{const pin=$('#adminPinSetting').value.trim();if(!pin){showToast('El PIN no puede estar vacío.');return;}try{await saveAdminPinDB(pin);showToast('✅ PIN actualizado.');}catch(err){showToast('Error: '+err.message);}});
 
   // ============================================================
-  // PEDIDOS ADMIN RENDER - CON CAMBIO DE ESTADO
+  // PEDIDOS ADMIN RENDER
   // ============================================================
   function renderPedidos(){
     const list=$('#pedidosList');
@@ -1349,7 +1385,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     if(filtroEstado) filtered=filtered.filter(p=>(p.estado||'nuevo')===filtroEstado);
 
     if(!filtered.length){
-      list.innerHTML='<p style="font-size:13px;color:var(--muted);">No hay pedidos con esos filtros. Los pedidos que lleguen del formulario aparecerán aquí.</p>';
+      list.innerHTML='<p style="font-size:13px;color:var(--muted);">No hay pedidos con esos filtros.</p>';
       return;
     }
 
@@ -1361,7 +1397,6 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
       const metodoBadge=p.metodo_pago==='contraentrega'?'📦 Contraentrega':p.metodo_pago==='dia_cierre'?'📅 Día del cierre':'💵 Contado';
       const tipoTag=tipo==='campana'?'<span class="pedido-tipo-tag pedido-tipo-campana">📅 Cierre de Campaña</span>':'<span class="pedido-tipo-tag pedido-tipo-inmediata">🚀 Entrega Inmediata</span>';
 
-      // Opciones de estado según tipo
       const estadosInmediata=['nuevo','confirmado','despachado','entregado','cancelado'];
       const estadosCampana=['reservado','confirmado','despachado','entregado','cancelado'];
       const estadoOpts=tipo==='campana'?estadosCampana:estadosInmediata;
@@ -1408,10 +1443,8 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     btn.disabled=true;btn.textContent='…';
     try{
       await updatePedidoEstado(pedidoId,nuevoEstado);
-      // Update local state
       const idx=pedidos.findIndex(p=>String(p.id)===String(pedidoId));
       if(idx>-1)pedidos[idx].estado=nuevoEstado;
-      // Update row class
       const row=document.querySelector(`.pedido-row[data-pedido-id="${pedidoId}"]`);
       if(row){
         row.className=`pedido-row estado-${nuevoEstado} tipo-${pedidos[idx]?.tipo_pedido||'inmediata'}`;
@@ -1423,7 +1456,6 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     finally{btn.disabled=false;btn.textContent='Guardar';}
   });
 
-  // Filtros pedidos
   $('#filtroTipo').addEventListener('change',()=>renderPedidos());
   $('#filtroEstado').addEventListener('change',()=>renderPedidos());
 
@@ -1608,7 +1640,10 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   // ============================================================
   // VENDOR AUTO REFRESH
   // ============================================================
-  async function refreshVendorData(){await Promise.all([loadProducts(),loadAnuncios()]);renderVendorCategories();renderVendorGrid();renderVendorAnuncios();updateVendorTimestamp();}
+  async function refreshVendorData(){
+    await Promise.all([loadProducts(),loadAnuncios(),loadVendorWallet()]);
+    renderVendorCategories();renderVendorGrid();renderVendorAnuncios();updateVendorTimestamp();
+  }
   $('#vendorRefreshBtn').addEventListener('click',async()=>{await refreshVendorData();showToast('✅ Catálogo actualizado.');});
   function updateVendorTimestamp(){const t=new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});$('#vendorUpdated').textContent='Actualizado '+t;const v2=$('#vendorUpdated2');if(v2)v2.textContent='Actualizado '+t;}
   function startVendorAutoRefresh(){stopVendorAutoRefresh();vendorRefreshTimer=setInterval(refreshVendorData,30000);}
@@ -1666,7 +1701,6 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   // ============================================================
   $('#modalSendCampanaBtn').addEventListener('click',()=>{
     if(!modalProduct)return;
-    // Build URL for the campaign order form (separate HTML file)
     const base=window.location.origin+window.location.pathname.replace('index.html','')+'pedido-campana.html';
     const vendorParam=currentVendor?'&v='+encodeURIComponent(currentVendor.id):'';
     const link=base+'?order='+encodeURIComponent(modalProduct.id)+vendorParam;
@@ -1737,3 +1771,5 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 </script>
 </body>
 </html>
+HTMLEOF
+echo "Done"
