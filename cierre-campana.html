@@ -83,7 +83,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .badge-estado-entregado{background:rgba(30,180,80,.15);color:#1a9e4a;}
 .badge-estado-cancelado{background:rgba(255,69,58,.1);color:var(--warn);}
 
-.pc-actions{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);}
+.pc-actions{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);display:flex;gap:8px;flex-wrap:wrap;}
 .btn-sm{font-size:12.5px;padding:8px 14px;}
 .btn-wa{background:#25D366;color:#fff;box-shadow:0 2px 8px rgba(37,211,102,.3);}
 .btn-wa:hover{opacity:.9;}
@@ -315,7 +315,9 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
           <span class="badge badge-pago">${metodoTxt}</span>
           <span class="badge badge-estado-${estado}">${eInfo.icon} ${eInfo.label}</span>
         </div>
-        ${p.telefono?`<div class="pc-actions"><button class="btn btn-wa btn-sm" data-wa-id="${esc(p.id)}">📲 Recordar pago por WhatsApp</button></div>`:`<div class="pc-nophone">Sin teléfono registrado — no se puede enviar recordatorio.</div>`}`;
+        ${p.telefono
+          ?`<div class="pc-actions"><button class="btn btn-wa btn-sm" data-wa-id="${esc(p.id)}">📲 Abrir WhatsApp</button><button class="btn btn-ghost btn-sm" data-copy-id="${esc(p.id)}">📋 Copiar mensaje</button></div>`
+          :`<div class="pc-actions"><button class="btn btn-ghost btn-sm" data-copy-id="${esc(p.id)}">📋 Copiar mensaje</button></div><div class="pc-nophone">Sin teléfono registrado — copia el mensaje y envíalo manualmente.</div>`}`;
       list.appendChild(card);
     });
 
@@ -326,15 +328,30 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
   }
 
   $('#pedidosList').addEventListener('click', e=>{
-    const btn=e.target.closest('[data-wa-id]');
-    if(!btn) return;
-    const id=btn.getAttribute('data-wa-id');
-    const p=currentPedidos.find(x=>String(x.id)===String(id));
-    if(!p) return;
-    const phone=cleanPhone(p.telefono);
-    if(!phone){alert('Número de teléfono inválido.');return;}
-    const msg=buildRecordatorioMsg(p);
-    window.open('https://wa.me/'+phone+'?text='+encodeURIComponent(msg),'_blank');
+    const waBtn=e.target.closest('[data-wa-id]');
+    const copyBtn=e.target.closest('[data-copy-id]');
+    if(waBtn){
+      const id=waBtn.getAttribute('data-wa-id');
+      const p=currentPedidos.find(x=>String(x.id)===String(id));
+      if(!p) return;
+      const phone=cleanPhone(p.telefono);
+      if(!phone){alert('Número de teléfono inválido.');return;}
+      const msg=buildRecordatorioMsg(p);
+      window.open('https://api.whatsapp.com/send?phone='+phone+'&text='+encodeURIComponent(msg),'_blank');
+      return;
+    }
+    if(copyBtn){
+      const id=copyBtn.getAttribute('data-copy-id');
+      const p=currentPedidos.find(x=>String(x.id)===String(id));
+      if(!p) return;
+      const msg=buildRecordatorioMsg(p);
+      const original=copyBtn.textContent;
+      navigator.clipboard.writeText(msg).then(()=>{
+        copyBtn.textContent='✅ Copiado';
+        setTimeout(()=>{copyBtn.textContent=original;},1800);
+      }).catch(()=>alert('No se pudo copiar automáticamente. Selecciona el texto manualmente.'));
+      return;
+    }
   });
 
   $('#printBtn').addEventListener('click',()=>window.print());
