@@ -1041,7 +1041,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   const $=sel=>document.querySelector(sel);
   function esc(str){const d=document.createElement('div');d.textContent=str==null?'':String(str);return d.innerHTML;}
   function showToast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2800);}
-  function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);const publicPrice=vendorPrice*(1+(p.margin||0)/100)+(p.shipping||0);return{vendorPrice,publicPrice,gain:vendorPrice-(p.price||0),shipping:p.shipping||0};}
+  function calcPrices(p){const shipping=p.shipping||0;const vendorPrice=(p.price||0)*(1+(p.commission||0)/100)+shipping;const publicPrice=vendorPrice*(1+(p.margin||0)/100);return{vendorPrice,publicPrice,gain:vendorPrice-(p.price||0)-shipping,shipping};}
   function setLoading(show){$('#appLoading').style.display=show?'flex':'none';}
   function setSaving(show){$('#savingIndicator').style.display=show?'block':'none';$('#saveBtn').disabled=show;}
   function maskNum(n){const s=String(n||'');return s.length<=4?s:'*****'+s.slice(-4);}
