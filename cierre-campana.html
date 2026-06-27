@@ -77,6 +77,11 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .badge{display:inline-block;font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:50px;}
 .badge-pago{background:rgba(48,209,88,.1);color:var(--accent2);}
 .badge-estado{background:rgba(100,110,130,.1);color:#5A6270;}
+.badge-estado-reservado{background:rgba(191,90,242,.12);color:var(--accent);}
+.badge-estado-confirmado{background:rgba(48,209,88,.12);color:var(--accent2);}
+.badge-estado-despachado{background:rgba(255,159,10,.14);color:var(--amber);}
+.badge-estado-entregado{background:rgba(30,180,80,.15);color:#1a9e4a;}
+.badge-estado-cancelado{background:rgba(255,69,58,.1);color:var(--warn);}
 
 .empty{text-align:center;padding:50px 20px;color:var(--muted);}
 .empty-icon{font-size:42px;margin-bottom:12px;}
@@ -100,7 +105,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
   <div class="gate-card card">
     <div class="brand"><span class="dot"></span><b>Saravi</b><span>Cierre de campaña</span></div>
     <h2>Hola, vendedor 👋</h2>
-    <p class="sub">Ingresa con tu mismo usuario del catálogo para ver tus pedidos.</p>
+    <p class="sub">Ingresa con tu mismo usuario del catálogo para ver tus reservas de campaña.</p>
     <div class="field">
       <label>Tu nombre</label>
       <input type="text" id="loginName" placeholder="Ej: María García">
@@ -123,7 +128,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
       <div class="vendor-pill">Vendedor: <b id="vendorNameLabel">-</b></div>
       <div id="logoutArea"><button class="btn btn-ghost" id="logoutBtn">Salir</button></div>
     </div>
-    <p class="sub" style="margin-top:10px;">Elige el rango de fechas de tu campaña para generar el reporte.</p>
+    <p class="sub" style="margin-top:10px;">Elige el rango de fechas de tu campaña para generar el reporte. Solo se incluyen pedidos de <b>Cierre de Campaña</b> (las reservas), no los de entrega inmediata.</p>
     <div class="row2">
       <div class="field"><label>Desde</label><input type="date" id="fDesde"></div>
       <div class="field"><label>Hasta</label><input type="date" id="fHasta"></div>
@@ -140,7 +145,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
         </div>
       </div>
       <div class="summary-grid">
-        <div class="sum-box"><div class="sv" id="sCount">0</div><div class="sl">Pedidos</div></div>
+        <div class="sum-box"><div class="sv" id="sCount">0</div><div class="sl">Reservas</div></div>
         <div class="sum-box"><div class="sv" id="sVendido">$0</div><div class="sl">Vendido al público</div></div>
         <div class="sum-box highlight"><div class="sv" id="sDebe">$0</div><div class="sl">Tú pagas a la bodega</div></div>
         <div class="sum-box"><div class="sv" id="sGanancia">$0</div><div class="sl">Tu ganancia</div></div>
@@ -148,15 +153,15 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
     </div>
 
     <div class="card">
-      <h2>Detalle de pedidos</h2>
-      <p class="sub">Cada pedido dentro del rango seleccionado.</p>
+      <h2>Detalle de reservas</h2>
+      <p class="sub">Cada reserva de cierre de campaña dentro del rango seleccionado.</p>
       <div id="pedidosList"></div>
     </div>
   </div>
 
   <div class="empty" id="emptyState" style="display:none">
     <div class="empty-icon">📭</div>
-    <strong>No hay pedidos en ese rango de fechas.</strong>
+    <strong>No hay reservas de campaña en ese rango de fechas.</strong>
   </div>
 </div>
 
@@ -168,6 +173,14 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
   const currency = new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0});
   const $=sel=>document.querySelector(sel);
   function esc(str){const d=document.createElement('div');d.textContent=str==null?'':String(str);return d.innerHTML;}
+
+  const ESTADO_LABELS = {
+    reservado:  {label:'Reservado',   icon:'🟣'},
+    confirmado: {label:'Confirmado',  icon:'🟢'},
+    despachado: {label:'Despachado',  icon:'🟡'},
+    entregado:  {label:'Entregado',   icon:'✅'},
+    cancelado:  {label:'Cancelado',   icon:'🔴'},
+  };
 
   let currentVendor=null, vendors=[];
 
@@ -218,6 +231,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
       const{data,error}=await db.from('pedidos')
         .select('*')
         .eq('vendor_id',currentVendor.id)
+        .eq('tipo_pedido','campana')
         .gte('created_at', desde+'T00:00:00')
         .lte('created_at', hasta+'T23:59:59')
         .order('created_at',{ascending:false});
@@ -253,7 +267,9 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
       totalVendido+=vendido;totalDebe+=debe;totalGanancia+=ganancia;
 
       const fecha=p.created_at?new Date(p.created_at).toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'}):'';
-      const metodoTxt=p.metodo_pago==='contado'?'💵 Contado':'📦 Contraentrega';
+      const metodoTxt=p.metodo_pago==='contado'?'💵 Anticipado':p.metodo_pago==='dia_cierre'?'📅 Día del cierre':(p.metodo_pago==='contraentrega'?'📦 Contraentrega':'💵 Contado');
+      const estado=p.estado||'reservado';
+      const eInfo=ESTADO_LABELS[estado]||{label:estado,icon:'⚪'};
 
       const card=document.createElement('div');card.className='pedido-card';
       card.innerHTML=`
@@ -263,13 +279,13 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
         </div>
         <div class="pc-producto">${esc(p.product_name)} · Cant. ${cant} · ${esc(p.ciudad||'')}</div>
         <div class="pc-money">
-          <div class="pc-m"><span>Cliente pagó</span><b>${currency.format(vendido)}</b></div>
+          <div class="pc-m"><span>Cliente paga</span><b>${currency.format(vendido)}</b></div>
           <div class="pc-m"><span>Tú pagas</span><b>${currency.format(debe)}</b></div>
           <div class="pc-m"><span>Tu ganancia</span><b style="color:var(--accent2)">${currency.format(ganancia)}</b></div>
         </div>
         <div class="pc-badges">
           <span class="badge badge-pago">${metodoTxt}</span>
-          <span class="badge badge-estado">${esc(p.estado||'nuevo')}</span>
+          <span class="badge badge-estado-${estado}">${eInfo.icon} ${eInfo.label}</span>
         </div>`;
       list.appendChild(card);
     });
