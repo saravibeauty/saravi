@@ -261,14 +261,14 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
     const cant=Number(p.cantidad)||1;
     const total=(Number(p.precio_publico)||0)*cant;
     const primerNombre=(p.nombre||'').trim().split(' ')[0]||p.nombre||'';
-    return `Hola ${primerNombre} 👋 Te escribimos de *Saravi* sobre tu pedido de la campaña.\n\n`+
-      `🛍️ *Producto:* ${p.product_name}\n`+
-      `📦 *Cantidad:* ${cant}\n`+
-      `📍 *Ciudad:* ${p.ciudad||''}\n`+
-      `💰 *Total a pagar:* ${currency.format(total)}\n\n`+
-      `Para despachar tu pedido de inmediato, te recordamos *cancelar* (realizar el pago) lo antes posible. `+
-      `En cuanto confirmemos tu pago, lo despachamos con *Interrapidísimo* y llega en *2 a 3 días hábiles* desde el momento en que se gestiona el pago.\n\n`+
-      `¿Nos cuentas cuándo puedes realizar el pago? Quedamos atentos 🙌`;
+    return `¡Hola ${primerNombre}! 👋 Soy del equipo de *Saravi* y quiero contarte sobre tu pedido de la campaña 🎉\n\n`+
+      `🧾 Producto: ${p.product_name}\n`+
+      `🔢 Cantidad: ${cant}\n`+
+      `📍 Ciudad: ${p.ciudad||''}\n`+
+      `💵 Total: ${currency.format(total)}\n\n`+
+      `Ya estamos listos para alistar tu pedido y enviarlo cuanto antes. Solo necesitamos que realices el pago para poder despacharlo — `+
+      `en cuanto lo confirmemos, lo enviamos con *Interrapidísimo* y te llega en *2 a 3 días hábiles*.\n\n`+
+      `¿Me cuentas cuándo puedes hacer el pago? Quedo atenta para ayudarte con cualquier duda 💜`;
   }
 
   function renderReport(pedidos){
