@@ -306,9 +306,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 .share-btn:hover{background:#1ebe5a;}
 .share-btn:disabled{opacity:.55;cursor:wait;}
 
-/* ============================================================
-   DATOS BANCARIOS PANEL
-   ============================================================ */
+/* DATOS BANCARIOS */
 .banco-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
 .banco-table-wrap{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;}
 .banco-table{width:100%;border-collapse:collapse;}
@@ -351,6 +349,63 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 .mfield input.err,.mfield select.err{border-color:var(--warn)!important;}
 .mfield-extra{display:none;}
 .mfield-extra.vis{display:block;}
+
+/* ── RETIROS DE SALDO ── */
+.retiro-form-box{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:24px;margin-bottom:20px;}
+.retiro-form-box h3{font-size:15px;font-weight:700;margin-bottom:18px;padding-bottom:12px;border-bottom:1.5px solid var(--line);}
+.retiro-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:600px){.retiro-grid{grid-template-columns:1fr;}}
+.retiro-banco-sel{width:100%;padding:12px 14px;background:var(--bg);border:1.5px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:14px;color:var(--ink);transition:border-color var(--transition),box-shadow var(--transition);appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236E6E73' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;cursor:pointer;}
+.retiro-banco-sel:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(191,90,242,.14);}
+.retiro-saldo-chip{display:inline-flex;align-items:center;gap:10px;background:rgba(48,209,88,.08);border:1.5px solid rgba(48,209,88,.22);border-radius:50px;padding:8px 18px;font-size:15px;font-weight:800;color:var(--accent2);margin-bottom:20px;font-variant-numeric:tabular-nums;}
+.retiro-saldo-chip .rs-label{font-size:11px;font-weight:500;color:var(--accent2);opacity:.75;text-transform:uppercase;letter-spacing:.05em;}
+.retiro-actions{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:20px;padding-top:16px;border-top:1.5px solid var(--line);}
+.retiro-err{font-size:12px;color:var(--warn);margin-top:5px;display:none;}
+.retiro-err.vis{display:block;}
+.input-err{border-color:var(--warn)!important;box-shadow:0 0 0 3px rgba(255,69,58,.12)!important;}
+.retiro-hist-box{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;}
+.retiro-hist-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line);}
+.retiro-hist-head h3{font-size:15px;font-weight:700;}
+.retiro-row{display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--line);}
+.retiro-row:last-child{border-bottom:none;}
+.retiro-row-icon{width:38px;height:38px;border-radius:50%;background:rgba(191,90,242,.1);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.retiro-row-info{flex:1;min-width:0;}
+.retiro-row-banco{font-size:13px;font-weight:700;color:var(--ink);}
+.retiro-row-fecha{font-size:11px;color:var(--muted);margin-top:1px;}
+.retiro-row-concepto{font-size:12px;color:var(--ink2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.retiro-row-monto{text-align:right;flex-shrink:0;}
+.retiro-row-monto b{display:block;font-size:14px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums;}
+.retiro-row-estado{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:3px;text-transform:uppercase;letter-spacing:.04em;}
+.re-estado-pendiente{background:rgba(255,159,10,.12);color:var(--amber);}
+.re-estado-aprobado{background:rgba(48,209,88,.12);color:var(--accent2);}
+.re-estado-rechazado{background:rgba(255,69,58,.1);color:var(--warn);}
+.retiro-empty{text-align:center;padding:40px 20px;color:var(--muted);}
+.retiro-empty .re-icon{font-size:36px;margin-bottom:10px;}
+
+/* Modales retiro */
+.r-modal-overlay{position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;}
+.r-modal-box{background:var(--surface);border-radius:var(--radius-lg);box-shadow:0 20px 60px rgba(0,0,0,.2);width:100%;max-width:400px;animation:popIn .28s cubic-bezier(.16,1,.3,1);}
+.r-modal-icon{text-align:center;padding:28px 24px 0;font-size:48px;}
+.r-modal-body{padding:16px 28px 24px;text-align:center;}
+.r-modal-body h3{font-size:18px;font-weight:700;margin-bottom:8px;letter-spacing:-.3px;}
+.r-modal-body p{font-size:14px;color:var(--muted);line-height:1.6;}
+.r-modal-body .rm-amount{font-size:28px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;margin:12px 0 4px;}
+.r-modal-body .rm-banco{font-size:13px;color:var(--ink2);font-weight:600;margin-bottom:16px;background:var(--bg);padding:8px 14px;border-radius:8px;}
+.r-modal-foot{display:flex;gap:10px;padding:0 24px 24px;}
+.r-modal-foot .btn{flex:1;}
+.r-err-box{background:var(--surface);border-radius:var(--radius-lg);box-shadow:0 20px 60px rgba(0,0,0,.2);width:100%;max-width:360px;padding:36px 28px;text-align:center;animation:popIn .28s cubic-bezier(.16,1,.3,1);}
+.r-err-icon{font-size:52px;margin-bottom:14px;}
+.r-err-box h3{font-size:18px;font-weight:700;color:var(--warn);margin-bottom:8px;}
+.r-err-box p{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:20px;}
+.r-ok-box{background:var(--surface);border-radius:var(--radius-lg);box-shadow:0 20px 60px rgba(0,0,0,.2);width:100%;max-width:400px;padding:36px 28px;text-align:center;animation:popIn .28s cubic-bezier(.16,1,.3,1);}
+.r-ok-icon{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#9b3dd8);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:32px;box-shadow:0 0 30px rgba(191,90,242,.35);}
+.r-ok-box h3{font-size:19px;font-weight:700;margin-bottom:8px;letter-spacing:-.3px;}
+.r-ok-box p{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:16px;}
+.r-ok-detail{background:var(--bg);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:20px;text-align:left;}
+.r-ok-detail .rd-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid var(--line);}
+.r-ok-detail .rd-row:last-child{border-bottom:none;}
+.r-ok-detail .rd-row span{color:var(--muted);}
+.r-ok-detail .rd-row b{color:var(--ink);font-variant-numeric:tabular-nums;}
 
 @media(max-width:600px){
   .vsidebar{display:none;}
@@ -509,6 +564,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
       <button class="btn btn-ghost btn-sm" id="pedidosToggleBtn">📋 Pedidos</button>
       <button class="btn btn-ghost btn-sm" id="vendorsToggleBtn">👥 Vendedores</button>
       <button class="btn btn-ghost btn-sm" id="anunciosToggleBtn">📢 Anuncios</button>
+      <button class="btn btn-ghost btn-sm" id="retirosAdminBtn">💸 Retiros</button>
       <button class="btn btn-ghost btn-sm" id="printBtn">Imprimir</button>
       <button class="btn btn-secondary btn-sm" id="exportCsvBtn">Exportar CSV</button>
       <button class="btn btn-ghost btn-sm" id="adminLogoutBtn">Salir</button>
@@ -521,6 +577,22 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     <div class="stat-item"><div class="stat-value" id="statStock">0</div><div class="stat-label">Unidades</div></div>
     <div class="stat-item"><div class="stat-value" id="statPedidos">0</div><div class="stat-label">Pedidos</div></div>
   </div>
+
+  <!-- Panel Retiros Admin -->
+  <section class="vendors-panel" id="retirosAdminPanel" style="display:none">
+    <div class="vendors-panel-title">💸 Solicitudes de retiro</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+      <select id="filtroEstadoRetiro" style="padding:8px 12px;border:1.5px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:13px;background:var(--bg);color:var(--ink);">
+        <option value="">Todos los estados</option>
+        <option value="pendiente">⏳ Pendiente</option>
+        <option value="aprobado">✅ Aprobado</option>
+        <option value="rechazado">❌ Rechazado</option>
+      </select>
+      <button class="btn btn-ghost btn-sm" id="retirosAdminRefreshBtn">⟳ Actualizar</button>
+    </div>
+    <div id="retirosAdminList"><p style="font-size:13px;color:var(--muted);">Cargando retiros…</p></div>
+  </section>
+
   <section class="pedidos-panel" id="pedidosPanel" style="display:none">
     <div class="vendors-panel-title">📋 Pedidos recibidos</div>
     <div class="pedidos-filters">
@@ -642,6 +714,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
         <li><button class="vsnav-active" data-vpanel="inicio"><span class="vsnav-icon">🏠</span> Inicio</button></li>
         <li><button data-vpanel="catalogo"><span class="vsnav-icon">🛍️</span> Catálogo</button></li>
         <li><button data-vpanel="banco"><span class="vsnav-icon">🏦</span> Datos bancarios</button></li>
+        <li><button data-vpanel="retiros"><span class="vsnav-icon">💸</span> Retiros de saldo</button></li>
       </ul>
       <div class="vsidebar-bottom"><button id="vendorLogoutBtn">🚪 Cerrar sesión</button></div>
     </aside>
@@ -677,12 +750,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
             <table class="banco-table" id="bancoTable">
               <thead>
                 <tr>
-                  <th>País</th>
-                  <th>Banco</th>
-                  <th>Número de cuenta</th>
-                  <th>Tipo de cuenta</th>
-                  <th>Identificación</th>
-                  <th>Acciones</th>
+                  <th>País</th><th>Banco</th><th>Número de cuenta</th><th>Tipo de cuenta</th><th>Identificación</th><th>Acciones</th>
                 </tr>
               </thead>
               <tbody id="bancoTbody"></tbody>
@@ -695,12 +763,65 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
           </div>
         </div>
       </div>
+      <!-- RETIROS DE SALDO -->
+      <div class="vpanel" id="vpanel-retiros">
+        <div class="vpanel-topbar">
+          <div>
+            <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;">Mi cuenta</div>
+            <div class="vpanel-title">Retiros de saldo</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="btnRefreshRetiros">⟳ Actualizar</button>
+        </div>
+        <!-- Chip de saldo -->
+        <div class="retiro-saldo-chip">
+          <span class="rs-label">Saldo disponible</span>
+          <span id="retiroSaldoVal">…</span>
+        </div>
+        <!-- Formulario -->
+        <div class="retiro-form-box">
+          <h3>💸 Solicitar retiro</h3>
+          <div class="retiro-grid">
+            <div class="field">
+              <label>Monto a retirar</label>
+              <div class="price-wrap">
+                <span class="pre">$</span>
+                <input type="number" id="retiroMonto" min="1000" step="1000" placeholder="0" style="padding-left:28px;">
+              </div>
+              <div class="retiro-err" id="errRetiroMonto">Ingresa un monto válido</div>
+            </div>
+            <div class="field">
+              <label>Banco / Cuenta destino</label>
+              <select id="retiroBancoSel" class="retiro-banco-sel">
+                <option value="">Seleccionar cuenta…</option>
+              </select>
+              <div class="retiro-err" id="errRetiroBanco">Selecciona una cuenta bancaria</div>
+            </div>
+          </div>
+          <div class="field" style="margin-top:4px;">
+            <label>Concepto de retiro <span style="font-weight:400;text-transform:none;font-size:11px;color:var(--muted);">(opcional)</span></label>
+            <input type="text" id="retiroConcepto" placeholder="Ej: Ganancias semana 1, comisión campaña…" maxlength="120">
+          </div>
+          <div class="retiro-actions">
+            <button class="btn btn-ghost btn-sm" id="btnVerHistorialRetiros">📋 Historial de retiros</button>
+            <button class="btn btn-primary" id="btnProcesarRetiro">Procesar retiro →</button>
+          </div>
+        </div>
+        <!-- Historial -->
+        <div class="retiro-hist-box" id="retiroHistBox" style="display:none;">
+          <div class="retiro-hist-head">
+            <h3>📋 Historial de retiros</h3>
+            <button class="btn btn-ghost btn-sm" id="btnCerrarHistorial">✕ Cerrar</button>
+          </div>
+          <div id="retiroHistList"></div>
+        </div>
+      </div>
     </main>
   </div>
   <nav class="vendor-bottom-nav" style="display:none;">
     <button class="vsnav-active" data-vpanel="inicio"><span class="vbn-icon">🏠</span> Inicio</button>
     <button data-vpanel="catalogo"><span class="vbn-icon">🛍️</span> Catálogo</button>
     <button data-vpanel="banco"><span class="vbn-icon">🏦</span> Banco</button>
+    <button data-vpanel="retiros"><span class="vbn-icon">💸</span> Retiros</button>
     <button id="vendorLogoutBtnMobile"><span class="vbn-icon">🚪</span> Salir</button>
   </nav>
 </div>
@@ -715,33 +836,18 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     <div class="modal-body">
       <div class="mfield">
         <label>País <span class="req">*</span></label>
-        <select id="bPais">
-          <option value="">Seleccionar país</option>
-          <option value="COLOMBIA">🇨🇴 Colombia</option>
-          <option value="BRASIL">🇧🇷 Brasil</option>
-        </select>
+        <select id="bPais"><option value="">Seleccionar país</option><option value="COLOMBIA">🇨🇴 Colombia</option><option value="BRASIL">🇧🇷 Brasil</option></select>
         <div class="mfield-err" id="errBPais">Selecciona un país</div>
       </div>
       <div class="mfield">
         <label>Banco <span class="req">*</span></label>
-        <select id="bBanco">
-          <option value="">Seleccionar banco</option>
-        </select>
+        <select id="bBanco"><option value="">Seleccionar banco</option></select>
         <div class="mfield-err" id="errBBanco">Selecciona un banco</div>
       </div>
-
-      <!-- Campos extra que aparecen al seleccionar banco -->
       <div class="mfield mfield-extra" id="extraFields">
         <div class="mfield">
           <label>Tipo de identificación <span class="req">*</span></label>
-          <select id="bTipoId">
-            <option value="">Tipo de identificación</option>
-            <option value="CC">CC – Cédula de ciudadanía</option>
-            <option value="CE">CE – Cédula de extranjería</option>
-            <option value="NIT">NIT – Número de identificación tributaria</option>
-            <option value="PP">PP – Pasaporte</option>
-            <option value="TI">TI – Tarjeta de identidad</option>
-          </select>
+          <select id="bTipoId"><option value="">Tipo de identificación</option><option value="CC">CC – Cédula de ciudadanía</option><option value="CE">CE – Cédula de extranjería</option><option value="NIT">NIT</option><option value="PP">PP – Pasaporte</option><option value="TI">TI – Tarjeta de identidad</option></select>
           <div class="mfield-err" id="errBTipoId">Selecciona el tipo de identificación</div>
         </div>
         <div class="mfield">
@@ -751,12 +857,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
         </div>
         <div class="mfield">
           <label>Tipo de cuenta <span class="req">*</span></label>
-          <select id="bTipoCuenta">
-            <option value="">Tipo de cuenta</option>
-            <option value="AHORROS">Ahorros</option>
-            <option value="CORRIENTE">Corriente</option>
-            <option value="DIGITAL">Digital / Billetera</option>
-          </select>
+          <select id="bTipoCuenta"><option value="">Tipo de cuenta</option><option value="AHORROS">Ahorros</option><option value="CORRIENTE">Corriente</option><option value="DIGITAL">Digital / Billetera</option></select>
           <div class="mfield-err" id="errBTipoCuenta">Selecciona el tipo de cuenta</div>
         </div>
         <div class="mfield">
@@ -770,6 +871,48 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
       <button class="btn btn-primary" id="bancoModalSave">Aceptar</button>
       <button class="btn btn-secondary" id="bancoModalCancel">Cancelar</button>
     </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMACIÓN RETIRO -->
+<div id="retiroConfirmModal" class="r-modal-overlay" style="display:none;">
+  <div class="r-modal-box">
+    <div class="r-modal-icon">💸</div>
+    <div class="r-modal-body">
+      <h3>Confirmar retiro</h3>
+      <div class="rm-amount" id="retiroConfirmMonto"></div>
+      <div class="rm-banco" id="retiroConfirmBanco"></div>
+      <p>El administrador revisará tu solicitud y recibirás una notificación por <strong>WhatsApp y correo</strong> cuando sea procesada.</p>
+    </div>
+    <div class="r-modal-foot">
+      <button class="btn btn-primary" id="retiroConfirmSi">Sí, solicitar</button>
+      <button class="btn btn-ghost" id="retiroConfirmNo">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ERROR SALDO -->
+<div id="retiroErrorModal" class="r-modal-overlay" style="display:none;">
+  <div class="r-err-box">
+    <div class="r-err-icon">😔</div>
+    <h3>Saldo insuficiente</h3>
+    <p id="retiroErrorMsg">Tu saldo disponible no es suficiente para este retiro.</p>
+    <button class="btn btn-primary btn-full" id="retiroErrorClose">Entendido</button>
+  </div>
+</div>
+
+<!-- MODAL ÉXITO RETIRO -->
+<div id="retiroSuccessModal" class="r-modal-overlay" style="display:none;">
+  <div class="r-ok-box">
+    <div class="r-ok-icon">✓</div>
+    <h3>¡Retiro en proceso!</h3>
+    <p>Tu solicitud fue registrada. El administrador la aprobará y recibirás confirmación por <strong>WhatsApp y correo electrónico</strong>.</p>
+    <div class="r-ok-detail">
+      <div class="rd-row"><span>Monto solicitado</span><b id="rsDetalleMonto"></b></div>
+      <div class="rd-row"><span>Cuenta destino</span><b id="rsDetalleBanco"></b></div>
+      <div class="rd-row"><span>Estado</span><b style="color:var(--amber);">⏳ Pendiente</b></div>
+    </div>
+    <button class="btn btn-primary btn-full" id="retiroSuccessClose">Entendido</button>
   </div>
 </div>
 
@@ -867,29 +1010,18 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   const FLETE = 20000;
   const currency = new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0});
 
-  const BANCOS_COLOMBIA = [
-    'AV VILLAS','BANAGRARIO','BANCAMíA S.A.','BANCO CAJA SOCIAL','BANCO CORPBANCA',
-    'BANCO CREDIFINANCIERA','BANCO DE BOGOTá','BANCO DE LA REPúBLICA','BANCO DE OCCIDENTE',
-    'BANCO FALABELLA','BANCO GNB SUDAMERIS','BANCO ITAU','BANCOLDEX','BANCOLOMBIA',
-    'BANCO MULTIBANK','BANCO MUNDO MUJER','BANCOOMEVA','BANCO PICHINCHA','BANCO POPULAR',
-    'BANCO SANTANDER','BANCO SERFINANZAS','BANCO W S.A.','BBVA COLOMBIA','BOLD','Bre-B',
-    'CITIBANK','COBRE','COINK S.A.','COLPATRIA','COOPCENTRAL','CORFICOLOMBIANA','CREDIBANCO',
-    'CREDIFAMILIA','CREZCAMOS','DAVIPLATA','DAVIVIENDA','Dropipay',
-    'FINANCIERA DE DESARROLLO NACIONAL S.A','FINANCIERA JURISCOOP C.F.','FINANDINA',
-    'FONDO NACIONAL DE GARANTíAS','FONDO NACIONAL DEL AHORRO','Global 66',
-    'GRUPO BOLíVAR S.A.','GRUPO DE INVERSIONES SURAMERICANA S.A.','INTERNACIONAL','IRIS',
-    'Lulo Bank','MOVII S.A.','NEQUI','NUBANK','Payoneer','Paypal','RAPPIPAY','SCOTIABANK',
-    'TECNIPAGOS','TUYA','USDT(RED=TRC-20)'
-  ];
+  const BANCOS_COLOMBIA = ['AV VILLAS','BANAGRARIO','BANCAMíA S.A.','BANCO CAJA SOCIAL','BANCO CORPBANCA','BANCO CREDIFINANCIERA','BANCO DE BOGOTá','BANCO DE LA REPúBLICA','BANCO DE OCCIDENTE','BANCO FALABELLA','BANCO GNB SUDAMERIS','BANCO ITAU','BANCOLDEX','BANCOLOMBIA','BANCO MULTIBANK','BANCO MUNDO MUJER','BANCOOMEVA','BANCO PICHINCHA','BANCO POPULAR','BANCO SANTANDER','BANCO SERFINANZAS','BANCO W S.A.','BBVA COLOMBIA','BOLD','Bre-B','CITIBANK','COBRE','COINK S.A.','COLPATRIA','COOPCENTRAL','CORFICOLOMBIANA','CREDIBANCO','CREDIFAMILIA','CREZCAMOS','DAVIPLATA','DAVIVIENDA','Dropipay','FINANCIERA DE DESARROLLO NACIONAL S.A','FINANCIERA JURISCOOP C.F.','FINANDINA','FONDO NACIONAL DE GARANTíAS','FONDO NACIONAL DEL AHORRO','Global 66','GRUPO BOLíVAR S.A.','GRUPO DE INVERSIONES SURAMERICANA S.A.','INTERNACIONAL','IRIS','Lulo Bank','MOVII S.A.','NEQUI','NUBANK','Payoneer','Paypal','RAPPIPAY','SCOTIABANK','TECNIPAGOS','TUYA','USDT(RED=TRC-20)'];
   const BANCOS_BRASIL = ['Nubank','Itaú','Bradesco','Caixa Econômica Federal','Banco do Brasil','Santander Brasil','BTG Pactual','PicPay','Mercado Pago'];
 
-  let products=[], vendors=[], anuncios=[], pedidos=[], cuentasBancarias=[];
+  let products=[], vendors=[], anuncios=[], pedidos=[], cuentasBancarias=[], retiros=[];
   let adminPin='1234';
   let editingId=null, pendingImageData=null, deleteConfirmId=null;
   let currentVendor=null, vendorCategory='Todas', vendorSearchTerm='';
   let vendorRefreshTimer=null, hideOutOfStock=false, modalProduct=null;
   let orderProduct=null, orderQty=1, orderMetodoPago='contraentrega', orderVendorName=null;
   let editingCuentaId=null;
+  let currentWalletBalance=0; // saldo en tiempo real para validar retiros
+  let pendingRetiroData=null; // datos del retiro pendiente de confirmación
 
   const $=sel=>document.querySelector(sel);
   function esc(str){const d=document.createElement('div');d.textContent=str==null?'':String(str);return d.innerHTML;}
@@ -969,161 +1101,58 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   // ── CUENTAS BANCARIAS ──
   async function loadCuentasBancarias(){
     if(!currentVendor)return;
-    $('#bancoLoading').style.display='block';
-    $('#bancoTableContainer').style.display='none';
-    $('#bancoEmpty').style.display='none';
-    try{
-      const{data,error}=await db.from('cuentas_bancarias').select('*').eq('vendor_id',currentVendor.id).order('created_at',{ascending:true});
-      if(error)throw error;
-      cuentasBancarias=data||[];
-      renderCuentasBancarias();
-    }catch(err){
-      console.error('cuentas_bancarias:',err);
-      showToast('Error al cargar cuentas: '+err.message);
-    }finally{
-      $('#bancoLoading').style.display='none';
-    }
+    $('#bancoLoading').style.display='block';$('#bancoTableContainer').style.display='none';$('#bancoEmpty').style.display='none';
+    try{const{data,error}=await db.from('cuentas_bancarias').select('*').eq('vendor_id',currentVendor.id).order('created_at',{ascending:true});if(error)throw error;cuentasBancarias=data||[];renderCuentasBancarias();}
+    catch(err){console.error('cuentas_bancarias:',err);showToast('Error al cargar cuentas: '+err.message);}
+    finally{$('#bancoLoading').style.display='none';}
   }
-
   async function saveCuentaBancaria(cuenta){
-    if(cuenta.id){
-      // UPDATE
-      const{error}=await db.from('cuentas_bancarias').update({
-        pais:cuenta.pais, banco:cuenta.banco, tipo_id:cuenta.tipo_id,
-        num_id:cuenta.num_id, tipo_cuenta:cuenta.tipo_cuenta, num_cuenta:cuenta.num_cuenta,
-        updated_at:new Date().toISOString()
-      }).eq('id',cuenta.id);
-      if(error)throw error;
-    } else {
-      // INSERT
-      const{error}=await db.from('cuentas_bancarias').insert({
-        vendor_id:currentVendor.id, vendor_name:currentVendor.name,
-        pais:cuenta.pais, banco:cuenta.banco, tipo_id:cuenta.tipo_id,
-        num_id:cuenta.num_id, tipo_cuenta:cuenta.tipo_cuenta, num_cuenta:cuenta.num_cuenta
-      });
-      if(error)throw error;
-    }
+    if(cuenta.id){const{error}=await db.from('cuentas_bancarias').update({pais:cuenta.pais,banco:cuenta.banco,tipo_id:cuenta.tipo_id,num_id:cuenta.num_id,tipo_cuenta:cuenta.tipo_cuenta,num_cuenta:cuenta.num_cuenta,updated_at:new Date().toISOString()}).eq('id',cuenta.id);if(error)throw error;}
+    else{const{error}=await db.from('cuentas_bancarias').insert({vendor_id:currentVendor.id,vendor_name:currentVendor.name,pais:cuenta.pais,banco:cuenta.banco,tipo_id:cuenta.tipo_id,num_id:cuenta.num_id,tipo_cuenta:cuenta.tipo_cuenta,num_cuenta:cuenta.num_cuenta});if(error)throw error;}
     await loadCuentasBancarias();
   }
-
-  async function deleteCuentaBancaria(id){
-    const{error}=await db.from('cuentas_bancarias').delete().eq('id',id);
-    if(error)throw error;
-    await loadCuentasBancarias();
-  }
-
+  async function deleteCuentaBancaria(id){const{error}=await db.from('cuentas_bancarias').delete().eq('id',id);if(error)throw error;await loadCuentasBancarias();}
   function renderCuentasBancarias(){
     const tbody=$('#bancoTbody');tbody.innerHTML='';
-    if(!cuentasBancarias.length){
-      $('#bancoTableContainer').style.display='none';
-      $('#bancoEmpty').style.display='block';
-      return;
-    }
-    $('#bancoEmpty').style.display='none';
-    $('#bancoTableContainer').style.display='block';
-    cuentasBancarias.forEach(c=>{
-      const tr=document.createElement('tr');
-      tr.innerHTML=`
-        <td>${esc(c.pais||'')}</td>
-        <td><span class="banco-nombre">${esc(c.banco||'')}</span></td>
-        <td><span class="banco-num-chip">${esc(maskNum(c.num_cuenta))}</span></td>
-        <td>${esc(c.tipo_cuenta||'')}</td>
-        <td>${esc(c.tipo_id||'')+': '+esc(c.num_id||'')}</td>
-        <td>
-          <div class="banco-actions">
-            <button class="banco-icon-btn edit" data-edit-id="${c.id}" title="Editar">✏️</button>
-            <button class="banco-icon-btn del" data-del-id="${c.id}" title="Eliminar">🗑️</button>
-          </div>
-        </td>`;
-      tbody.appendChild(tr);
-    });
+    if(!cuentasBancarias.length){$('#bancoTableContainer').style.display='none';$('#bancoEmpty').style.display='block';return;}
+    $('#bancoEmpty').style.display='none';$('#bancoTableContainer').style.display='block';
+    cuentasBancarias.forEach(c=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${esc(c.pais||'')}</td><td><span class="banco-nombre">${esc(c.banco||'')}</span></td><td><span class="banco-num-chip">${esc(maskNum(c.num_cuenta))}</span></td><td>${esc(c.tipo_cuenta||'')}</td><td>${esc(c.tipo_id||'')+': '+esc(c.num_id||'')}</td><td><div class="banco-actions"><button class="banco-icon-btn edit" data-edit-id="${c.id}" title="Editar">✏️</button><button class="banco-icon-btn del" data-del-id="${c.id}" title="Eliminar">🗑️</button></div></td>`;tbody.appendChild(tr);});
   }
-
-  // Delegación de eventos en tabla banco
   $('#bancoTbody').addEventListener('click',async e=>{
-    const editBtn=e.target.closest('[data-edit-id]');
-    const delBtn=e.target.closest('[data-del-id]');
-    if(editBtn){
-      const id=editBtn.getAttribute('data-edit-id');
-      const cuenta=cuentasBancarias.find(c=>String(c.id)===String(id));
-      if(cuenta)openBancoModal(cuenta);
-    }
-    if(delBtn){
-      const id=delBtn.getAttribute('data-del-id');
-      if(confirm('¿Eliminar esta cuenta bancaria?')){
-        try{await deleteCuentaBancaria(id);showToast('✅ Cuenta eliminada.');}
-        catch(err){showToast('Error: '+err.message);}
-      }
-    }
+    const editBtn=e.target.closest('[data-edit-id]');const delBtn=e.target.closest('[data-del-id]');
+    if(editBtn){const id=editBtn.getAttribute('data-edit-id');const cuenta=cuentasBancarias.find(c=>String(c.id)===String(id));if(cuenta)openBancoModal(cuenta);}
+    if(delBtn){const id=delBtn.getAttribute('data-del-id');if(confirm('¿Eliminar esta cuenta bancaria?')){try{await deleteCuentaBancaria(id);showToast('✅ Cuenta eliminada.');}catch(err){showToast('Error: '+err.message);}}}
   });
 
   // ── MODAL BANCARIO ──
-  function updateBancoOptions(){
-    const pais=$('#bPais').value;
-    const bancoSel=$('#bBanco');
-    bancoSel.innerHTML='<option value="">Seleccionar banco</option>';
-    const lista=pais==='BRASIL'?BANCOS_BRASIL:pais?BANCOS_COLOMBIA:[];
-    lista.forEach(b=>{const opt=document.createElement('option');opt.value=b;opt.textContent=b;bancoSel.appendChild(opt);});
-    toggleExtraFields();
-  }
-
-  function toggleExtraFields(){
-    const banco=$('#bBanco').value;
-    const extra=$('#extraFields');
-    if(banco){extra.classList.add('vis');}else{extra.classList.remove('vis');}
-  }
-
+  function updateBancoOptions(){const pais=$('#bPais').value;const bancoSel=$('#bBanco');bancoSel.innerHTML='<option value="">Seleccionar banco</option>';const lista=pais==='BRASIL'?BANCOS_BRASIL:pais?BANCOS_COLOMBIA:[];lista.forEach(b=>{const opt=document.createElement('option');opt.value=b;opt.textContent=b;bancoSel.appendChild(opt);});toggleExtraFields();}
+  function toggleExtraFields(){const banco=$('#bBanco').value;const extra=$('#extraFields');if(banco){extra.classList.add('vis');}else{extra.classList.remove('vis');}}
   $('#bPais').addEventListener('change',updateBancoOptions);
   $('#bBanco').addEventListener('change',toggleExtraFields);
-
   function openBancoModal(cuenta=null){
     editingCuentaId=cuenta?cuenta.id:null;
     $('#bancoModalTitle').textContent=cuenta?'Editar cuenta bancaria':'Agregar cuenta bancaria';
-    // Reset
-    $('#bPais').value=cuenta?cuenta.pais:'';
-    updateBancoOptions();
-    $('#bBanco').value=cuenta?cuenta.banco:'';
-    toggleExtraFields();
-    $('#bTipoId').value=cuenta?cuenta.tipo_id:'';
-    $('#bNumId').value=cuenta?cuenta.num_id:'';
-    $('#bTipoCuenta').value=cuenta?cuenta.tipo_cuenta:'';
-    $('#bNumCuenta').value=cuenta?cuenta.num_cuenta:'';
-    // Limpiar errores
+    $('#bPais').value=cuenta?cuenta.pais:'';updateBancoOptions();$('#bBanco').value=cuenta?cuenta.banco:'';toggleExtraFields();
+    $('#bTipoId').value=cuenta?cuenta.tipo_id:'';$('#bNumId').value=cuenta?cuenta.num_id:'';$('#bTipoCuenta').value=cuenta?cuenta.tipo_cuenta:'';$('#bNumCuenta').value=cuenta?cuenta.num_cuenta:'';
     ['errBPais','errBBanco','errBTipoId','errBNumId','errBTipoCuenta','errBNumCuenta'].forEach(id=>{const el=$('#'+id);if(el)el.classList.remove('vis');});
     ['bPais','bBanco','bTipoId','bNumId','bTipoCuenta','bNumCuenta'].forEach(id=>{const el=$('#'+id);if(el)el.classList.remove('err');});
-    $('#bancoModal').style.display='flex';
-    document.body.style.overflow='hidden';
+    $('#bancoModal').style.display='flex';document.body.style.overflow='hidden';
   }
-
   function closeBancoModal(){$('#bancoModal').style.display='none';document.body.style.overflow='';editingCuentaId=null;}
-
   $('#btnAgregarCuenta').addEventListener('click',()=>openBancoModal());
   $('#bancoModalClose').addEventListener('click',closeBancoModal);
   $('#bancoModalCancel').addEventListener('click',closeBancoModal);
   $('#bancoModal').addEventListener('click',e=>{if(e.target===$('#bancoModal'))closeBancoModal();});
-
   $('#bancoModalSave').addEventListener('click',async()=>{
-    // Validate
     let ok=true;
     function vf(id,errId,val){const el=$('#'+id),err=$('#'+errId);if(!val){el.classList.add('err');err.classList.add('vis');ok=false;}else{el.classList.remove('err');err.classList.remove('vis');}}
-    const pais=$('#bPais').value,banco=$('#bBanco').value;
-    const tipoId=$('#bTipoId').value,numId=$('#bNumId').value.trim();
-    const tipoCuenta=$('#bTipoCuenta').value,numCuenta=$('#bNumCuenta').value.trim();
-    vf('bPais','errBPais',pais);
-    vf('bBanco','errBBanco',banco);
-    if(banco){
-      vf('bTipoId','errBTipoId',tipoId);
-      vf('bNumId','errBNumId',numId);
-      vf('bTipoCuenta','errBTipoCuenta',tipoCuenta);
-      vf('bNumCuenta','errBNumCuenta',numCuenta);
-    }
+    const pais=$('#bPais').value,banco=$('#bBanco').value,tipoId=$('#bTipoId').value,numId=$('#bNumId').value.trim(),tipoCuenta=$('#bTipoCuenta').value,numCuenta=$('#bNumCuenta').value.trim();
+    vf('bPais','errBPais',pais);vf('bBanco','errBBanco',banco);
+    if(banco){vf('bTipoId','errBTipoId',tipoId);vf('bNumId','errBNumId',numId);vf('bTipoCuenta','errBTipoCuenta',tipoCuenta);vf('bNumCuenta','errBNumCuenta',numCuenta);}
     if(!ok)return;
     const btn=$('#bancoModalSave');btn.disabled=true;btn.textContent='Guardando…';
-    try{
-      await saveCuentaBancaria({id:editingCuentaId,pais,banco,tipo_id:tipoId,num_id:numId,tipo_cuenta:tipoCuenta,num_cuenta:numCuenta});
-      showToast(editingCuentaId?'✅ Cuenta actualizada.':'✅ Cuenta guardada.');
-      closeBancoModal();
-    }catch(err){showToast('❌ Error: '+err.message);}
+    try{await saveCuentaBancaria({id:editingCuentaId,pais,banco,tipo_id:tipoId,num_id:numId,tipo_cuenta:tipoCuenta,num_cuenta:numCuenta});showToast(editingCuentaId?'✅ Cuenta actualizada.':'✅ Cuenta guardada.');closeBancoModal();}
+    catch(err){showToast('❌ Error: '+err.message);}
     finally{btn.disabled=false;btn.textContent='Aceptar';}
   });
 
@@ -1131,9 +1160,248 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   async function loadVendorWallet(){
     if(!currentVendor)return;
     const walletEl=$('#walletAmount');walletEl.innerHTML='<span class="wallet-loading">…</span>';
-    try{const{data,error}=await db.from('pedidos').select('ganancia_vendedor,cantidad').eq('vendor_id',currentVendor.id).eq('estado','entregado');if(error)throw error;const total=(data||[]).reduce((sum,p)=>sum+(Number(p.ganancia_vendedor)||0),0);walletEl.textContent=currency.format(total);}
-    catch(err){console.error('wallet error:',err);walletEl.textContent='—';}
+    try{
+      const{data,error}=await db.from('pedidos').select('ganancia_vendedor,cantidad').eq('vendor_id',currentVendor.id).eq('estado','entregado');
+      if(error)throw error;
+      const total=(data||[]).reduce((sum,p)=>sum+(Number(p.ganancia_vendedor)||0),0);
+      currentWalletBalance=total;
+      walletEl.textContent=currency.format(total);
+      // Actualizar chip en panel retiros
+      const retiroSaldoEl=$('#retiroSaldoVal');
+      if(retiroSaldoEl)retiroSaldoEl.textContent=currency.format(total);
+    }catch(err){console.error('wallet error:',err);walletEl.textContent='—';currentWalletBalance=0;}
   }
+
+  // ══════════════════════════════════════
+  // ── RETIROS DE SALDO ──
+  // ══════════════════════════════════════
+  function populateRetiroBancoSel(){
+    const sel=$('#retiroBancoSel');
+    sel.innerHTML='<option value="">Seleccionar cuenta…</option>';
+    if(!cuentasBancarias.length){
+      sel.innerHTML='<option value="">— Sin cuentas registradas —</option>';
+      return;
+    }
+    cuentasBancarias.forEach(c=>{
+      const opt=document.createElement('option');
+      opt.value=c.id;
+      opt.textContent=`${c.banco} · ${c.tipo_cuenta} · ${maskNum(c.num_cuenta)}`;
+      sel.appendChild(opt);
+    });
+  }
+
+  async function loadRetiros(){
+    if(!currentVendor)return;
+    try{
+      const{data,error}=await db.from('retiros_saldo').select('*').eq('vendor_id',currentVendor.id).order('created_at',{ascending:false});
+      if(error)throw error;
+      retiros=data||[];
+    }catch(err){console.error('retiros:',err);}
+  }
+
+  function renderRetiroHistorial(){
+    const list=$('#retiroHistList');
+    if(!retiros.length){
+      list.innerHTML=`<div class="retiro-empty"><div class="re-icon">📭</div><p>Sin retiros registrados aún.</p></div>`;
+      return;
+    }
+    const estadoLabels={pendiente:{label:'Pendiente',cls:'re-estado-pendiente',icon:'⏳'},aprobado:{label:'Aprobado',cls:'re-estado-aprobado',icon:'✅'},rechazado:{label:'Rechazado',cls:'re-estado-rechazado',icon:'❌'}};
+    list.innerHTML=retiros.map(r=>{
+      const fecha=r.created_at?new Date(r.created_at).toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+      const est=estadoLabels[r.estado]||{label:r.estado,cls:'re-estado-pendiente',icon:'⏳'};
+      return `<div class="retiro-row">
+        <div class="retiro-row-icon">💸</div>
+        <div class="retiro-row-info">
+          <div class="retiro-row-banco">${esc(r.banco)}</div>
+          <div class="retiro-row-fecha">${fecha}</div>
+          ${r.concepto?`<div class="retiro-row-concepto">${esc(r.concepto)}</div>`:''}
+        </div>
+        <div class="retiro-row-monto">
+          <b>${currency.format(r.monto)}</b>
+          <span class="retiro-row-estado ${est.cls}">${est.icon} ${est.label}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Abrir/cerrar historial
+  $('#btnVerHistorialRetiros').addEventListener('click',async()=>{
+    await loadRetiros();
+    renderRetiroHistorial();
+    $('#retiroHistBox').style.display='block';
+    setTimeout(()=>$('#retiroHistBox').scrollIntoView({behavior:'smooth',block:'nearest'}),100);
+  });
+  $('#btnCerrarHistorial').addEventListener('click',()=>{$('#retiroHistBox').style.display='none';});
+  $('#btnRefreshRetiros').addEventListener('click',async()=>{
+    await loadVendorWallet();
+    await loadCuentasBancarias();
+    populateRetiroBancoSel();
+    showToast('✅ Saldo actualizado.');
+  });
+
+  // Procesar retiro — validar y mostrar confirmación
+  $('#btnProcesarRetiro').addEventListener('click',()=>{
+    const montoRaw=parseFloat($('#retiroMonto').value);
+    const bancoSelId=$('#retiroBancoSel').value;
+    let ok=true;
+
+    // Validar monto
+    const errMonto=$('#errRetiroMonto');const inpMonto=$('#retiroMonto');
+    if(!montoRaw||montoRaw<1000){inpMonto.classList.add('input-err');errMonto.textContent='Ingresa un monto de al menos $1.000';errMonto.classList.add('vis');ok=false;}
+    else{inpMonto.classList.remove('input-err');errMonto.classList.remove('vis');}
+
+    // Validar banco
+    const errBanco=$('#errRetiroBanco');const selBanco=$('#retiroBancoSel');
+    if(!bancoSelId){selBanco.classList.add('input-err');errBanco.classList.add('vis');ok=false;}
+    else{selBanco.classList.remove('input-err');errBanco.classList.remove('vis');}
+
+    if(!ok)return;
+
+    // Validar saldo suficiente
+    if(montoRaw>currentWalletBalance){
+      $('#retiroErrorMsg').textContent=`Tu saldo disponible es ${currency.format(currentWalletBalance)} y el monto solicitado es ${currency.format(montoRaw)}. Por favor ajusta el monto.`;
+      $('#retiroErrorModal').style.display='flex';
+      document.body.style.overflow='hidden';
+      return;
+    }
+
+    // Preparar datos para confirmación
+    const cuentaSeleccionada=cuentasBancarias.find(c=>String(c.id)===String(bancoSelId));
+    const bancoLabel=cuentaSeleccionada?`${cuentaSeleccionada.banco} · ${cuentaSeleccionada.tipo_cuenta} · ****${String(cuentaSeleccionada.num_cuenta).slice(-4)}`:'Cuenta seleccionada';
+    pendingRetiroData={
+      monto:montoRaw,
+      banco:cuentaSeleccionada?cuentaSeleccionada.banco:'',
+      num_cuenta:cuentaSeleccionada?cuentaSeleccionada.num_cuenta:'',
+      tipo_cuenta:cuentaSeleccionada?cuentaSeleccionada.tipo_cuenta:'',
+      cuenta_id:bancoSelId,
+      bancoLabel,
+      concepto:$('#retiroConcepto').value.trim(),
+      saldo_disponible:currentWalletBalance
+    };
+
+    $('#retiroConfirmMonto').textContent=currency.format(montoRaw);
+    $('#retiroConfirmBanco').textContent=bancoLabel;
+    $('#retiroConfirmModal').style.display='flex';
+    document.body.style.overflow='hidden';
+  });
+
+  // Cancelar confirmación
+  $('#retiroConfirmNo').addEventListener('click',()=>{$('#retiroConfirmModal').style.display='none';document.body.style.overflow='';pendingRetiroData=null;});
+  $('#retiroConfirmModal').addEventListener('click',e=>{if(e.target===$('#retiroConfirmModal')){$('#retiroConfirmModal').style.display='none';document.body.style.overflow='';pendingRetiroData=null;}});
+
+  // Confirmar y guardar retiro en Supabase
+  $('#retiroConfirmSi').addEventListener('click',async()=>{
+    if(!pendingRetiroData||!currentVendor)return;
+    const btn=$('#retiroConfirmSi');btn.disabled=true;btn.textContent='Guardando…';
+    try{
+      const{error}=await db.from('retiros_saldo').insert({
+        vendor_id:currentVendor.id,
+        vendor_name:currentVendor.name,
+        monto:pendingRetiroData.monto,
+        concepto:pendingRetiroData.concepto||null,
+        banco:pendingRetiroData.banco,
+        num_cuenta:pendingRetiroData.num_cuenta,
+        tipo_cuenta:pendingRetiroData.tipo_cuenta,
+        saldo_disponible:pendingRetiroData.saldo_disponible,
+        estado:'pendiente'
+      });
+      if(error)throw error;
+
+      // Cerrar modal confirmación
+      $('#retiroConfirmModal').style.display='none';
+      document.body.style.overflow='';
+
+      // Mostrar éxito
+      $('#rsDetalleMonto').textContent=currency.format(pendingRetiroData.monto);
+      $('#rsDetalleBanco').textContent=pendingRetiroData.bancoLabel;
+      $('#retiroSuccessModal').style.display='flex';
+      document.body.style.overflow='hidden';
+
+      // Limpiar formulario
+      $('#retiroMonto').value='';$('#retiroBancoSel').value='';$('#retiroConcepto').value='';
+      pendingRetiroData=null;
+    }catch(err){
+      showToast('❌ Error al guardar el retiro: '+err.message);
+    }finally{btn.disabled=false;btn.textContent='Sí, solicitar';}
+  });
+
+  // Cerrar modal error
+  $('#retiroErrorClose').addEventListener('click',()=>{$('#retiroErrorModal').style.display='none';document.body.style.overflow='';});
+  $('#retiroErrorModal').addEventListener('click',e=>{if(e.target===$('#retiroErrorModal')){$('#retiroErrorModal').style.display='none';document.body.style.overflow='';}});
+
+  // Cerrar modal éxito
+  $('#retiroSuccessClose').addEventListener('click',()=>{$('#retiroSuccessModal').style.display='none';document.body.style.overflow='';});
+
+  // ── RETIROS ADMIN ──
+  async function loadRetirosAdmin(){
+    const filtro=$('#filtroEstadoRetiro').value;
+    let q=db.from('retiros_saldo').select('*').order('created_at',{ascending:false}).limit(200);
+    if(filtro)q=q.eq('estado',filtro);
+    const{data,error}=await q;
+    if(error){showToast('Error al cargar retiros: '+error.message);return;}
+    renderRetirosAdmin(data||[]);
+  }
+
+  function renderRetirosAdmin(list){
+    const container=$('#retirosAdminList');
+    if(!list.length){container.innerHTML='<p style="font-size:13px;color:var(--muted);">No hay solicitudes de retiro.</p>';return;}
+    const estadoOpts=['pendiente','aprobado','rechazado'];
+    container.innerHTML='';
+    list.forEach(r=>{
+      const fecha=r.created_at?new Date(r.created_at).toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+      const div=document.createElement('div');
+      div.style.cssText='background:var(--bg);border-radius:var(--radius-sm);padding:16px;margin-bottom:12px;border-left:4px solid var(--amber);';
+      if(r.estado==='aprobado')div.style.borderLeftColor='var(--accent2)';
+      if(r.estado==='rechazado')div.style.borderLeftColor='var(--warn)';
+      div.innerHTML=`
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+          <div>
+            <div style="font-size:15px;font-weight:700;">${esc(r.vendor_name||'')}</div>
+            <div style="font-size:12px;color:var(--muted);">${fecha}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:18px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;">${currency.format(r.monto)}</div>
+            <div style="font-size:11px;color:var(--muted);">Saldo al momento: ${currency.format(r.saldo_disponible)}</div>
+          </div>
+        </div>
+        <div style="font-size:13px;color:var(--ink2);margin-bottom:4px;">🏦 <b>${esc(r.banco)}</b> · ${esc(r.tipo_cuenta||'')} · ****${String(r.num_cuenta||'').slice(-4)}</div>
+        ${r.concepto?`<div style="font-size:12px;color:var(--muted);margin-bottom:10px;">📝 ${esc(r.concepto)}</div>`:''}
+        <div style="display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);">
+          <span style="font-size:12px;color:var(--muted);">Estado:</span>
+          <select class="status-select" data-retiro-id="${r.id}" style="font-size:12px;padding:5px 10px;">
+            ${estadoOpts.map(s=>`<option value="${s}" ${r.estado===s?'selected':''}>${s==='pendiente'?'⏳ Pendiente':s==='aprobado'?'✅ Aprobado':'❌ Rechazado'}</option>`).join('')}
+          </select>
+          <button class="btn btn-primary btn-sm" data-update-retiro="${r.id}">Guardar</button>
+        </div>`;
+      container.appendChild(div);
+    });
+  }
+
+  $('#retirosAdminList').addEventListener('click',async e=>{
+    const btn=e.target.closest('[data-update-retiro]');
+    if(!btn)return;
+    const id=btn.getAttribute('data-update-retiro');
+    const sel=document.querySelector(`.status-select[data-retiro-id="${id}"]`);
+    if(!sel)return;
+    const nuevoEstado=sel.value;
+    btn.disabled=true;btn.textContent='…';
+    try{
+      const{error}=await db.from('retiros_saldo').update({estado:nuevoEstado,updated_at:new Date().toISOString()}).eq('id',id);
+      if(error)throw error;
+      showToast('✅ Estado actualizado: '+nuevoEstado);
+      await loadRetirosAdmin();
+    }catch(err){showToast('❌ Error: '+err.message);}
+    finally{btn.disabled=false;btn.textContent='Guardar';}
+  });
+
+  $('#filtroEstadoRetiro').addEventListener('change',loadRetirosAdmin);
+  $('#retirosAdminRefreshBtn').addEventListener('click',loadRetirosAdmin);
+  $('#retirosAdminBtn').addEventListener('click',async()=>{
+    const p=$('#retirosAdminPanel'),open=p.style.display!=='none';
+    $('#vendorsPanel').style.display='none';$('#anunciosPanel').style.display='none';$('#pedidosPanel').style.display='none';
+    p.style.display=open?'none':'block';
+    if(!open)await loadRetirosAdmin();
+  });
 
   // ── INIT ──
   async function init(){
@@ -1158,19 +1426,20 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     $('#gateScreen').style.display='none';$('#vendorScreen').style.display='flex';
     $('#sidebarVendorName').textContent=currentVendor?currentVendor.name:'';
     $('#vendorGreeting').textContent='Hola, '+currentVendor.name+' 👋';
-    setLoading(true);await Promise.all([loadProducts(),loadAnuncios(),loadVendorWallet()]);setLoading(false);
+    setLoading(true);await Promise.all([loadProducts(),loadAnuncios(),loadVendorWallet(),loadCuentasBancarias()]);setLoading(false);
     renderVendorAnuncios();switchVendorPanel('inicio');
     vendorCategory='Todas';vendorSearchTerm='';$('#vendorSearchInput').value='';
     renderVendorCategories();renderVendorGrid();updateVendorTimestamp();startVendorAutoRefresh();
+    populateRetiroBancoSel();
   }
   $('#adminLogoutBtn').addEventListener('click',showGate);
   $('#vendorLogoutBtn').addEventListener('click',showGate);
   const mobileLogout=$('#vendorLogoutBtnMobile');if(mobileLogout)mobileLogout.addEventListener('click',showGate);
 
   // ── VENDORS MANAGEMENT ──
-  $('#vendorsToggleBtn').addEventListener('click',()=>{const p=$('#vendorsPanel'),open=p.style.display!=='none';$('#anunciosPanel').style.display='none';$('#pedidosPanel').style.display='none';p.style.display=open?'none':'block';if(!open){$('#adminPinSetting').value=adminPin;renderVendorsList();}});
-  $('#anunciosToggleBtn').addEventListener('click',()=>{const p=$('#anunciosPanel'),open=p.style.display!=='none';$('#vendorsPanel').style.display='none';$('#pedidosPanel').style.display='none';p.style.display=open?'none':'block';if(!open)renderAdminAnuncios();});
-  $('#pedidosToggleBtn').addEventListener('click',async()=>{const p=$('#pedidosPanel'),open=p.style.display!=='none';$('#vendorsPanel').style.display='none';$('#anunciosPanel').style.display='none';p.style.display=open?'none':'block';if(!open){await loadPedidos();renderPedidos();}});
+  $('#vendorsToggleBtn').addEventListener('click',()=>{const p=$('#vendorsPanel'),open=p.style.display!=='none';$('#anunciosPanel').style.display='none';$('#pedidosPanel').style.display='none';$('#retirosAdminPanel').style.display='none';p.style.display=open?'none':'block';if(!open){$('#adminPinSetting').value=adminPin;renderVendorsList();}});
+  $('#anunciosToggleBtn').addEventListener('click',()=>{const p=$('#anunciosPanel'),open=p.style.display!=='none';$('#vendorsPanel').style.display='none';$('#pedidosPanel').style.display='none';$('#retirosAdminPanel').style.display='none';p.style.display=open?'none':'block';if(!open)renderAdminAnuncios();});
+  $('#pedidosToggleBtn').addEventListener('click',async()=>{const p=$('#pedidosPanel'),open=p.style.display!=='none';$('#vendorsPanel').style.display='none';$('#anunciosPanel').style.display='none';$('#retirosAdminPanel').style.display='none';p.style.display=open?'none':'block';if(!open){await loadPedidos();renderPedidos();}});
   $('#pedidosRefreshBtn').addEventListener('click',async()=>{await loadPedidos();renderPedidos();showToast('✅ Pedidos actualizados.');});
 
   function renderVendorsList(){const list=$('#vendorsList');if(!vendors.length){list.innerHTML='<p style="font-size:13px;color:var(--muted);margin-top:12px;">Aún no has creado vendedores.</p>';return;}list.innerHTML=vendors.map(v=>`<div class="vendor-row"><div><strong>${esc(v.name)}</strong><div class="pin-label">PIN: ${esc(v.pin)}</div></div><button class="btn btn-danger btn-sm" data-del-vendor="${v.id}">Eliminar</button></div>`).join('');}
@@ -1260,7 +1529,6 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   $('#productModal').addEventListener('click',e=>{if(e.target===$('#productModal'))closeModal();});
   $('#modalCopyBtn').addEventListener('click',()=>{if(!modalProduct||!modalProduct.copy)return;navigator.clipboard.writeText(modalProduct.copy.trim()).then(()=>showToast('✅ Copy copiado.')).catch(()=>showToast('No se pudo copiar.'));});
   $('#modalShareBtn').addEventListener('click',()=>{if(modalProduct)shareToWhatsapp(modalProduct,$('#modalShareBtn'));});
-
   $('#modalSendOrderBtn').addEventListener('click',()=>{if(!modalProduct)return;const base=window.location.origin+window.location.pathname;const vendorParam=currentVendor?'&v='+encodeURIComponent(currentVendor.id):'';const link=base+'?order='+encodeURIComponent(modalProduct.id)+vendorParam;$('#orderLinkText').textContent=link;$('#orderLinkBox').style.display='block';$('#campanaLinkBox').style.display='none';setTimeout(()=>$('#orderLinkBox').scrollIntoView({behavior:'smooth',block:'nearest'}),100);});
   $('#copyLinkBtn').addEventListener('click',()=>{const link=$('#orderLinkText').textContent;navigator.clipboard.writeText(link).then(()=>{showToast('✅ Link copiado.');$('#copyLinkBtn').textContent='✅ Copiado';setTimeout(()=>$('#copyLinkBtn').textContent='📋 Copiar link',1500);}).catch(()=>showToast('No se pudo copiar.'));});
   $('#sendViaWaBtn').addEventListener('click',()=>{if(!modalProduct)return;const link=$('#orderLinkText').textContent;const prices=calcPrices(modalProduct);const msg=`Hola! 👋 Te comparto este producto que creo que te va a encantar:\n\n*${modalProduct.name}*\nPrecio: ${currency.format(prices.publicPrice)}\n\n🚀 Haz tu pedido de *Entrega Inmediata* aquí:\n${link}`;window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');});
@@ -1284,8 +1552,14 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     document.querySelectorAll('.vpanel').forEach(p=>p.classList.remove('vpanel-active'));
     const target=$('#vpanel-'+name);if(target)target.classList.add('vpanel-active');
     document.querySelectorAll('[data-vpanel]').forEach(btn=>btn.classList.toggle('vsnav-active',btn.getAttribute('data-vpanel')===name));
-    // Cargar cuentas si navega a banco
-    if(name==='banco'){loadCuentasBancarias();}
+    if(name==='banco')loadCuentasBancarias();
+    if(name==='retiros'){
+      // Actualizar saldo y cuentas al entrar al panel
+      loadVendorWallet().then(()=>{
+        const el=$('#retiroSaldoVal');if(el)el.textContent=currency.format(currentWalletBalance);
+      });
+      populateRetiroBancoSel();
+    }
   }
   document.querySelectorAll('[data-vpanel]').forEach(btn=>{btn.addEventListener('click',()=>switchVendorPanel(btn.getAttribute('data-vpanel')));});
 
