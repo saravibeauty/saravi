@@ -1195,7 +1195,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
         vendor_id:orderVendorId||null,vendor_name:orderVendorName||null,
         nombre,telefono,correo,ciudad,direccion,nota,
         cantidad:orderQty,precio_unitario:prices.publicPrice,precio_publico:prices.publicPrice,
-        precio_vendedor:prices.vendorPrice,ganancia_vendedor:prices.publicPrice-prices.vendorPrice,
+        precio_vendedor:prices.vendorPrice,ganancia_vendedor:(prices.publicPrice-prices.vendorPrice)*orderQty,
         flete:FLETE,total,metodo_pago:metodo,
         estado:'nuevo',
         tipo_pedido:'inmediata'
