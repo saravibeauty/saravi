@@ -999,7 +999,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
         <div class="order-res-row"><span>Precio unitario</span><span id="resUnitario">—</span></div>
         <div class="order-res-row"><span>Cantidad</span><span id="resCantidad">1</span></div>
         <div class="order-res-row"><span>Subtotal</span><span id="resSubtotal">—</span></div>
-        <div class="order-res-row"><span>Envío Interrapidísimo</span><span>$20.000</span></div>
+        <div class="order-res-row"><span>Envío Interrapidísimo</span><span id="resEnvio">$20.000</span></div>
         <div class="order-res-row total"><span>Total a pagar</span><span id="resTotal">—</span></div>
       </div>
       <button class="btn-order" id="btnConfirmar" type="button">Confirmar pedido →</button>
@@ -1070,7 +1070,7 @@ function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);
     $('#oBtnContado').classList.remove('active');$('#oBtnContraentrega').classList.add('active');
   }
   function renderOrderBanner(){const p=orderProduct;const prices=calcPrices(p);const imgHtml=p.image?`<img src="${esc(p.image)}" style="width:60px;height:60px;object-fit:cover;border-radius:10px;flex-shrink:0;">`:`<div class="product-banner-img">🛍️</div>`;$('#productBanner').innerHTML=`${imgHtml}<div class="product-banner-info"><div class="product-banner-name">${esc(p.name)}</div><div class="product-banner-price">${currency.format(prices.publicPrice)}</div><div class="product-banner-per">por unidad · precio al público</div></div>`;}
-  function updateOrderResumen(){if(!orderProduct)return;const prices=calcPrices(orderProduct);const subtotal=prices.publicPrice*orderQty;const flete=orderProduct.shipping>0?0:FLETE;const total=subtotal+flete;$('#resUnitario').textContent=currency.format(prices.publicPrice);$('#resCantidad').textContent=orderQty;$('#resSubtotal').textContent=currency.format(subtotal);$('#resTotal').textContent=currency.format(total);}
+  $('#resUnitario').textContent=currency.format(prices.publicPrice);$('#resCantidad').textContent=orderQty;$('#resSubtotal').textContent=currency.format(subtotal);$('#resEnvio').textContent=flete>0?currency.format(flete):'🎁 ¡Envío gratis!';$('#resTotal').textContent=currency.format(total);}
   $('#qtyMinus').addEventListener('click',()=>{if(orderQty>1){orderQty--;$('#qtyDisplay').textContent=orderQty;updateOrderResumen();}});
   $('#qtyPlus').addEventListener('click',()=>{const m=orderProduct?(orderProduct.stock||99):99;if(orderQty<m){orderQty++;$('#qtyDisplay').textContent=orderQty;updateOrderResumen();}else showToast('No hay más unidades disponibles.');});
   $('#oBtnContado').addEventListener('click',()=>{orderMetodoPago='contado';$('#oBtnContado').classList.add('active');$('#oBtnContraentrega').classList.remove('active');$('#oMetodoPago').value='contado';});
