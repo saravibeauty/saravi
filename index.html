@@ -1285,7 +1285,7 @@ function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);
 
     // Preparar datos para confirmación
     const cuentaSeleccionada=cuentasBancarias.find(c=>String(c.id)===String(bancoSelId));
-    const bancoLabel=cuentaSeleccionada?`${cuentaSeleccionada.banco} · ${cuentaSeleccionada.tipo_cuenta} · ****${String(cuentaSeleccionada.num_cuenta).slice(-4)}`:'Cuenta seleccionada';
+    const bancoLabel=cuentaSeleccionada?`${cuentaSeleccionada.banco} · ${cuentaSeleccionada.tipo_cuenta} · ${cuentaSeleccionada.num_cuenta}`:'Cuenta seleccionada';
     pendingRetiroData={
       monto:montoRaw,
       banco:cuentaSeleccionada?cuentaSeleccionada.banco:'',
