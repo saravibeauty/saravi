@@ -677,14 +677,36 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
             <p style="font-size:11px;color:var(--muted);margin-top:5px;">Se suma al precio público sugerido. El vendedor lo ve incluido.</p>
           </div>
         </div>
-        <div class="calc-box">
+        <!-- OFERTAS -->
+        <div class="field" style="margin-bottom:14px;">
+          <label style="display:flex;align-items:center;gap:8px;text-transform:none;font-size:13px;font-weight:700;color:var(--ink2);cursor:pointer;">
+            <input type="checkbox" id="oferta2Toggle" style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;flex-shrink:0;">
+            Habilitar Oferta x2
+          </label>
+          <div id="oferta2Preview" style="display:none;margin-top:8px;background:rgba(10,132,255,.07);border:1px solid rgba(10,132,255,.2);border-radius:8px;padding:10px 14px;font-size:13px;">
+            <span style="color:var(--muted);">Precio Oferta x2:</span> <b id="oferta2PreviewVal" style="color:var(--blue);font-variant-numeric:tabular-nums;">$0</b>
+            <span style="font-size:11px;color:var(--muted);margin-left:8px;">= público x1 + vendedor paga</span>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:14px;">
+          <label style="display:flex;align-items:center;gap:8px;text-transform:none;font-size:13px;font-weight:700;color:var(--ink2);cursor:pointer;">
+            <input type="checkbox" id="oferta3Toggle" style="width:16px;height:16px;accent-color:var(--blue);cursor:pointer;flex-shrink:0;">
+            Habilitar Oferta x3
+          </label>
+          <div id="oferta3Preview" style="display:none;margin-top:8px;background:rgba(10,132,255,.07);border:1px solid rgba(10,132,255,.2);border-radius:8px;padding:10px 14px;font-size:13px;">
+            <span style="color:var(--muted);">Precio Oferta x3:</span> <b id="oferta3PreviewVal" style="color:var(--blue);font-variant-numeric:tabular-nums;">$0</b>
+            <span style="font-size:11px;color:var(--muted);margin-left:8px;">= oferta x2 + vendedor paga</span>
+          </div>
+        </div>
           <div class="calc-title">📊 Desglose automático</div>
           <div class="calc-row"><span>Precio bodega</span><b id="calcBodega">$0</b></div>
           <div class="calc-row"><span>Tu ganancia</span><b id="calcGanancia">$0</b></div>
           <div class="calc-row"><span>Vendedor paga</span><b id="calcVendedorPaga">$0</b></div>
           <div class="calc-row" id="calcEnvioRow" style="display:none;"><span>Envío incluido</span><b id="calcEnvio" style="color:var(--amber);">$0</b></div>
           <div class="calc-row total"><span>Precio público sugerido</span><b id="calcPublico">$0</b></div>
-        </div>
+      <div class="calc-row" id="calcOferta2Row" style="display:none;border-top:1px dashed rgba(191,90,242,.2);margin-top:6px;padding-top:8px;"><span>Oferta x2 (precio al cliente)</span><b id="calcOferta2" style="color:var(--blue);">$0</b></div>
+      <div class="calc-row" id="calcOferta3Row" style="display:none;"><span>Oferta x3 (precio al cliente)</span><b id="calcOferta3" style="color:var(--blue);">$0</b></div>
+    </div>
         <div class="form-buttons">
           <button type="submit" class="btn btn-primary" id="saveBtn">Guardar producto</button>
           <button type="button" class="btn btn-ghost" id="cancelEditBtn" style="display:none">Cancelar</button>
@@ -982,6 +1004,10 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     <div id="orderFormContent" style="display:none;">
       <div class="order-tipo-tag">🚀 Entrega Inmediata</div>
       <div class="product-banner" id="productBanner"></div>
+      <div id="ofertaSelector" style="display:none;margin-bottom:1.2rem;">
+        <p class="osection-title" style="margin-top:0;">Elige tu oferta</p>
+        <div id="ofertaBtns" style="display:flex;flex-direction:column;gap:.5rem;"></div>
+      </div>
       <p class="osection-title" style="margin-top:0;">Tus datos</p>
       <div class="ofield"><label>Nombre completo *</label><input type="text" id="oNombre" placeholder="¿Cómo te llamas?"><div class="ofield-error" id="oErrNombre">Ingresa tu nombre</div></div>
       <div class="ofield"><label>Teléfono / WhatsApp *</label><input type="tel" id="oTelefono" placeholder="Ej: 300 123 4567"><div class="ofield-error" id="oErrTelefono">Ingresa tu teléfono</div></div>
@@ -1069,8 +1095,53 @@ function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);
     renderOrderBanner();updateOrderResumen();$('#orderFormContent').style.display='block';
     $('#oBtnContado').classList.remove('active');$('#oBtnContraentrega').classList.add('active');
   }
-  function renderOrderBanner(){const p=orderProduct;const prices=calcPrices(p);const imgHtml=p.image?`<img src="${esc(p.image)}" style="width:60px;height:60px;object-fit:cover;border-radius:10px;flex-shrink:0;">`:`<div class="product-banner-img">🛍️</div>`;$('#productBanner').innerHTML=`${imgHtml}<div class="product-banner-info"><div class="product-banner-name">${esc(p.name)}</div><div class="product-banner-price">${currency.format(prices.publicPrice)}</div><div class="product-banner-per">por unidad · precio al público</div></div>`;}
-  function updateOrderResumen(){if(!orderProduct)return;const prices=calcPrices(orderProduct);const subtotal=prices.publicPrice*orderQty;const flete=orderProduct.shipping>0?0:FLETE;const total=subtotal+flete;$('#resUnitario').textContent=currency.format(prices.publicPrice);$('#resCantidad').textContent=orderQty;$('#resSubtotal').textContent=currency.format(subtotal);$('#resEnvio').textContent=flete>0?currency.format(flete):'🎁 ¡Envío gratis!';$('#resTotal').textContent=currency.format(total);}
+  let orderOfertaSel='normal'; // 'normal' | 'oferta2' | 'oferta3'
+  function renderOrderBanner(){
+    const p=orderProduct;const prices=calcPrices(p);
+    const imgHtml=p.image?`<img src="${esc(p.image)}" style="width:60px;height:60px;object-fit:cover;border-radius:10px;flex-shrink:0;">`:`<div class="product-banner-img">🛍️</div>`;
+    $('#productBanner').innerHTML=`${imgHtml}<div class="product-banner-info"><div class="product-banner-name">${esc(p.name)}</div><div class="product-banner-price" id="bannerPrice">${currency.format(prices.publicPrice)}</div><div class="product-banner-per" id="bannerPer">por unidad · precio al público</div></div>`;
+    // Selector de oferta
+    const hayOfertas=p.oferta2_activa||p.oferta3_activa;
+    const sel=$('#ofertaSelector');sel.style.display=hayOfertas?'block':'none';
+    const btns=$('#ofertaBtns');btns.innerHTML='';
+    function mkBtn(label,val,precio){
+      const btn=document.createElement('button');
+      btn.type='button';
+      btn.style.cssText='padding:.75rem 1rem;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:#fff;font-family:inherit;font-size:.85rem;cursor:pointer;text-align:left;transition:all .2s;display:flex;justify-content:space-between;align-items:center;';
+      btn.innerHTML=`<span>${label}</span><b style="font-variant-numeric:tabular-nums;">${currency.format(precio)}</b>`;
+      btn.addEventListener('click',()=>{
+        orderOfertaSel=val;
+        btns.querySelectorAll('button').forEach(b=>b.style.background='rgba(255,255,255,.07)');
+        btns.querySelectorAll('button').forEach(b=>b.style.borderColor='rgba(255,255,255,.2)');
+        btn.style.background='rgba(192,132,252,.18)';btn.style.borderColor='#c084fc';
+        updateOrderResumen();
+        // Actualizar banner
+        document.getElementById('bannerPrice').textContent=currency.format(precio);
+        const perMap={normal:'1 unidad',oferta2:'2 unidades',oferta3:'3 unidades'};
+        document.getElementById('bannerPer').textContent=perMap[val]+' · precio al público';
+      });
+      if(val==='normal'){btn.style.background='rgba(192,132,252,.18)';btn.style.borderColor='#c084fc';}
+      btns.appendChild(btn);
+    }
+    mkBtn('1 unidad',  'normal',  prices.publicPrice);
+    if(p.oferta2_activa)mkBtn('Oferta x2 (2 unidades)','oferta2',p.oferta2_precio||0);
+    if(p.oferta3_activa)mkBtn('Oferta x3 (3 unidades)','oferta3',p.oferta3_precio||0);
+    orderOfertaSel='normal';
+  }
+  function updateOrderResumen(){
+    if(!orderProduct)return;
+    const prices=calcPrices(orderProduct);
+    let precioUnit=prices.publicPrice,cantLabel=orderQty,cantReal=orderQty;
+    if(orderOfertaSel==='oferta2'){precioUnit=orderProduct.oferta2_precio||0;cantLabel='x2 × '+orderQty;cantReal=orderQty*2;}
+    else if(orderOfertaSel==='oferta3'){precioUnit=orderProduct.oferta3_precio||0;cantLabel='x3 × '+orderQty;cantReal=orderQty*3;}
+    const subtotal=precioUnit*orderQty;
+    const flete=orderProduct.shipping>0?0:FLETE;const total=subtotal+flete;
+    $('#resUnitario').textContent=currency.format(precioUnit)+(orderOfertaSel!=='normal'?' (paquete)':'');
+    $('#resCantidad').textContent=cantLabel;
+    $('#resSubtotal').textContent=currency.format(subtotal);
+    $('#resEnvio').textContent=flete>0?currency.format(flete):'🎁 ¡Envío gratis!';
+    $('#resTotal').textContent=currency.format(total);
+  }
   $('#qtyMinus').addEventListener('click',()=>{if(orderQty>1){orderQty--;$('#qtyDisplay').textContent=orderQty;updateOrderResumen();}});
   $('#qtyPlus').addEventListener('click',()=>{const m=orderProduct?(orderProduct.stock||99):99;if(orderQty<m){orderQty++;$('#qtyDisplay').textContent=orderQty;updateOrderResumen();}else showToast('No hay más unidades disponibles.');});
   $('#oBtnContado').addEventListener('click',()=>{orderMetodoPago='contado';$('#oBtnContado').classList.add('active');$('#oBtnContraentrega').classList.remove('active');$('#oMetodoPago').value='contado';});
@@ -1090,7 +1161,10 @@ function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);
     const prices=calcPrices(orderProduct);const subtotal=prices.publicPrice*orderQty;const flete=orderProduct.shipping>0?0:FLETE;const total=subtotal+flete;
     const btn=$('#btnConfirmar');btn.disabled=true;btn.textContent='Enviando pedido…';
     try{
-      const{error}=await db.from('pedidos').insert({product_id:orderProduct.id,product_name:orderProduct.name,vendor_id:orderVendorId||null,vendor_name:orderVendorName||null,nombre,telefono,correo,ciudad,direccion,nota,cantidad:orderQty,precio_unitario:prices.publicPrice,precio_publico:prices.publicPrice,precio_vendedor:prices.vendorPrice,ganancia_vendedor:(prices.publicPrice-prices.vendorPrice-prices.shipping)*orderQty,flete:flete,total,metodo_pago:metodo,estado:'nuevo',tipo_pedido:'inmediata'});
+      let precioUnit=prices.publicPrice,cantReal=orderQty;
+      if(orderOfertaSel==='oferta2'){precioUnit=orderProduct.oferta2_precio||0;cantReal=orderQty*2;}
+      else if(orderOfertaSel==='oferta3'){precioUnit=orderProduct.oferta3_precio||0;cantReal=orderQty*3;}
+      const{error}=await db.from('pedidos').insert({product_id:orderProduct.id,product_name:orderProduct.name,vendor_id:orderVendorId||null,vendor_name:orderVendorName||null,nombre,telefono,correo,ciudad,direccion,nota,cantidad:cantReal,precio_unitario:precioUnit,precio_publico:precioUnit,precio_vendedor:prices.vendorPrice,ganancia_vendedor:(precioUnit-prices.vendorPrice)*cantReal,flete:flete,total,metodo_pago:metodo,estado:'nuevo',tipo_pedido:'inmediata',tipo_oferta:orderOfertaSel||'normal'});
       if(error)throw error;
       $('#orderFormContent').style.display='none';const success=$('#orderSuccess');success.style.display='block';
       if(metodo==='contraentrega'){$('#successContraentrega').style.display='block';$('#successNombreCE').textContent=nombre;$('#orderSuccessTitle').textContent='¡Pedido confirmado!';$('#orderSuccessIcon').textContent='✓';}
@@ -1100,7 +1174,7 @@ function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);
 
   // ── SUPABASE DATA ──
   async function loadProducts(){const{data,error}=await db.from('products').select('*').order('created_at',{ascending:false});if(error){console.error('products:',error);return;}products=data||[];}
-  async function saveProduct(p){const row={id:p.id,name:p.name,category:p.category||'',city:p.city||'',price:p.price||0,stock:p.stock||0,commission:p.commission||0,margin:p.margin||0,copy:p.copy||'',image:p.image||'',shipping:p.shipping||0,in_stock:(p.stock||0)>0,updated_at:new Date().toISOString()};const{error}=await db.from('products').upsert(row,{onConflict:'id'});if(error)throw error;}
+  async function saveProduct(p){const row={id:p.id,name:p.name,category:p.category||'',city:p.city||'',price:p.price||0,stock:p.stock||0,commission:p.commission||0,margin:p.margin||0,copy:p.copy||'',image:p.image||'',shipping:p.shipping||0,in_stock:(p.stock||0)>0,oferta2_activa:!!p.oferta2_activa,oferta2_precio:p.oferta2_precio||0,oferta3_activa:!!p.oferta3_activa,oferta3_precio:p.oferta3_precio||0,updated_at:new Date().toISOString()};
   async function deleteProduct(id){const{error}=await db.from('products').delete().eq('id',id);if(error)throw error;}
   async function loadVendors(){const{data,error}=await db.from('vendors').select('*').order('created_at',{ascending:true});if(error){console.error('vendors:',error);return;}vendors=data||[];}
   async function addVendor(name,pin){const{error}=await db.from('vendors').insert({name,pin});if(error)throw error;await loadVendors();}
@@ -1501,7 +1575,23 @@ function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);
     $('#calcPublico').textContent=currency.format(prices.publicPrice);
     $('#calcEnvioRow').style.display=envioActivo&&envio>0?'flex':'none';
     $('#calcEnvio').textContent=currency.format(envio);
+    // Ofertas
+    const o2activa=$('#oferta2Toggle').checked;
+    const o3activa=$('#oferta3Toggle').checked;
+    const oferta2=prices.publicPrice+prices.vendorPrice;
+    const oferta3=oferta2+prices.vendorPrice;
+    $('#oferta2Preview').style.display=o2activa?'block':'none';
+    $('#oferta2PreviewVal').textContent=currency.format(oferta2);
+    $('#calcOferta2Row').style.display=o2activa?'flex':'none';
+    $('#calcOferta2').textContent=currency.format(oferta2);
+    $('#oferta3Preview').style.display=o3activa?'block':'none';
+    $('#oferta3PreviewVal').textContent=currency.format(oferta3);
+    $('#calcOferta3Row').style.display=o3activa?'flex':'none';
+    $('#calcOferta3').textContent=currency.format(oferta3);
   }
+  // Listeners toggles oferta
+  $('#oferta2Toggle').addEventListener('change',updateCalcPreview);
+  $('#oferta3Toggle').addEventListener('change',updateCalcPreview);
   // Toggle envío
   $('#envioToggle').addEventListener('change',()=>{
     $('#envioValueWrap').style.display=$('#envioToggle').checked?'block':'none';
@@ -1519,15 +1609,22 @@ function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);
   // ── FORM ──
   $('#genIdBtn').addEventListener('click',()=>{let id;do{id='SKU-'+Math.floor(1000+Math.random()*9000);}while(products.some(p=>p.id===id));$('#idInput').value=id;$('#idError').style.display='none';});
   $('#idInput').addEventListener('input',()=>{$('#idError').style.display='none';});
-  function resetForm(){$('#productForm').reset();pendingImageData=null;$('#imgPreview').src='';$('#dzPreviewWrap').style.display='none';$('#dzPlaceholder').style.display='block';$('#imgInput').value='';$('#copyInput').value='';$('#copyCount').textContent='0 / 500';editingId=null;$('#formTitle').textContent='Agregar producto';$('#saveBtn').textContent='Guardar producto';$('#cancelEditBtn').style.display='none';$('#idError').style.display='none';$('#idInput').disabled=false;$('#commissionInput').value=15;$('#marginInput').value=20;$('#envioToggle').checked=false;$('#envioValueWrap').style.display='none';$('#envioInput').value='';$('#calcEnvioRow').style.display='none';updateCalcPreview();}
-  $('#cancelEditBtn').addEventListener('click',resetForm);
+  function resetForm(){$('#productForm').reset();pendingImageData=null;$('#imgPreview').src='';$('#dzPreviewWrap').style.display='none';$('#dzPlaceholder').style.display='block';$('#imgInput').value='';$('#copyInput').value='';$('#copyCount').textContent='0 / 500';editingId=null;$('#formTitle').textContent='Agregar producto';$('#saveBtn').textContent='Guardar producto';$('#cancelEditBtn').style.display='none';$('#idError').style.display='none';$('#idInput').disabled=false;$('#commissionInput').value=15;$('#marginInput').value=20;$('#envioToggle').checked=false;$('#envioValueWrap').style.display='none';$('#envioInput').value='';$('#calcEnvioRow').style.display='none';
+    $('#oferta2Toggle').checked=false;$('#oferta2Preview').style.display='none';$('#calcOferta2Row').style.display='none';
+    $('#oferta3Toggle').checked=false;$('#oferta3Preview').style.display='none';$('#calcOferta3Row').style.display='none';
+    updateCalcPreview();
   $('#productForm').addEventListener('submit',async e=>{
     e.preventDefault();const name=$('#nameInput').value.trim(),id=$('#idInput').value.trim(),category=$('#categoryInput').value.trim();const city=$('#cityInput').value.trim(),price=parseFloat($('#priceInput').value),stock=parseInt($('#stockInput').value,10);const commission=parseFloat($('#commissionInput').value)||0,margin=parseFloat($('#marginInput').value)||0;const copy=$('#copyInput').value.trim();
     const shipping=$('#envioToggle').checked?(parseFloat($('#envioInput').value)||0):0;
     if(!name||!id||!category||!city||isNaN(price)||isNaN(stock)){showToast('Completa todos los campos.');return;}
     if(products.some(p=>p.id===id&&p.id!==editingId)){$('#idError').style.display='block';return;}
     let imageData=pendingImageData;if(editingId!==null&&pendingImageData===null){const ex=products.find(p=>p.id===editingId);imageData=ex?ex.image:'';}
-    const productObj={id,name,category,city,price,stock,commission,margin,copy,image:imageData||'',shipping};setSaving(true);
+    const prices2=calcPrices({price,commission,margin,shipping});
+    const o2activa=$('#oferta2Toggle').checked;
+    const o3activa=$('#oferta3Toggle').checked;
+    const oferta2precio=o2activa?prices2.publicPrice+prices2.vendorPrice:0;
+    const oferta3precio=o3activa?oferta2precio+prices2.vendorPrice:0;
+    const productObj={id,name,category,city,price,stock,commission,margin,copy,image:imageData||'',shipping,oferta2_activa:o2activa,oferta2_precio:oferta2precio,oferta3_activa:o3activa,oferta3_precio:oferta3precio};setSaving(true);
     try{await saveProduct(productObj);await loadProducts();showToast(editingId?'✅ Producto actualizado.':'✅ Producto guardado.');resetForm();render();}catch(err){showToast('❌ Error al guardar: '+err.message);}finally{setSaving(false);}
   });
 
@@ -1540,6 +1637,12 @@ function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);
     $('#envioToggle').checked=shipping>0;
     $('#envioValueWrap').style.display=shipping>0?'block':'none';
     $('#envioInput').value=shipping>0?shipping:'';
+    $('#oferta2Toggle').checked=!!(p.oferta2_activa);
+    $('#oferta2Preview').style.display=p.oferta2_activa?'block':'none';
+    $('#calcOferta2Row').style.display=p.oferta2_activa?'flex':'none';
+    $('#oferta3Toggle').checked=!!(p.oferta3_activa);
+    $('#oferta3Preview').style.display=p.oferta3_activa?'block':'none';
+    $('#calcOferta3Row').style.display=p.oferta3_activa?'flex':'none';                                                                                                                                                                                                                                                                       
     const copy=p.copy||'';$('#copyInput').value=copy;$('#copyCount').textContent=copy.length+' / 500';updateCalcPreview();pendingImageData=null;if(p.image){$('#imgPreview').src=p.image;$('#dzPreviewWrap').style.display='block';$('#dzPlaceholder').style.display='none';}else{$('#dzPreviewWrap').style.display='none';$('#dzPlaceholder').style.display='block';}$('#formTitle').textContent='Editar producto';$('#saveBtn').textContent='Actualizar';$('#cancelEditBtn').style.display='block';window.scrollTo({top:0,behavior:'smooth'});}if(delId!==null){deleteConfirmId=delId;render();}if(confirmDelId!==null){try{await deleteProduct(confirmDelId);products=products.filter(p=>p.id!==confirmDelId);deleteConfirmId=null;render();showToast('Producto eliminado.');}catch(err){showToast('Error al eliminar: '+err.message);}}if(cancelDelId!==null){deleteConfirmId=null;render();}});
   $('#searchInput').addEventListener('input',render);
 
@@ -1553,7 +1656,9 @@ function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);
   $('#vendorSearchInput').addEventListener('input',e=>{vendorSearchTerm=e.target.value;renderVendorGrid();});
   $('#stockToggleBtn').addEventListener('click',()=>{hideOutOfStock=!hideOutOfStock;$('#stockToggleBtn').textContent=hideOutOfStock?'📦 Mostrar agotados':'📦 Ocultar agotados';$('#stockToggleBtn').style.color=hideOutOfStock?'var(--accent)':'';renderVendorGrid();});
   function renderVendorGrid(){const term=vendorSearchTerm.trim().toLowerCase();const filtered=products.filter(p=>{const inCat=vendorCategory==='Todas'||p.category===vendorCategory;const inSearch=!term||p.name.toLowerCase().includes(term)||(p.category||'').toLowerCase().includes(term);const inStock=!hideOutOfStock||(p.stock||0)>0;return inCat&&inSearch&&inStock;});const vgrid=$('#vendorGrid');vgrid.innerHTML='';filtered.forEach(p=>vgrid.appendChild(buildVendorCard(p)));$('#vendorEmptyState').style.display=filtered.length===0?'block':'none';}
-  function buildVendorCard(p){const card=document.createElement('div');card.className='vcard';card.setAttribute('data-product-id',p.id);const prices=calcPrices(p);let stockBadge=(p.stock||0)<=0?`<span class="badge badge-out">Agotado</span>`:(p.stock||0)<=5?`<span class="badge badge-low">Pocas ud.</span>`:`<span class="badge badge-ok">Disponible</span>`;if((p.stock||0)<=0)card.style.opacity='.55';const imgHtml=p.image?`<img src="${esc(p.image)}" alt="${esc(p.name)}">`:`<div class="noimg">🫙</div>`;const hasCopy=p.copy&&p.copy.trim().length>0;const shippingBadge=prices.shipping>0?`<span class="badge" style="background:rgba(255,159,10,.1);color:var(--amber);">📦 Envío inc.</span>`:'';card.innerHTML=`<div class="vcard-img">${imgHtml}</div><div class="vcard-body"><div class="vcard-badges"><span class="badge badge-cat">${esc(p.category||'')}</span>${stockBadge}${shippingBadge}</div><div class="vcard-name">${esc(p.name)}</div><div class="vcard-id-row"><span class="vcard-id-chip" data-copy-id="${esc(p.id)}"># ${esc(p.id)}</span></div><div class="vcard-price"><div class="vp-label">Precio al público${prices.shipping>0?' (c/envío)':''}</div><div class="vp-amount">${currency.format(prices.publicPrice)}</div></div><div class="vcard-money"><div class="vm-row vm-pay"><span>Tú pagas</span><b>${currency.format(prices.vendorPrice+prices.shipping)}</b>${prices.shipping>0?`<span style="font-size:10px;color:var(--amber);display:block;margin-top:2px;">${currency.format(prices.vendorPrice)} + ${currency.format(prices.shipping)} envío</span>`:''}</div><div class="vm-row vm-earn"><span>Tu ganancia</span><b>${currency.format(prices.publicPrice-prices.vendorPrice-prices.shipping)}</b><em>${p.margin||0}%</em></div></div><div class="vcard-tap-hint">${hasCopy?'👆 Toca para ver detalle y compartir':'👆 Toca para ver detalle'}</div></div>`;return card;}
+  function buildVendorCard(p){const card=document.createElement('div');card.className='vcard';card.setAttribute('data-product-id',p.id);const prices=calcPrices(p);let stockBadge=(p.stock||0)<=0?`<span class="badge badge-out">Agotado</span>`:(p.stock||0)<=5?`<span class="badge badge-low">Pocas ud.</span>`:`<span class="badge badge-ok">Disponible</span>`;if((p.stock||0)<=0)card.style.opacity='.55';const imgHtml=p.image?`<img src="${esc(p.image)}" alt="${esc(p.name)}">`:`<div class="noimg">🫙</div>`;const hasCopy=p.copy&&p.copy.trim().length>0;const shippingBadge=prices.shipping>0?`<span class="badge" style="background:rgba(255,159,10,.1);color:var(--amber);">📦 Envío inc.</span>`:'';card.innerHTML=`<div class="vcard-img">${imgHtml}</div><div class="vcard-body"><div class="vcard-badges"><span class="badge badge-cat">${esc(p.category||'')}</span>${stockBadge}${shippingBadge}</div><div class="vcard-name">${esc(p.name)}</div><div class="vcard-id-row"><span class="vcard-id-chip" data-copy-id="${esc(p.id)}"># ${esc(p.id)}</span></div><div class="vcard-price"><div class="vp-label">Precio al público${prices.shipping>0?' (c/envío)':''}</div><div class="vp-amount">${currency.format(prices.publicPrice)}</div></div><div class="vcard-money"><div class="vm-row vm-pay"><span>Tú pagas</span><b>${currency.format(prices.vendorPrice+prices.shipping)}</b>${prices.shipping>0?`<span style="font-size:10px;color:var(--amber);display:block;margin-top:2px;">${currency.format(prices.vendorPrice)} + ${currency.format(prices.shipping)} envío</span>`:''}</div><div class="vm-row vm-earn"><span>Tu ganancia</span><b>${currency.format(prices.publicPrice-prices.vendorPrice-prices.shipping)}</b><em>${p.margin||0}%</em></div></div>${p.oferta2_activa?`<div style="margin-bottom:6px;background:rgba(10,132,255,.08);border-radius:7px;padding:6px 10px;display:flex;justify-content:space-between;font-size:11px;"><span style="color:#0A84FF;font-weight:700;">📦 Oferta x2</span><b style="color:#0A84FF;font-variant-numeric:tabular-nums;">${currency.format(p.oferta2_precio||0)}</b></div>`:''}
+    ${p.oferta3_activa?`<div style="margin-bottom:8px;background:rgba(10,132,255,.08);border-radius:7px;padding:6px 10px;display:flex;justify-content:space-between;font-size:11px;"><span style="color:#0A84FF;font-weight:700;">📦 Oferta x3</span><b style="color:#0A84FF;font-variant-numeric:tabular-nums;">${currency.format(p.oferta3_precio||0)}</b></div>`:''}
+    <div class="vcard-tap-hint">${hasCopy?'👆 Toca para ver detalle y compartir':'👆 Toca para ver detalle'}</div></div>`;return card;}
   $('#vendorGrid').addEventListener('click',e=>{const chip=e.target.closest('[data-copy-id]');if(chip){e.stopPropagation();const id=chip.getAttribute('data-copy-id');navigator.clipboard.writeText(id).then(()=>{chip.classList.add('copied');chip.textContent='✅ Copiado';setTimeout(()=>{chip.classList.remove('copied');chip.textContent='# '+id;},1500);}).catch(()=>{});return;}const card=e.target.closest('.vcard');if(card){const id=card.getAttribute('data-product-id');if(id){const p=products.find(x=>x.id===id);if(p)openModal(p);}}});
 
   // ── AUTO REFRESH ──
@@ -1564,6 +1669,13 @@ function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);
   function stopVendorAutoRefresh(){if(vendorRefreshTimer){clearInterval(vendorRefreshTimer);vendorRefreshTimer=null;}}
 
   // ── MODAL PRODUCTO ──
+  // Ofertas en el modal
+    let ofertasHtml='';
+    if(p.oferta2_activa)ofertasHtml+=`<div style="background:rgba(10,132,255,.08);border:1px solid rgba(10,132,255,.2);border-radius:8px;padding:8px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;font-weight:700;color:#0A84FF;">📦 Oferta x2 — precio al cliente</span><b style="color:#0A84FF;font-size:14px;font-variant-numeric:tabular-nums;">${currency.format(p.oferta2_precio||0)}</b></div>`;
+    if(p.oferta3_activa)ofertasHtml+=`<div style="background:rgba(10,132,255,.08);border:1px solid rgba(10,132,255,.2);border-radius:8px;padding:8px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;font-weight:700;color:#0A84FF;">📦 Oferta x3 — precio al cliente</span><b style="color:#0A84FF;font-size:14px;font-variant-numeric:tabular-nums;">${currency.format(p.oferta3_precio||0)}</b></div>`;
+    let ofertasEl=document.getElementById('modalOfertasBlock');
+    if(!ofertasEl){ofertasEl=document.createElement('div');ofertasEl.id='modalOfertasBlock';$('#modalCopy').parentNode.insertBefore(ofertasEl,$('#modalCopy'));}
+    ofertasEl.innerHTML=ofertasHtml;                     
   function openModal(p){modalProduct=p;const prices=calcPrices(p);const earn=prices.publicPrice-prices.vendorPrice-prices.shipping;const mi=$('#modalImg');mi.innerHTML=p.image?`<img src="${esc(p.image)}" style="width:100%;max-height:420px;object-fit:contain;display:block;">`:`<div style="height:160px;display:flex;align-items:center;justify-content:center;font-size:60px;opacity:.2;">🫙</div>`;let stockBadge=(p.stock||0)<=0?`<span class="badge badge-out">Agotado</span>`:(p.stock||0)<=5?`<span class="badge badge-low">Pocas ud.</span>`:`<span class="badge badge-ok">Disponible</span>`;const shippingBadge=prices.shipping>0?`<span class="badge" style="background:rgba(255,159,10,.1);color:var(--amber);">📦 Envío incluido</span>`:'';$('#modalBadges').innerHTML=`<span class="badge badge-cat">${esc(p.category||'')}</span>${stockBadge}${shippingBadge}`;$('#modalName').textContent=p.name;$('#modalPublicPrice').textContent=currency.format(prices.publicPrice)+(prices.shipping>0?' (c/envío)':'');$('#modalVendorPrice').textContent=currency.format(prices.vendorPrice);$('#modalEarn').textContent='+'+currency.format(earn);$('#modalMargin').textContent=(p.margin||0)+'%';$('#modalCopy').textContent=p.copy||'(Sin copy de venta)';const canShare=!!(p.image&&p.copy&&p.copy.trim());$('#modalShareBtn').disabled=!canShare;$('#modalShareBtn').style.opacity=canShare?'1':'.4';$('#orderLinkBox').style.display='none';$('#campanaLinkBox').style.display='none';$('#productModal').style.display='block';document.body.style.overflow='hidden';}
   function closeModal(){$('#productModal').style.display='none';document.body.style.overflow='';modalProduct=null;}
   $('#modalCloseBtn').addEventListener('click',closeModal);
