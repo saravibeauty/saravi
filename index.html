@@ -1179,8 +1179,11 @@ function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);
       const{data,error}=await db.from('pedidos').select('ganancia_vendedor,cantidad').eq('vendor_id',currentVendor.id).eq('estado','entregado');
       if(error)throw error;
       const total=(data||[]).reduce((sum,p)=>sum+(Number(p.ganancia_vendedor)||0),0);
-      currentWalletBalance=total;
-      walletEl.textContent=currency.format(total);
+      const{data:rData}=await db.from('retiros_saldo').select('monto').eq('vendor_id',currentVendor.id).eq('estado','aprobado');
+      const totalRetiros=(rData||[]).reduce((sum,r)=>sum+(Number(r.monto)||0),0);
+      const saldo=total-totalRetiros;
+      currentWalletBalance=saldo;
+      walletEl.textContent=currency.format(saldo);
       // Actualizar chip en panel retiros
       const retiroSaldoEl=$('#retiroSaldoVal');
       if(retiroSaldoEl)retiroSaldoEl.textContent=currency.format(total);
@@ -1379,7 +1382,7 @@ function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);
             <div style="font-size:11px;color:var(--muted);">Saldo al momento: ${currency.format(r.saldo_disponible)}</div>
           </div>
         </div>
-        <div style="font-size:13px;color:var(--ink2);margin-bottom:4px;">🏦 <b>${esc(r.banco)}</b> · ${esc(r.tipo_cuenta||'')} · ****${String(r.num_cuenta||'').slice(-4)}</div>
+        <div style="font-size:13px;color:var(--ink2);margin-bottom:4px;">🏦 <b>${esc(r.banco)}</b> · ${esc(r.tipo_cuenta||'')} · ${esc(r.num_cuenta||'')}</div>
         ${r.concepto?`<div style="font-size:12px;color:var(--muted);margin-bottom:10px;">📝 ${esc(r.concepto)}</div>`:''}
         <div style="display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);">
           <span style="font-size:12px;color:var(--muted);">Estado:</span>
