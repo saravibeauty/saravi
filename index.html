@@ -1095,38 +1095,71 @@ function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);
     renderOrderBanner();updateOrderResumen();$('#orderFormContent').style.display='block';
     $('#oBtnContado').classList.remove('active');$('#oBtnContraentrega').classList.add('active');
   }
-  let orderOfertaSel='normal'; // 'normal' | 'oferta2' | 'oferta3'
+  let orderOfertaSel='normal';
   function renderOrderBanner(){
-    const p=orderProduct;const prices=calcPrices(p);
-    const imgHtml=p.image?`<img src="${esc(p.image)}" style="width:60px;height:60px;object-fit:cover;border-radius:10px;flex-shrink:0;">`:`<div class="product-banner-img">🛍️</div>`;
-    $('#productBanner').innerHTML=`${imgHtml}<div class="product-banner-info"><div class="product-banner-name">${esc(p.name)}</div><div class="product-banner-price" id="bannerPrice">${currency.format(prices.publicPrice)}</div><div class="product-banner-per" id="bannerPer">por unidad · precio al público</div></div>`;
-    // Selector de oferta
-    const hayOfertas=p.oferta2_activa||p.oferta3_activa;
-    const sel=$('#ofertaSelector');sel.style.display=hayOfertas?'block':'none';
-    const btns=$('#ofertaBtns');btns.innerHTML='';
+    const p=orderProduct;
+    const prices=calcPrices(p);
+    const imgHtml=p.image
+      ?'<img src="'+p.image+'" style="width:60px;height:60px;object-fit:cover;border-radius:10px;flex-shrink:0;">'
+      :'<div class="product-banner-img">\uD83D\uDED2</div>';
+    document.getElementById('productBanner').innerHTML=imgHtml+
+      '<div class="product-banner-info">'+
+        '<div class="product-banner-name">'+p.name+'</div>'+
+        '<div class="product-banner-price" id="bannerPrice">'+currency.format(prices.publicPrice)+'</div>'+
+        '<div class="product-banner-per" id="bannerPer">por unidad \u00B7 precio al p\u00FAblico</div>'+
+      '</div>';
+    var hayOfertas=p.oferta2_activa||p.oferta3_activa;
+    var sel=document.getElementById('ofertaSelector');
+    sel.style.display=hayOfertas?'block':'none';
+    var btns=document.getElementById('ofertaBtns');
+    btns.innerHTML='';
+    orderOfertaSel='normal';
     function mkBtn(label,val,precio){
-      const btn=document.createElement('button');
+      var btn=document.createElement('button');
       btn.type='button';
-      btn.style.cssText='padding:.75rem 1rem;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:#fff;font-family:inherit;font-size:.85rem;cursor:pointer;text-align:left;transition:all .2s;display:flex;justify-content:space-between;align-items:center;';
-      btn.innerHTML=`<span>${label}</span><b style="font-variant-numeric:tabular-nums;">${currency.format(precio)}</b>`;
-      btn.addEventListener('click',()=>{
+      btn.style.padding='.75rem 1rem';
+      btn.style.borderRadius='10px';
+      btn.style.border='1px solid rgba(255,255,255,.2)';
+      btn.style.background='rgba(255,255,255,.07)';
+      btn.style.color='#fff';
+      btn.style.fontFamily='inherit';
+      btn.style.fontSize='.85rem';
+      btn.style.cursor='pointer';
+      btn.style.textAlign='left';
+      btn.style.transition='all .2s';
+      btn.style.display='flex';
+      btn.style.justifyContent='space-between';
+      btn.style.alignItems='center';
+      btn.style.width='100%';
+      btn.style.marginBottom='4px';
+      btn.innerHTML='<span>'+label+'</span><b style="font-variant-numeric:tabular-nums;">'+currency.format(precio)+'</b>';
+      btn.addEventListener('click',function(){
         orderOfertaSel=val;
-        btns.querySelectorAll('button').forEach(b=>b.style.background='rgba(255,255,255,.07)');
-        btns.querySelectorAll('button').forEach(b=>b.style.borderColor='rgba(255,255,255,.2)');
-        btn.style.background='rgba(192,132,252,.18)';btn.style.borderColor='#c084fc';
+        var allBtns=btns.querySelectorAll('button');
+        allBtns.forEach(function(b){
+          b.style.background='rgba(255,255,255,.07)';
+          b.style.borderColor='rgba(255,255,255,.2)';
+        });
+        btn.style.background='rgba(192,132,252,.18)';
+        btn.style.borderColor='#c084fc';
         updateOrderResumen();
-        // Actualizar banner
-        document.getElementById('bannerPrice').textContent=currency.format(precio);
-        const perMap={normal:'1 unidad',oferta2:'2 unidades',oferta3:'3 unidades'};
-        document.getElementById('bannerPer').textContent=perMap[val]+' · precio al público';
+        var bannerPrice=document.getElementById('bannerPrice');
+        var bannerPer=document.getElementById('bannerPer');
+        if(bannerPrice)bannerPrice.textContent=currency.format(precio);
+        if(bannerPer){
+          var perMap={normal:'1 unidad',oferta2:'2 unidades',oferta3:'3 unidades'};
+          bannerPer.textContent=(perMap[val]||'1 unidad')+' \u00B7 precio al p\u00FAblico';
+        }
       });
-      if(val==='normal'){btn.style.background='rgba(192,132,252,.18)';btn.style.borderColor='#c084fc';}
+      if(val==='normal'){
+        btn.style.background='rgba(192,132,252,.18)';
+        btn.style.borderColor='#c084fc';
+      }
       btns.appendChild(btn);
     }
-    mkBtn('1 unidad',  'normal',  prices.publicPrice);
+    mkBtn('1 unidad','normal',prices.publicPrice);
     if(p.oferta2_activa)mkBtn('Oferta x2 (2 unidades)','oferta2',p.oferta2_precio||0);
     if(p.oferta3_activa)mkBtn('Oferta x3 (3 unidades)','oferta3',p.oferta3_precio||0);
-    orderOfertaSel='normal';
   }
   function updateOrderResumen(){
     if(!orderProduct)return;
