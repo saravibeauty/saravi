@@ -1186,7 +1186,7 @@ function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);
       walletEl.textContent=currency.format(saldo);
       // Actualizar chip en panel retiros
       const retiroSaldoEl=$('#retiroSaldoVal');
-      if(retiroSaldoEl)retiroSaldoEl.textContent=currency.format(total);
+      if(retiroSaldoEl)retiroSaldoEl.textContent=currency.format(saldo);
     }catch(err){console.error('wallet error:',err);walletEl.textContent='—';currentWalletBalance=0;}
   }
 
