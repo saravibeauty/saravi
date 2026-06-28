@@ -1639,13 +1639,14 @@ function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);
   $('#removeImgBtn').addEventListener('click',e=>{e.stopPropagation();pendingImageData=null;$('#imgPreview').src='';$('#dzPreviewWrap').style.display='none';$('#dzPlaceholder').style.display='block';$('#imgInput').value='';});
   $('#copyInput').addEventListener('input',()=>{const len=$('#copyInput').value.length;$('#copyCount').textContent=len+' / 500';$('#copyCount').style.color=len>450?'var(--warn)':'var(--muted)';});
 
-  // ── FORM ──
+// ── FORM ──
   $('#genIdBtn').addEventListener('click',()=>{let id;do{id='SKU-'+Math.floor(1000+Math.random()*9000);}while(products.some(p=>p.id===id));$('#idInput').value=id;$('#idError').style.display='none';});
   $('#idInput').addEventListener('input',()=>{$('#idError').style.display='none';});
   function resetForm(){$('#productForm').reset();pendingImageData=null;$('#imgPreview').src='';$('#dzPreviewWrap').style.display='none';$('#dzPlaceholder').style.display='block';$('#imgInput').value='';$('#copyInput').value='';$('#copyCount').textContent='0 / 500';editingId=null;$('#formTitle').textContent='Agregar producto';$('#saveBtn').textContent='Guardar producto';$('#cancelEditBtn').style.display='none';$('#idError').style.display='none';$('#idInput').disabled=false;$('#commissionInput').value=15;$('#marginInput').value=20;$('#envioToggle').checked=false;$('#envioValueWrap').style.display='none';$('#envioInput').value='';$('#calcEnvioRow').style.display='none';
     $('#oferta2Toggle').checked=false;$('#oferta2Preview').style.display='none';$('#calcOferta2Row').style.display='none';
     $('#oferta3Toggle').checked=false;$('#oferta3Preview').style.display='none';$('#calcOferta3Row').style.display='none';
     updateCalcPreview();
+  }
   $('#productForm').addEventListener('submit',async e=>{
     e.preventDefault();const name=$('#nameInput').value.trim(),id=$('#idInput').value.trim(),category=$('#categoryInput').value.trim();const city=$('#cityInput').value.trim(),price=parseFloat($('#priceInput').value),stock=parseInt($('#stockInput').value,10);const commission=parseFloat($('#commissionInput').value)||0,margin=parseFloat($('#marginInput').value)||0;const copy=$('#copyInput').value.trim();
     const shipping=$('#envioToggle').checked?(parseFloat($('#envioInput').value)||0):0;
