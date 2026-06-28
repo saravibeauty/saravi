@@ -1702,14 +1702,39 @@ function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);
   function stopVendorAutoRefresh(){if(vendorRefreshTimer){clearInterval(vendorRefreshTimer);vendorRefreshTimer=null;}}
 
   // ── MODAL PRODUCTO ──
-  // Ofertas en el modal
-    let ofertasHtml='';
-    if(p.oferta2_activa)ofertasHtml+=`<div style="background:rgba(10,132,255,.08);border:1px solid rgba(10,132,255,.2);border-radius:8px;padding:8px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;font-weight:700;color:#0A84FF;">📦 Oferta x2 — precio al cliente</span><b style="color:#0A84FF;font-size:14px;font-variant-numeric:tabular-nums;">${currency.format(p.oferta2_precio||0)}</b></div>`;
-    if(p.oferta3_activa)ofertasHtml+=`<div style="background:rgba(10,132,255,.08);border:1px solid rgba(10,132,255,.2);border-radius:8px;padding:8px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;font-weight:700;color:#0A84FF;">📦 Oferta x3 — precio al cliente</span><b style="color:#0A84FF;font-size:14px;font-variant-numeric:tabular-nums;">${currency.format(p.oferta3_precio||0)}</b></div>`;
-    let ofertasEl=document.getElementById('modalOfertasBlock');
+  function openModal(p){
+    modalProduct=p;
+    const prices=calcPrices(p);
+    const earn=prices.publicPrice-prices.vendorPrice-prices.shipping;
+    const mi=$('#modalImg');
+    mi.innerHTML=p.image?'<img src="'+p.image+'" style="width:100%;max-height:420px;object-fit:contain;display:block;">'
+      :'<div style="height:160px;display:flex;align-items:center;justify-content:center;font-size:60px;opacity:.2;">🫙</div>';
+    let stockBadge=(p.stock||0)<=0?'<span class="badge badge-out">Agotado</span>'
+      :(p.stock||0)<=5?'<span class="badge badge-low">Pocas ud.</span>'
+      :'<span class="badge badge-ok">Disponible</span>';
+    const shippingBadge=prices.shipping>0?'<span class="badge" style="background:rgba(255,159,10,.1);color:var(--amber);">📦 Envío incluido</span>':'';
+    $('#modalBadges').innerHTML='<span class="badge badge-cat">'+esc(p.category||'')+'</span>'+stockBadge+shippingBadge;
+    $('#modalName').textContent=p.name;
+    $('#modalPublicPrice').textContent=currency.format(prices.publicPrice)+(prices.shipping>0?' (c/envío)':'');
+    $('#modalVendorPrice').textContent=currency.format(prices.vendorPrice);
+    $('#modalEarn').textContent='+'+currency.format(earn);
+    $('#modalMargin').textContent=(p.margin||0)+'%';
+    $('#modalCopy').textContent=p.copy||'(Sin copy de venta)';
+    const canShare=!!(p.image&&p.copy&&p.copy.trim());
+    $('#modalShareBtn').disabled=!canShare;
+    $('#modalShareBtn').style.opacity=canShare?'1':'.4';
+    // Ofertas en el modal
+    var ofertasHtml='';
+    if(p.oferta2_activa)ofertasHtml+='<div style="background:rgba(10,132,255,.08);border:1px solid rgba(10,132,255,.2);border-radius:8px;padding:8px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;font-weight:700;color:#0A84FF;">📦 Oferta x2 - precio al cliente</span><b style="color:#0A84FF;font-size:14px;font-variant-numeric:tabular-nums;">'+currency.format(p.oferta2_precio||0)+'</b></div>';
+    if(p.oferta3_activa)ofertasHtml+='<div style="background:rgba(10,132,255,.08);border:1px solid rgba(10,132,255,.2);border-radius:8px;padding:8px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;font-weight:700;color:#0A84FF;">📦 Oferta x3 - precio al cliente</span><b style="color:#0A84FF;font-size:14px;font-variant-numeric:tabular-nums;">'+currency.format(p.oferta3_precio||0)+'</b></div>';
+    var ofertasEl=document.getElementById('modalOfertasBlock');
     if(!ofertasEl){ofertasEl=document.createElement('div');ofertasEl.id='modalOfertasBlock';$('#modalCopy').parentNode.insertBefore(ofertasEl,$('#modalCopy'));}
-    ofertasEl.innerHTML=ofertasHtml;                     
-  function openModal(p){modalProduct=p;const prices=calcPrices(p);const earn=prices.publicPrice-prices.vendorPrice-prices.shipping;const mi=$('#modalImg');mi.innerHTML=p.image?`<img src="${esc(p.image)}" style="width:100%;max-height:420px;object-fit:contain;display:block;">`:`<div style="height:160px;display:flex;align-items:center;justify-content:center;font-size:60px;opacity:.2;">🫙</div>`;let stockBadge=(p.stock||0)<=0?`<span class="badge badge-out">Agotado</span>`:(p.stock||0)<=5?`<span class="badge badge-low">Pocas ud.</span>`:`<span class="badge badge-ok">Disponible</span>`;const shippingBadge=prices.shipping>0?`<span class="badge" style="background:rgba(255,159,10,.1);color:var(--amber);">📦 Envío incluido</span>`:'';$('#modalBadges').innerHTML=`<span class="badge badge-cat">${esc(p.category||'')}</span>${stockBadge}${shippingBadge}`;$('#modalName').textContent=p.name;$('#modalPublicPrice').textContent=currency.format(prices.publicPrice)+(prices.shipping>0?' (c/envío)':'');$('#modalVendorPrice').textContent=currency.format(prices.vendorPrice);$('#modalEarn').textContent='+'+currency.format(earn);$('#modalMargin').textContent=(p.margin||0)+'%';$('#modalCopy').textContent=p.copy||'(Sin copy de venta)';const canShare=!!(p.image&&p.copy&&p.copy.trim());$('#modalShareBtn').disabled=!canShare;$('#modalShareBtn').style.opacity=canShare?'1':'.4';$('#orderLinkBox').style.display='none';$('#campanaLinkBox').style.display='none';$('#productModal').style.display='block';document.body.style.overflow='hidden';}
+    ofertasEl.innerHTML=ofertasHtml;
+    $('#orderLinkBox').style.display='none';
+    $('#campanaLinkBox').style.display='none';
+    $('#productModal').style.display='block';
+    document.body.style.overflow='hidden';
+  }
   function closeModal(){$('#productModal').style.display='none';document.body.style.overflow='';modalProduct=null;}
   $('#modalCloseBtn').addEventListener('click',closeModal);
   $('#productModal').addEventListener('click',e=>{if(e.target===$('#productModal'))closeModal();});
@@ -1717,10 +1742,10 @@ function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);
   $('#modalShareBtn').addEventListener('click',()=>{if(modalProduct)shareToWhatsapp(modalProduct,$('#modalShareBtn'));});
   $('#modalSendOrderBtn').addEventListener('click',()=>{if(!modalProduct)return;const base=window.location.origin+window.location.pathname;const vendorParam=currentVendor?'&v='+encodeURIComponent(currentVendor.id):'';const link=base+'?order='+encodeURIComponent(modalProduct.id)+vendorParam;$('#orderLinkText').textContent=link;$('#orderLinkBox').style.display='block';$('#campanaLinkBox').style.display='none';setTimeout(()=>$('#orderLinkBox').scrollIntoView({behavior:'smooth',block:'nearest'}),100);});
   $('#copyLinkBtn').addEventListener('click',()=>{const link=$('#orderLinkText').textContent;navigator.clipboard.writeText(link).then(()=>{showToast('✅ Link copiado.');$('#copyLinkBtn').textContent='✅ Copiado';setTimeout(()=>$('#copyLinkBtn').textContent='📋 Copiar link',1500);}).catch(()=>showToast('No se pudo copiar.'));});
-  $('#sendViaWaBtn').addEventListener('click',()=>{if(!modalProduct)return;const link=$('#orderLinkText').textContent;const prices=calcPrices(modalProduct);const msg=`Hola! 👋 Te comparto este producto que creo que te va a encantar:\n\n*${modalProduct.name}*\nPrecio: ${currency.format(prices.publicPrice)}\n\n🚀 Haz tu pedido de *Entrega Inmediata* aquí:\n${link}`;window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');});
+  $('#sendViaWaBtn').addEventListener('click',()=>{if(!modalProduct)return;const link=$('#orderLinkText').textContent;const prices=calcPrices(modalProduct);const msg='Hola! 👋 Te comparto este producto que creo que te va a encantar:\n\n*'+modalProduct.name+'*\nPrecio: '+currency.format(prices.publicPrice)+'\n\n🚀 Haz tu pedido de *Entrega Inmediata* aquí:\n'+link;window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');});
   $('#modalSendCampanaBtn').addEventListener('click',()=>{if(!modalProduct)return;const base=window.location.origin+window.location.pathname.replace('index.html','')+'pedido-campana.html';const vendorParam=currentVendor?'&v='+encodeURIComponent(currentVendor.id):'';const link=base+'?order='+encodeURIComponent(modalProduct.id)+vendorParam;$('#campanaLinkText').textContent=link;$('#campanaLinkBox').style.display='block';$('#orderLinkBox').style.display='none';setTimeout(()=>$('#campanaLinkBox').scrollIntoView({behavior:'smooth',block:'nearest'}),100);});
   $('#copyCampanaLinkBtn').addEventListener('click',()=>{const link=$('#campanaLinkText').textContent;navigator.clipboard.writeText(link).then(()=>{showToast('✅ Link copiado.');$('#copyCampanaLinkBtn').textContent='✅ Copiado';setTimeout(()=>$('#copyCampanaLinkBtn').textContent='📋 Copiar link',1500);}).catch(()=>showToast('No se pudo copiar.'));});
-  $('#sendCampanaViaWaBtn').addEventListener('click',()=>{if(!modalProduct)return;const link=$('#campanaLinkText').textContent;const prices=calcPrices(modalProduct);const msg=`Hola! 👋 Te comparto esta oferta especial de nuestra *campaña*:\n\n*${modalProduct.name}*\nPrecio: ${currency.format(prices.publicPrice)}\n\n📅 Reserva tu pedido (pagas el día del cierre):\n${link}`;window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');});
+  $('#sendCampanaViaWaBtn').addEventListener('click',()=>{if(!modalProduct)return;const link=$('#campanaLinkText').textContent;const prices=calcPrices(modalProduct);const msg='Hola! 👋 Te comparto esta oferta especial de nuestra *campaña*:\n\n*'+modalProduct.name+'*\nPrecio: '+currency.format(prices.publicPrice)+'\n\n📅 Reserva tu pedido (pagas el día del cierre):\n'+link;window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');});
 
   // ── WA SHARE ──
   function buildShareImage(p){return new Promise(resolve=>{const img=new Image();img.onload=()=>{const canvas=document.createElement('canvas');canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0);canvas.toBlob(blob=>resolve(blob),'image/jpeg',.95);};img.onerror=()=>resolve(null);img.src=p.image;});}
@@ -1729,9 +1754,9 @@ function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);
 
   // ── ANUNCIOS ADMIN ──
   $('#saveAnuncioBtn').addEventListener('click',async()=>{const titulo=$('#anuncioTitulo').value.trim(),texto=$('#anuncioTexto').value.trim(),tipo=$('#anuncioTipo').value;if(!titulo||!texto){showToast('⚠️ Escribe título y mensaje.');return;}try{await saveAnuncio(titulo,texto,tipo);renderAdminAnuncios();renderVendorAnuncios();$('#anuncioTitulo').value='';$('#anuncioTexto').value='';showToast('✅ Anuncio publicado.');}catch(err){showToast('Error al publicar: '+err.message);}});
-  function renderAdminAnuncios(){const list=$('#anunciosList');if(!list)return;if(!anuncios.length){list.innerHTML='<p style="font-size:13px;color:var(--muted);padding:10px 0;">No hay anuncios.</p>';return;}const iconos={general:'📢',alerta:'🔴',info:'💬',logro:'🏆'};list.innerHTML=anuncios.map(a=>`<div style="background:var(--bg);border-radius:10px;padding:12px 14px;margin-bottom:10px;position:relative;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="font-size:16px;">${iconos[a.tipo]||'📢'}</span><b style="font-size:13px;">${esc(a.titulo)}</b><span style="font-size:11px;color:var(--muted);margin-left:auto;">${a.fecha||''}</span></div><p style="font-size:13px;color:var(--ink2);line-height:1.5;">${esc(a.texto)}</p><button data-del-anuncio="${a.id}" style="position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;font-size:14px;color:var(--muted);">✕</button></div>`).join('');}
+  function renderAdminAnuncios(){const list=$('#anunciosList');if(!list)return;if(!anuncios.length){list.innerHTML='<p style="font-size:13px;color:var(--muted);padding:10px 0;">No hay anuncios.</p>';return;}const iconos={general:'📢',alerta:'🔴',info:'💬',logro:'🏆'};list.innerHTML=anuncios.map(a=>'<div style="background:var(--bg);border-radius:10px;padding:12px 14px;margin-bottom:10px;position:relative;"><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="font-size:16px;">'+( iconos[a.tipo]||'📢')+'</span><b style="font-size:13px;">'+esc(a.titulo)+'</b><span style="font-size:11px;color:var(--muted);margin-left:auto;">'+(a.fecha||'')+'</span></div><p style="font-size:13px;color:var(--ink2);line-height:1.5;">'+esc(a.texto)+'</p><button data-del-anuncio="'+a.id+'" style="position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;font-size:14px;color:var(--muted);">✕</button></div>').join('');}
   $('#anunciosList').addEventListener('click',async e=>{const id=e.target.getAttribute('data-del-anuncio');if(id){try{await removeAnuncio(id);renderAdminAnuncios();renderVendorAnuncios();}catch(err){showToast('Error: '+err.message);}}});
-  function renderVendorAnuncios(){const container=$('#anunciosContainer');if(!container)return;if(!anuncios.length){container.innerHTML=`<div class="no-anuncios"><div class="na-icon">📢</div><b>Sin anuncios por ahora</b><p style="margin-top:6px;font-size:13px;">Aquí aparecerán los mensajes de tu administrador.</p></div>`;return;}const iconos={general:'📢',alerta:'🔴',info:'💬',logro:'🏆'};container.innerHTML=anuncios.map(a=>`<div class="anuncio-card tipo-${a.tipo}"><div class="anuncio-header"><span class="anuncio-emoji">${iconos[a.tipo]||'📢'}</span><span class="anuncio-titulo">${esc(a.titulo)}</span><span class="anuncio-fecha">${a.fecha||''}</span></div><div class="anuncio-texto">${esc(a.texto)}</div></div>`).join('');}
+  function renderVendorAnuncios(){const container=$('#anunciosContainer');if(!container)return;if(!anuncios.length){container.innerHTML='<div class="no-anuncios"><div class="na-icon">📢</div><b>Sin anuncios por ahora</b><p style="margin-top:6px;font-size:13px;">Aquí aparecerán los mensajes de tu administrador.</p></div>';return;}const iconos={general:'📢',alerta:'🔴',info:'💬',logro:'🏆'};container.innerHTML=anuncios.map(a=>'<div class="anuncio-card tipo-'+a.tipo+'"><div class="anuncio-header"><span class="anuncio-emoji">'+(iconos[a.tipo]||'📢')+'</span><span class="anuncio-titulo">'+esc(a.titulo)+'</span><span class="anuncio-fecha">'+(a.fecha||'')+'</span></div><div class="anuncio-texto">'+esc(a.texto)+'</div></div>').join('');}
 
   // ── VENDOR PANEL NAV ──
   function switchVendorPanel(name){
@@ -1740,7 +1765,6 @@ function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);
     document.querySelectorAll('[data-vpanel]').forEach(btn=>btn.classList.toggle('vsnav-active',btn.getAttribute('data-vpanel')===name));
     if(name==='banco')loadCuentasBancarias();
     if(name==='retiros'){
-      // Actualizar saldo y cuentas al entrar al panel
       loadVendorWallet().then(()=>{
         const el=$('#retiroSaldoVal');if(el)el.textContent=currency.format(currentWalletBalance);
       });
