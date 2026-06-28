@@ -1208,7 +1208,7 @@ function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);
   // ── SUPABASE DATA ──
   async function loadProducts(){const{data,error}=await db.from('products').select('*').order('created_at',{ascending:false});if(error){console.error('products:',error);return;}products=data||[];}
   async function saveProduct(p){const row={id:p.id,name:p.name,category:p.category||'',city:p.city||'',price:p.price||0,stock:p.stock||0,commission:p.commission||0,margin:p.margin||0,copy:p.copy||'',image:p.image||'',shipping:p.shipping||0,in_stock:(p.stock||0)>0,oferta2_activa:!!p.oferta2_activa,oferta2_precio:p.oferta2_precio||0,oferta3_activa:!!p.oferta3_activa,oferta3_precio:p.oferta3_precio||0,updated_at:new Date().toISOString()};const{error}=await db.from('products').upsert(row,{onConflict:'id'});if(error)throw error;}
-  async function deleteProduct(id){
+  async function deleteProduct(id){const{error}=await db.from('products').delete().eq('id',id);if(error)throw error;}
   async function loadVendors(){const{data,error}=await db.from('vendors').select('*').order('created_at',{ascending:true});if(error){console.error('vendors:',error);return;}vendors=data||[];}
   async function addVendor(name,pin){const{error}=await db.from('vendors').insert({name,pin});if(error)throw error;await loadVendors();}
   async function removeVendor(id){const{error}=await db.from('vendors').delete().eq('id',id);if(error)throw error;await loadVendors();}
