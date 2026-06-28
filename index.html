@@ -1090,7 +1090,7 @@ function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);
     const prices=calcPrices(orderProduct);const subtotal=prices.publicPrice*orderQty;const flete=orderProduct.shipping>0?0:FLETE;const total=subtotal+flete;
     const btn=$('#btnConfirmar');btn.disabled=true;btn.textContent='Enviando pedido…';
     try{
-      const{error}=await db.from('pedidos').insert({product_id:orderProduct.id,product_name:orderProduct.name,vendor_id:orderVendorId||null,vendor_name:orderVendorName||null,nombre,telefono,correo,ciudad,direccion,nota,cantidad:orderQty,precio_unitario:prices.publicPrice,precio_publico:prices.publicPrice,precio_vendedor:prices.vendorPrice,ganancia_vendedor:(prices.publicPrice-prices.vendorPrice)*orderQty,flete:flete,total,metodo_pago:metodo,estado:'nuevo',tipo_pedido:'inmediata'});
+      const{error}=await db.from('pedidos').insert({product_id:orderProduct.id,product_name:orderProduct.name,vendor_id:orderVendorId||null,vendor_name:orderVendorName||null,nombre,telefono,correo,ciudad,direccion,nota,cantidad:orderQty,precio_unitario:prices.publicPrice,precio_publico:prices.publicPrice,precio_vendedor:prices.vendorPrice,ganancia_vendedor:(prices.publicPrice-prices.vendorPrice-prices.shipping)*orderQty,flete:flete,total,metodo_pago:metodo,estado:'nuevo',tipo_pedido:'inmediata'});
       if(error)throw error;
       $('#orderFormContent').style.display='none';const success=$('#orderSuccess');success.style.display='block';
       if(metodo==='contraentrega'){$('#successContraentrega').style.display='block';$('#successNombreCE').textContent=nombre;$('#orderSuccessTitle').textContent='¡Pedido confirmado!';$('#orderSuccessIcon').textContent='✓';}
