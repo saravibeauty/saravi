@@ -1611,8 +1611,9 @@ function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);
     // Ofertas
     const o2activa=$('#oferta2Toggle').checked;
     const o3activa=$('#oferta3Toggle').checked;
-    const oferta2=prices.publicPrice+prices.vendorPrice;
-    const oferta3=oferta2+prices.vendorPrice;
+    const gananciaVendedor = prices.publicPrice - prices.vendorPrice - prices.shipping;
+    const oferta2 = prices.publicPrice + prices.vendorPrice + gananciaVendedor;
+    const oferta3 = oferta2 + prices.vendorPrice + gananciaVendedor;
     $('#oferta2Preview').style.display=o2activa?'block':'none';
     $('#oferta2PreviewVal').textContent=currency.format(oferta2);
     $('#calcOferta2Row').style.display=o2activa?'flex':'none';
@@ -1656,8 +1657,9 @@ function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);
     const prices2=calcPrices({price,commission,margin,shipping});
     const o2activa=$('#oferta2Toggle').checked;
     const o3activa=$('#oferta3Toggle').checked;
-    const oferta2precio=o2activa?prices2.publicPrice+prices2.vendorPrice:0;
-    const oferta3precio=o3activa?oferta2precio+prices2.vendorPrice:0;
+    const gananciaVendedor2 = prices2.publicPrice - prices2.vendorPrice - prices2.shipping;
+    const oferta2precio = o2activa ? prices2.publicPrice + prices2.vendorPrice + gananciaVendedor2 : 0;
+    const oferta3precio = o3activa ? oferta2precio + prices2.vendorPrice + gananciaVendedor2 : 0;
     const productObj={id,name,category,city,price,stock,commission,margin,copy,image:imageData||'',shipping,oferta2_activa:o2activa,oferta2_precio:oferta2precio,oferta3_activa:o3activa,oferta3_precio:oferta3precio};setSaving(true);
     try{await saveProduct(productObj);await loadProducts();showToast(editingId?'✅ Producto actualizado.':'✅ Producto guardado.');resetForm();render();}catch(err){showToast('❌ Error al guardar: '+err.message);}finally{setSaving(false);}
   });
