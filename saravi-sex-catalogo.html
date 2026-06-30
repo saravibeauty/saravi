@@ -432,6 +432,17 @@
   .empty { text-align:center; padding: 80px 24px; color: var(--gris); }
   .empty-icon { font-size: 3rem; margin-bottom: 12px; opacity: 0.3; }
 
+  .btn-subir-img {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(232,120,154,0.1);
+    border: 1px solid rgba(232,120,154,0.35);
+    color: var(--rosa); padding: 9px 16px;
+    border-radius: 9px; font-size: 0.8rem; font-weight: 500;
+    cursor: pointer; transition: background 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-subir-img:hover { background: rgba(232,120,154,0.2); }
+
   /* TOAST */
   .toast {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
@@ -558,8 +569,19 @@
       <input type="number" id="e-precio" placeholder="Ej: 74000"/>
     </div>
     <div class="form-group">
-      <label>URL de imagen</label>
-      <input type="text" id="e-img" placeholder="https://raw.githubusercontent.com/..."/>
+      <label>Imagen del producto</label>
+      <div id="img-preview-wrap" style="display:none;margin-bottom:10px;">
+        <img id="img-preview" src="" alt="preview" style="width:100%;max-height:180px;object-fit:cover;border-radius:10px;border:1px solid rgba(201,168,76,0.2);"/>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <label class="btn-subir-img" for="img-file-input">
+          📷 Subir desde dispositivo
+          <input type="file" id="img-file-input" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="previsualizarImagen(this)"/>
+        </label>
+        <span style="color:var(--gris);font-size:0.75rem;">o pega una URL:</span>
+      </div>
+      <input type="text" id="e-img" placeholder="https://raw.githubusercontent.com/..." style="margin-top:8px;" oninput="mostrarPreviewUrl(this.value)"/>
+      <div id="upload-status" style="font-size:0.75rem;margin-top:6px;color:var(--dorado);display:none;"></div>
     </div>
     <div class="edit-actions">
       <button class="btn-guardar" onclick="guardarProducto()">Guardar cambios</button>
@@ -726,6 +748,7 @@ function cerrarAdmin() {
 /* EDITAR / CREAR */
 function abrirEditar(id) {
   editandoId = id;
+  archivoImagenPendiente = null;
   const p = id ? todosProductos.find(x=>x.id===id) : null;
   document.getElementById('edit-title').textContent = p ? 'Editar producto' : 'Nuevo producto';
   document.getElementById('e-id').value = p?.producto_id || '';
@@ -733,20 +756,46 @@ function abrirEditar(id) {
   document.getElementById('e-desc').value = p?.descripcion || '';
   document.getElementById('e-precio').value = p?.precio || '';
   document.getElementById('e-img').value = p?.imagen_url || '';
+  document.getElementById('img-file-input').value = '';
+  document.getElementById('upload-status').style.display = 'none';
+  if(p?.imagen_url) {
+    document.getElementById('img-preview').src = p.imagen_url;
+    document.getElementById('img-preview-wrap').style.display = 'block';
+  } else {
+    document.getElementById('img-preview-wrap').style.display = 'none';
+  }
   document.getElementById('edit-overlay').classList.add('active');
 }
-function cerrarEditar() { document.getElementById('edit-overlay').classList.remove('active'); }
+function cerrarEditar() {
+  archivoImagenPendiente = null;
+  document.getElementById('edit-overlay').classList.remove('active');
+}
 
 async function guardarProducto() {
+  const productoId = document.getElementById('e-id').value.trim();
+  const nombre = document.getElementById('e-nombre').value.trim();
+  const precio = Number(document.getElementById('e-precio').value);
+  if(!productoId || !nombre || !precio) { toast('Completa los campos obligatorios'); return; }
+
+  // Si hay imagen local pendiente, subirla primero
+  let imagenUrl = document.getElementById('e-img').value.trim() || null;
+  if(archivoImagenPendiente) {
+    document.getElementById('upload-status').textContent = '⏳ Subiendo imagen...';
+    const urlSubida = await subirImagenStorage(archivoImagenPendiente, productoId);
+    if(!urlSubida) return;
+    imagenUrl = urlSubida;
+    archivoImagenPendiente = null;
+  }
+
   const body = {
-    producto_id: document.getElementById('e-id').value.trim(),
-    nombre: document.getElementById('e-nombre').value.trim(),
+    producto_id: productoId,
+    nombre,
     descripcion: document.getElementById('e-desc').value.trim(),
-    precio: Number(document.getElementById('e-precio').value),
-    imagen_url: document.getElementById('e-img').value.trim() || null,
+    precio,
+    imagen_url: imagenUrl,
     updated_at: new Date().toISOString()
   };
-  if(!body.producto_id || !body.nombre || !body.precio) { toast('Completa los campos obligatorios'); return; }
+
   let res;
   if(editandoId) {
     res = await fetch(`${SUPABASE_URL}/rest/v1/productos?id=eq.${editandoId}`, { method:'PATCH', headers, body: JSON.stringify(body) });
@@ -764,6 +813,54 @@ async function eliminarProducto(id, nombre) {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/productos?id=eq.${id}`, { method:'DELETE', headers });
   if(res.ok) { toast('Producto eliminado'); await abrirAdmin(); }
   else toast('Error al eliminar');
+}
+
+/* SUBIR IMAGEN A SUPABASE STORAGE */
+let archivoImagenPendiente = null;
+
+function previsualizarImagen(input) {
+  const file = input.files[0];
+  if(!file) return;
+  archivoImagenPendiente = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('img-preview').src = e.target.result;
+    document.getElementById('img-preview-wrap').style.display = 'block';
+    document.getElementById('e-img').value = '';
+    document.getElementById('upload-status').style.display = 'block';
+    document.getElementById('upload-status').textContent = '📎 Imagen lista — se subirá al guardar';
+  };
+  reader.readAsDataURL(file);
+}
+
+function mostrarPreviewUrl(url) {
+  archivoImagenPendiente = null;
+  if(url && url.startsWith('http')) {
+    document.getElementById('img-preview').src = url;
+    document.getElementById('img-preview-wrap').style.display = 'block';
+  } else {
+    document.getElementById('img-preview-wrap').style.display = 'none';
+  }
+}
+
+async function subirImagenStorage(file, productoId) {
+  const ext = file.name.split('.').pop().toLowerCase();
+  const nombreArchivo = `${productoId}-${Date.now()}.${ext}`;
+  const res = await fetch(
+    `${SUPABASE_URL}/storage/v1/object/saravi-sex-imagenes/${nombreArchivo}`,
+    {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': file.type,
+        'x-upsert': 'true'
+      },
+      body: file
+    }
+  );
+  if(!res.ok) { toast('Error al subir la imagen'); return null; }
+  return `${SUPABASE_URL}/storage/v1/object/public/saravi-sex-imagenes/${nombreArchivo}`;
 }
 
 function toast(msg) {
