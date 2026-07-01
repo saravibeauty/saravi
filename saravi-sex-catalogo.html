@@ -231,10 +231,11 @@
     background-clip: text;
   }
   .modal-close {
-    position: absolute; top: 16px; right: 16px;
-    background: rgba(255,255,255,0.08); border: none; color: #fff;
-    width: 36px; height: 36px; border-radius: 50%;
+    position: absolute; top: 12px; right: 12px;
+    background: rgba(0,0,0,0.65); border: 1px solid rgba(255,255,255,0.2); color: #fff;
+    width: 38px; height: 38px; border-radius: 50%;
     font-size: 1.1rem; cursor: pointer; display:flex; align-items:center; justify-content:center;
+    z-index: 20; box-shadow: 0 2px 10px rgba(0,0,0,0.45); backdrop-filter: blur(4px);
   }
   .modal-wrap { position: relative; }
 
@@ -242,7 +243,7 @@
   .admin-overlay {
     display: none; position: fixed; inset: 0;
     background: rgba(0,0,0,0.9); z-index: 300;
-    align-items: center; justify-content: center;
+    align-items: center; justify-content: center; padding: 20px;
   }
   .admin-overlay.active { display: flex; }
   .login-box {
@@ -457,6 +458,15 @@
     .hero { padding: 50px 20px 36px; }
     .controls { padding: 16px; }
     .grid { padding: 8px 16px 50px; gap: 14px; }
+    .modal-img { min-height: 220px; }
+    .modal-body { padding: 22px; }
+    .admin-header { flex-wrap: wrap; gap: 12px; padding: 14px 16px; }
+    .admin-header h2 { font-size: 1.05rem; }
+    .admin-actions { width: 100%; }
+    .admin-actions .btn-nuevo, .admin-actions .btn-salir { flex: 1; }
+    .admin-content { padding: 16px; }
+    .edit-box { padding: 22px; }
+    .login-box { padding: 30px 24px; }
   }
 </style>
 </head>
@@ -573,14 +583,11 @@
       <div id="img-preview-wrap" style="display:none;margin-bottom:10px;">
         <img id="img-preview" src="" alt="preview" style="width:100%;max-height:180px;object-fit:cover;border-radius:10px;border:1px solid rgba(201,168,76,0.2);"/>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        <label class="btn-subir-img" for="img-file-input">
-          📷 Subir desde dispositivo
-          <input type="file" id="img-file-input" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="previsualizarImagen(this)"/>
-        </label>
-        <span style="color:var(--gris);font-size:0.75rem;">o pega una URL:</span>
-      </div>
-      <input type="text" id="e-img" placeholder="https://raw.githubusercontent.com/..." style="margin-top:8px;" oninput="mostrarPreviewUrl(this.value)"/>
+      <label class="btn-subir-img" for="img-file-input" style="width:100%;justify-content:center;">
+        📷 Subir desde dispositivo
+        <input type="file" id="img-file-input" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="previsualizarImagen(this)"/>
+      </label>
+      <input type="hidden" id="e-img" value=""/>
       <div id="upload-status" style="font-size:0.75rem;margin-top:6px;color:var(--dorado);display:none;"></div>
     </div>
     <div class="edit-actions">
@@ -831,16 +838,6 @@ function previsualizarImagen(input) {
     document.getElementById('upload-status').textContent = '📎 Imagen lista — se subirá al guardar';
   };
   reader.readAsDataURL(file);
-}
-
-function mostrarPreviewUrl(url) {
-  archivoImagenPendiente = null;
-  if(url && url.startsWith('http')) {
-    document.getElementById('img-preview').src = url;
-    document.getElementById('img-preview-wrap').style.display = 'block';
-  } else {
-    document.getElementById('img-preview-wrap').style.display = 'none';
-  }
 }
 
 async function subirImagenStorage(file, productoId) {
