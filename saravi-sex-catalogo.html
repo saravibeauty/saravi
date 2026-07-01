@@ -48,7 +48,7 @@
     background-clip: text;
     letter-spacing: 1px;
   }
-  .logo span { font-weight: 400; font-style: italic; }
+  .logo #logo-nombre2 { font-weight: 400; font-style: italic; }
   .header-right { display:flex; align-items:center; gap:16px; }
   .btn-admin {
     background: transparent;
@@ -85,11 +85,11 @@
     font-weight: 700; line-height: 1.2;
     margin-bottom: 14px;
   }
-  .hero h1 em {
-    font-style: italic;
+  #hero-titulo {
     background: linear-gradient(135deg, var(--dorado), var(--rosa));
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     background-clip: text;
+    white-space: pre-line;
   }
   .hero p { color: var(--gris); font-size: 0.95rem; max-width: 460px; margin: 0 auto 30px; }
 
@@ -333,6 +333,33 @@
     background-clip: text;
   }
 
+  /* PERSONALIZACION */
+  .personalizacion-box {
+    background: var(--negro2);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px; padding: 20px; margin-bottom: 28px;
+  }
+  .personalizacion-box .stat-label { margin-bottom: 16px; }
+  .color-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 12px; margin-bottom: 8px;
+  }
+  .color-field label { font-size: 0.78rem; color: var(--gris); display:block; margin-bottom:6px; }
+  .color-field input[type="color"] {
+    width: 100%; height: 44px; border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1); background: var(--negro3);
+    cursor: pointer; padding: 4px;
+  }
+  .personalizacion-box textarea {
+    width: 100%; background: var(--negro3);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--blanco); padding: 10px 14px;
+    border-radius: 10px; font-size: 0.85rem;
+    font-family: 'Inter', sans-serif; outline: none; resize: vertical;
+    min-height: 70px; transition: border-color 0.2s;
+  }
+  .personalizacion-box textarea:focus { border-color: rgba(201,168,76,0.5); }
+
   /* TABLA ADMIN */
   .table-wrap { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
@@ -524,6 +551,7 @@
     .admin-content { padding: 16px; }
     .edit-box { padding: 22px; }
     .login-box { padding: 30px 24px; }
+    .color-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -531,7 +559,7 @@
 
 <!-- HEADER -->
 <header>
-  <div class="logo">Saravi <span>Sex</span></div>
+  <div class="logo"><span id="logo-nombre1">Saravi</span> <span id="logo-nombre2">Sex</span></div>
   <div class="header-right">
     <button class="btn-admin" onclick="abrirLogin()">⚙ Admin</button>
   </div>
@@ -539,9 +567,9 @@
 
 <!-- HERO -->
 <div class="hero">
-  <div class="hero-badge">Catálogo Oficial 2025</div>
-  <h1>Placer & <em>Bienestar</em><br>sin límites</h1>
-  <p>Productos íntimos de alta calidad seleccionados para tu disfrute y bienestar personal.</p>
+  <div class="hero-badge" id="hero-badge">Catálogo Oficial 2025</div>
+  <h1 id="hero-titulo">Placer &amp; Bienestar<br>sin límites</h1>
+  <p id="hero-subtitulo">Productos íntimos de alta calidad seleccionados para tu disfrute y bienestar personal.</p>
 </div>
 
 <!-- CONTROLES -->
@@ -595,6 +623,49 @@
     </div>
   </div>
   <div class="admin-content">
+    <div class="personalizacion-box">
+      <div class="stat-label">🎨 Personalización del catálogo</div>
+      <div class="form-group">
+        <label>Nombre del catálogo (parte 1)</label>
+        <input type="text" id="p-logo1" placeholder="Saravi"/>
+      </div>
+      <div class="form-group">
+        <label>Nombre del catálogo (parte 2, en cursiva)</label>
+        <input type="text" id="p-logo2" placeholder="Sex"/>
+      </div>
+      <div class="form-group">
+        <label>Texto de la etiqueta (arriba del título)</label>
+        <input type="text" id="p-badge" placeholder="Catálogo Oficial 2025"/>
+      </div>
+      <div class="form-group">
+        <label>Título principal</label>
+        <textarea id="p-titulo" placeholder="Placer & Bienestar
+sin límites"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Subtítulo / descripción</label>
+        <textarea id="p-subtitulo" placeholder="Descripción corta del catálogo..."></textarea>
+      </div>
+      <div class="color-grid">
+        <div class="color-field">
+          <label>Color acento 1</label>
+          <input type="color" id="p-color1"/>
+        </div>
+        <div class="color-field">
+          <label>Color acento 2</label>
+          <input type="color" id="p-color2"/>
+        </div>
+        <div class="color-field">
+          <label>Color de fondo</label>
+          <input type="color" id="p-color-fondo"/>
+        </div>
+        <div class="color-field">
+          <label>Color de texto</label>
+          <input type="color" id="p-color-texto"/>
+        </div>
+      </div>
+      <button class="btn-guardar" style="width:100%;margin-top:12px;" onclick="guardarPersonalizacion()">Guardar personalización</button>
+    </div>
     <div class="admin-stats" id="admin-stats"></div>
     <div class="controls" style="padding:0 0 16px;">
       <div class="search-wrap">
@@ -665,6 +736,88 @@ const headers = {
   'Content-Type': 'application/json',
   'Prefer': 'return=representation'
 };
+
+/* PERSONALIZACION */
+const DEFAULT_SETTINGS = {
+  colorDorado: '#c9a84c',
+  colorRosa: '#e8789a',
+  colorFondo: '#0a0a0a',
+  colorTexto: '#f8f4ee',
+  logoNombre1: 'Saravi',
+  logoNombre2: 'Sex',
+  badge: 'Catálogo Oficial 2025',
+  titulo: 'Placer & Bienestar\nsin límites',
+  subtitulo: 'Productos íntimos de alta calidad seleccionados para tu disfrute y bienestar personal.'
+};
+let currentSettings = DEFAULT_SETTINGS;
+
+function aplicarPersonalizacion(s) {
+  const root = document.documentElement;
+  root.style.setProperty('--dorado', s.colorDorado);
+  root.style.setProperty('--dorado2', s.colorDorado);
+  root.style.setProperty('--dorado3', s.colorDorado);
+  root.style.setProperty('--rosa', s.colorRosa);
+  root.style.setProperty('--negro', s.colorFondo);
+  root.style.setProperty('--blanco', s.colorTexto);
+  document.getElementById('logo-nombre1').textContent = s.logoNombre1;
+  document.getElementById('logo-nombre2').textContent = s.logoNombre2;
+  document.getElementById('hero-badge').textContent = s.badge;
+  document.getElementById('hero-titulo').textContent = s.titulo;
+  document.getElementById('hero-subtitulo').textContent = s.subtitulo;
+}
+
+async function cargarPersonalizacion() {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/config?key=eq.catalog_settings&select=value`, { headers });
+    const rows = await res.json();
+    if (rows.length && rows[0].value) {
+      currentSettings = { ...DEFAULT_SETTINGS, ...JSON.parse(rows[0].value) };
+    } else {
+      currentSettings = DEFAULT_SETTINGS;
+    }
+  } catch(e) {
+    currentSettings = DEFAULT_SETTINGS;
+  }
+  aplicarPersonalizacion(currentSettings);
+}
+
+function llenarFormPersonalizacion() {
+  document.getElementById('p-logo1').value = currentSettings.logoNombre1;
+  document.getElementById('p-logo2').value = currentSettings.logoNombre2;
+  document.getElementById('p-badge').value = currentSettings.badge;
+  document.getElementById('p-titulo').value = currentSettings.titulo;
+  document.getElementById('p-subtitulo').value = currentSettings.subtitulo;
+  document.getElementById('p-color1').value = currentSettings.colorDorado;
+  document.getElementById('p-color2').value = currentSettings.colorRosa;
+  document.getElementById('p-color-fondo').value = currentSettings.colorFondo;
+  document.getElementById('p-color-texto').value = currentSettings.colorTexto;
+}
+
+async function guardarPersonalizacion() {
+  const s = {
+    logoNombre1: document.getElementById('p-logo1').value.trim() || DEFAULT_SETTINGS.logoNombre1,
+    logoNombre2: document.getElementById('p-logo2').value.trim() || DEFAULT_SETTINGS.logoNombre2,
+    badge: document.getElementById('p-badge').value.trim() || DEFAULT_SETTINGS.badge,
+    titulo: document.getElementById('p-titulo').value.trim() || DEFAULT_SETTINGS.titulo,
+    subtitulo: document.getElementById('p-subtitulo').value.trim() || DEFAULT_SETTINGS.subtitulo,
+    colorDorado: document.getElementById('p-color1').value,
+    colorRosa: document.getElementById('p-color2').value,
+    colorFondo: document.getElementById('p-color-fondo').value,
+    colorTexto: document.getElementById('p-color-texto').value
+  };
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/config?on_conflict=key`, {
+    method: 'POST',
+    headers: { ...headers, 'Prefer': 'resolution=merge-duplicates,return=representation' },
+    body: JSON.stringify({ key: 'catalog_settings', value: JSON.stringify(s) })
+  });
+  if(res.ok) {
+    currentSettings = s;
+    aplicarPersonalizacion(s);
+    toast('✓ Personalización guardada');
+  } else {
+    toast('Error al guardar personalización');
+  }
+}
 
 async function cargarProductos() {
   mostrarSkeletons();
@@ -792,6 +945,7 @@ function verificarPass() {
 async function abrirAdmin() {
   document.getElementById('admin-panel').classList.add('active');
   document.body.style.overflow = 'hidden';
+  llenarFormPersonalizacion();
   const res = await fetch(`${SUPABASE_URL}/rest/v1/productos?order=id.asc`, { headers });
   todosProductos = await res.json();
   const total = todosProductos.length;
@@ -981,7 +1135,7 @@ document.addEventListener('keydown', e => {
   }
 });
 
-cargarProductos();
+cargarPersonalizacion().then(() => cargarProductos());
 </script>
 </body>
 </html>
