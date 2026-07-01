@@ -210,12 +210,11 @@
   }
   @media(min-width:600px) { .modal { flex-direction: row; } }
   .modal-img {
-    width: 100%; min-height: 260px;
+    width: 100%;
     background: var(--negro3);
-    display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
   }
-  @media(min-width:600px) { .modal-img { width: 320px; min-height: auto; } }
+  @media(min-width:600px) { .modal-img { width: 320px; } }
   .modal-img img { width:100%; height:100%; object-fit:cover; border-radius: 18px 0 0 18px; }
   .modal-body { padding: 28px; flex:1; display:flex; flex-direction:column; gap:12px; }
   .modal-id { font-size: 0.7rem; color: var(--gris2); }
@@ -444,6 +443,64 @@
   }
   .btn-subir-img:hover { background: rgba(232,120,154,0.2); }
 
+  /* MULTI IMAGEN - SLOTS */
+  .img-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+  .img-slot {
+    position: relative; aspect-ratio: 1/1; border-radius: 10px;
+    background: var(--negro3); border: 1.5px dashed rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; overflow: hidden; transition: border-color 0.2s;
+  }
+  .img-slot:hover { border-color: rgba(201,168,76,0.4); }
+  .img-slot.has-img { border-style: solid; border-color: rgba(201,168,76,0.3); }
+  .img-slot img { width: 100%; height: 100%; object-fit: cover; }
+  .img-slot .slot-plus { font-size: 1.6rem; color: var(--gris2); }
+  .img-slot .slot-txt { font-size: 0.62rem; color: var(--gris2); margin-top: 2px; }
+  .img-slot .slot-empty { display: flex; flex-direction: column; align-items: center; }
+  .img-slot .slot-remove {
+    position: absolute; top: 4px; right: 4px;
+    background: rgba(0,0,0,0.7); color: #fff; border: none;
+    width: 22px; height: 22px; border-radius: 50%;
+    font-size: 0.7rem; cursor: pointer; display: none;
+    align-items: center; justify-content: center; z-index: 2;
+  }
+  .img-slot.has-img .slot-remove { display: flex; }
+  .img-slot .slot-main-tag {
+    position: absolute; bottom: 3px; left: 3px;
+    background: rgba(201,168,76,0.85); color: #000;
+    font-size: 0.55rem; font-weight: 700; padding: 1px 6px;
+    border-radius: 5px; letter-spacing: 0.3px;
+  }
+
+  /* GALERIA MODAL PRODUCTO */
+  .modal-gallery { position: relative; width: 100%; flex-shrink: 0; }
+  .gallery-track {
+    display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    width: 100%; min-height: 260px;
+  }
+  .gallery-track::-webkit-scrollbar { display: none; }
+  @media(min-width:600px) { .gallery-track { min-height: auto; height: 100%; } }
+  .gallery-slide {
+    flex: 0 0 100%; scroll-snap-align: start; aspect-ratio: 1/1;
+    background: var(--negro3); display: flex; align-items: center; justify-content: center;
+  }
+  .gallery-slide img { width: 100%; height: 100%; object-fit: cover; }
+  .gallery-dots {
+    position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 6px; z-index: 5;
+  }
+  .gallery-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: rgba(255,255,255,0.4); transition: background 0.2s, transform 0.2s;
+  }
+  .gallery-dot.active { background: var(--dorado); transform: scale(1.25); }
+  .gallery-counter {
+    position: absolute; top: 12px; left: 12px;
+    background: rgba(0,0,0,0.6); color: #fff; font-size: 0.7rem;
+    padding: 3px 9px; border-radius: 20px; z-index: 5;
+  }
+
   /* TOAST */
   .toast {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
@@ -579,16 +636,10 @@
       <input type="number" id="e-precio" placeholder="Ej: 74000"/>
     </div>
     <div class="form-group">
-      <label>Imagen del producto</label>
-      <div id="img-preview-wrap" style="display:none;margin-bottom:10px;">
-        <img id="img-preview" src="" alt="preview" style="width:100%;max-height:180px;object-fit:cover;border-radius:10px;border:1px solid rgba(201,168,76,0.2);"/>
-      </div>
-      <label class="btn-subir-img" for="img-file-input" style="width:100%;justify-content:center;">
-        📷 Subir desde dispositivo
-        <input type="file" id="img-file-input" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="previsualizarImagen(this)"/>
-      </label>
-      <input type="hidden" id="e-img" value=""/>
-      <div id="upload-status" style="font-size:0.75rem;margin-top:6px;color:var(--dorado);display:none;"></div>
+      <label>Fotos del producto (máx. 3)</label>
+      <div class="img-slots" id="img-slots"></div>
+      <input type="file" id="img-file-input" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="onArchivoSeleccionado(this)"/>
+      <div id="upload-status" style="font-size:0.75rem;margin-top:2px;color:var(--dorado);display:none;"></div>
     </div>
     <div class="edit-actions">
       <button class="btn-guardar" onclick="guardarProducto()">Guardar cambios</button>
@@ -642,6 +693,14 @@ function filtrar() {
   renderGrid(lista);
 }
 
+function imagenesDe(p) {
+  // Compatibilidad: usa 'imagenes' (array) si existe y tiene datos, si no cae a imagen_url
+  if (Array.isArray(p.imagenes) && p.imagenes.filter(Boolean).length) {
+    return p.imagenes.filter(Boolean);
+  }
+  return p.imagen_url ? [p.imagen_url] : [];
+}
+
 function renderGrid(lista) {
   const w = document.getElementById('grid-wrapper');
   if(!lista.length) {
@@ -650,11 +709,13 @@ function renderGrid(lista) {
   }
   let h = '<div class="grid">';
   lista.forEach(p => {
-    const img = p.imagen_url
-      ? `<img src="${p.imagen_url}" alt="${p.nombre}" loading="lazy" onerror="this.style.display='none';this.parentElement.querySelector('.no-img').style.display='block'">`
+    const imgs = imagenesDe(p);
+    const portada = imgs[0] || '';
+    const img = portada
+      ? `<img src="${portada}" alt="${p.nombre}" loading="lazy" onerror="this.style.display='none';this.parentElement.querySelector('.no-img').style.display='block'">`
       : '';
     h += `<div class="card" onclick="abrirProducto(${p.id})">
-      <div class="card-img">${img}<div class="no-img" style="display:${p.imagen_url?'none':'block'}">🛍</div></div>
+      <div class="card-img">${img}<div class="no-img" style="display:${portada?'none':'block'}">🛍</div></div>
       <div class="card-body">
         <div class="card-id">ID: ${p.producto_id}</div>
         <div class="card-name">${p.nombre}</div>
@@ -676,11 +737,18 @@ function formatPrecio(n) {
 async function abrirProducto(id) {
   const p = todosProductos.find(x => x.id === id);
   if(!p) return;
-  const img = p.imagen_url
-    ? `<img src="${p.imagen_url}" alt="${p.nombre}" style="width:100%;height:100%;object-fit:cover;border-radius:18px 0 0 18px;">`
-    : `<div style="font-size:3rem;opacity:0.2;">🛍</div>`;
+  const imgs = imagenesDe(p);
+  let galeriaHtml;
+  if(imgs.length) {
+    const slides = imgs.map(url => `<div class="gallery-slide"><img src="${url}" alt="${p.nombre}"></div>`).join('');
+    const dots = imgs.length > 1 ? `<div class="gallery-dots" id="gallery-dots">${imgs.map((_,i)=>`<div class="gallery-dot${i===0?' active':''}"></div>`).join('')}</div>` : '';
+    const counter = imgs.length > 1 ? `<div class="gallery-counter" id="gallery-counter">1/${imgs.length}</div>` : '';
+    galeriaHtml = `<div class="modal-gallery"><div class="gallery-track" id="gallery-track">${slides}</div>${dots}${counter}</div>`;
+  } else {
+    galeriaHtml = `<div class="gallery-track" style="display:flex;align-items:center;justify-content:center;min-height:260px;"><div style="font-size:3rem;opacity:0.2;">🛍</div></div>`;
+  }
   document.getElementById('modal-content').innerHTML = `
-    <div class="modal-img">${img}</div>
+    <div class="modal-img">${galeriaHtml}</div>
     <div class="modal-body">
       <div class="modal-id">ID: ${p.producto_id}</div>
       <div class="modal-name">${p.nombre}</div>
@@ -689,6 +757,17 @@ async function abrirProducto(id) {
     </div>`;
   document.getElementById('overlay').classList.add('active');
   document.body.style.overflow = 'hidden';
+
+  if(imgs.length > 1) {
+    const track = document.getElementById('gallery-track');
+    const dotsWrap = document.getElementById('gallery-dots');
+    const counterEl = document.getElementById('gallery-counter');
+    track.addEventListener('scroll', () => {
+      const idx = Math.round(track.scrollLeft / track.clientWidth);
+      [...dotsWrap.children].forEach((d,i) => d.classList.toggle('active', i===idx));
+      if(counterEl) counterEl.textContent = `${idx+1}/${imgs.length}`;
+    });
+  }
 }
 
 function cerrarModal(e, forzar) {
@@ -731,7 +810,8 @@ function renderTabla() {
   const lista = todosProductos.filter(p => p.nombre.toLowerCase().includes(q) || p.producto_id.includes(q));
   let h = '';
   lista.forEach(p => {
-    const imgTag = p.imagen_url ? `<img src="${p.imagen_url}" alt="">` : '🛍';
+    const portada = imagenesDe(p)[0];
+    const imgTag = portada ? `<img src="${portada}" alt="">` : '🛍';
     h += `<tr>
       <td class="td-img">${imgTag}</td>
       <td class="td-id">${p.producto_id}</td>
@@ -753,29 +833,67 @@ function cerrarAdmin() {
 }
 
 /* EDITAR / CREAR */
+// slotsImagenes[i] = { url: string|null (existente o ya subida), file: File|null (pendiente por subir) }
+let slotsImagenes = [ {url:null,file:null}, {url:null,file:null}, {url:null,file:null} ];
+let slotActivo = 0;
+
 function abrirEditar(id) {
   editandoId = id;
-  archivoImagenPendiente = null;
   const p = id ? todosProductos.find(x=>x.id===id) : null;
   document.getElementById('edit-title').textContent = p ? 'Editar producto' : 'Nuevo producto';
   document.getElementById('e-id').value = p?.producto_id || '';
   document.getElementById('e-nombre').value = p?.nombre || '';
   document.getElementById('e-desc').value = p?.descripcion || '';
   document.getElementById('e-precio').value = p?.precio || '';
-  document.getElementById('e-img').value = p?.imagen_url || '';
   document.getElementById('img-file-input').value = '';
   document.getElementById('upload-status').style.display = 'none';
-  if(p?.imagen_url) {
-    document.getElementById('img-preview').src = p.imagen_url;
-    document.getElementById('img-preview-wrap').style.display = 'block';
-  } else {
-    document.getElementById('img-preview-wrap').style.display = 'none';
-  }
+
+  const existentes = p ? imagenesDe(p) : [];
+  slotsImagenes = [0,1,2].map(i => ({ url: existentes[i] || null, file: null }));
+  renderSlots();
+
   document.getElementById('edit-overlay').classList.add('active');
 }
+
 function cerrarEditar() {
-  archivoImagenPendiente = null;
   document.getElementById('edit-overlay').classList.remove('active');
+}
+
+function renderSlots() {
+  const wrap = document.getElementById('img-slots');
+  let h = '';
+  slotsImagenes.forEach((slot, i) => {
+    const preview = slot.file ? slot._localPreview : slot.url;
+    const tieneImg = !!preview;
+    h += `<div class="img-slot${tieneImg?' has-img':''}" onclick="clickSlot(${i})">
+      ${tieneImg ? `<img src="${preview}" alt="foto ${i+1}">` : `<div class="slot-empty"><span class="slot-plus">＋</span><span class="slot-txt">Foto ${i+1}</span></div>`}
+      ${i===0 && tieneImg ? '<span class="slot-main-tag">Portada</span>' : ''}
+      <button type="button" class="slot-remove" onclick="event.stopPropagation();quitarSlot(${i})">✕</button>
+    </div>`;
+  });
+  wrap.innerHTML = h;
+}
+
+function clickSlot(i) {
+  slotActivo = i;
+  document.getElementById('img-file-input').click();
+}
+
+function quitarSlot(i) {
+  slotsImagenes[i] = { url: null, file: null };
+  renderSlots();
+}
+
+function onArchivoSeleccionado(input) {
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    slotsImagenes[slotActivo] = { url: slotsImagenes[slotActivo].url, file, _localPreview: e.target.result };
+    renderSlots();
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
 }
 
 async function guardarProducto() {
@@ -784,22 +902,29 @@ async function guardarProducto() {
   const precio = Number(document.getElementById('e-precio').value);
   if(!productoId || !nombre || !precio) { toast('Completa los campos obligatorios'); return; }
 
-  // Si hay imagen local pendiente, subirla primero
-  let imagenUrl = document.getElementById('e-img').value.trim() || null;
-  if(archivoImagenPendiente) {
-    document.getElementById('upload-status').textContent = '⏳ Subiendo imagen...';
-    const urlSubida = await subirImagenStorage(archivoImagenPendiente, productoId);
-    if(!urlSubida) return;
-    imagenUrl = urlSubida;
-    archivoImagenPendiente = null;
+  const statusEl = document.getElementById('upload-status');
+  const imagenesFinal = [];
+  for(let i=0;i<slotsImagenes.length;i++) {
+    const slot = slotsImagenes[i];
+    if(slot.file) {
+      statusEl.style.display = 'block';
+      statusEl.textContent = `⏳ Subiendo foto ${i+1}...`;
+      const urlSubida = await subirImagenStorage(slot.file, productoId, i);
+      if(!urlSubida) { statusEl.style.display = 'none'; return; }
+      imagenesFinal.push(urlSubida);
+    } else if(slot.url) {
+      imagenesFinal.push(slot.url);
+    }
   }
+  statusEl.style.display = 'none';
 
   const body = {
     producto_id: productoId,
     nombre,
     descripcion: document.getElementById('e-desc').value.trim(),
     precio,
-    imagen_url: imagenUrl,
+    imagen_url: imagenesFinal[0] || null,
+    imagenes: imagenesFinal,
     updated_at: new Date().toISOString()
   };
 
@@ -822,27 +947,9 @@ async function eliminarProducto(id, nombre) {
   else toast('Error al eliminar');
 }
 
-/* SUBIR IMAGEN A SUPABASE STORAGE */
-let archivoImagenPendiente = null;
-
-function previsualizarImagen(input) {
-  const file = input.files[0];
-  if(!file) return;
-  archivoImagenPendiente = file;
-  const reader = new FileReader();
-  reader.onload = e => {
-    document.getElementById('img-preview').src = e.target.result;
-    document.getElementById('img-preview-wrap').style.display = 'block';
-    document.getElementById('e-img').value = '';
-    document.getElementById('upload-status').style.display = 'block';
-    document.getElementById('upload-status').textContent = '📎 Imagen lista — se subirá al guardar';
-  };
-  reader.readAsDataURL(file);
-}
-
-async function subirImagenStorage(file, productoId) {
+async function subirImagenStorage(file, productoId, index) {
   const ext = file.name.split('.').pop().toLowerCase();
-  const nombreArchivo = `${productoId}-${Date.now()}.${ext}`;
+  const nombreArchivo = `${productoId}-${index}-${Date.now()}.${ext}`;
   const res = await fetch(
     `${SUPABASE_URL}/storage/v1/object/saravi-sex-imagenes/${nombreArchivo}`,
     {
