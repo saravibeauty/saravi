@@ -360,6 +360,44 @@
   }
   .personalizacion-box textarea:focus { border-color: rgba(201,168,76,0.5); }
 
+  /* PALETAS PREDEFINIDAS */
+  .paletas-wrap { margin: 18px 0 20px; }
+  .paletas-label {
+    font-size: 0.78rem; color: var(--gris); margin-bottom: 10px;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+  }
+  .paletas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+    gap: 10px;
+  }
+  .paleta-card {
+    position: relative;
+    border-radius: 12px;
+    border: 1.5px solid rgba(255,255,255,0.08);
+    padding: 8px; cursor: pointer;
+    background: var(--negro3);
+    transition: border-color 0.2s, transform 0.15s;
+    display: flex; flex-direction: column; gap: 6px; align-items: center;
+  }
+  .paleta-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.25); }
+  .paleta-card.activa { border-color: var(--dorado); box-shadow: 0 0 0 1px var(--dorado); }
+  .paleta-swatches { display: flex; width: 100%; height: 30px; border-radius: 7px; overflow: hidden; }
+  .paleta-swatches span { flex: 1; height: 100%; }
+  .paleta-nombre { font-size: 0.64rem; color: var(--gris); text-align: center; line-height: 1.2; }
+  .btn-restaurar {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--gris);
+    padding: 6px 14px; border-radius: 8px;
+    font-size: 0.72rem; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+    display: inline-flex; align-items: center; gap: 5px;
+    white-space: nowrap;
+  }
+  .btn-restaurar:hover { background: rgba(255,255,255,0.12); color: var(--blanco); }
+
   /* TABLA ADMIN */
   .table-wrap { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
@@ -552,6 +590,8 @@
     .edit-box { padding: 22px; }
     .login-box { padding: 30px 24px; }
     .color-grid { grid-template-columns: 1fr; }
+    .paletas-grid { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 8px; }
+    .paletas-label { flex-direction: column; align-items: flex-start; }
   }
 </style>
 </head>
@@ -624,7 +664,10 @@
   </div>
   <div class="admin-content">
     <div class="personalizacion-box">
-      <div class="stat-label">🎨 Personalización del catálogo</div>
+      <div class="stat-label" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <span>🎨 Personalización del catálogo</span>
+        <button type="button" class="btn-restaurar" onclick="restaurarColoresOriginales()">↺ Restaurar colores originales</button>
+      </div>
       <div class="form-group">
         <label>Nombre del catálogo (parte 1)</label>
         <input type="text" id="p-logo1" placeholder="Saravi"/>
@@ -646,24 +689,33 @@ sin límites"></textarea>
         <label>Subtítulo / descripción</label>
         <textarea id="p-subtitulo" placeholder="Descripción corta del catálogo..."></textarea>
       </div>
+
+      <div class="paletas-wrap">
+        <div class="paletas-label">
+          <span>✨ Combinaciones sugeridas — toca una para aplicarla</span>
+        </div>
+        <div class="paletas-grid" id="paletas-grid"></div>
+      </div>
+
       <div class="color-grid">
         <div class="color-field">
           <label>Color acento 1</label>
-          <input type="color" id="p-color1"/>
+          <input type="color" id="p-color1" oninput="previsualizarColores()"/>
         </div>
         <div class="color-field">
           <label>Color acento 2</label>
-          <input type="color" id="p-color2"/>
+          <input type="color" id="p-color2" oninput="previsualizarColores()"/>
         </div>
         <div class="color-field">
           <label>Color de fondo</label>
-          <input type="color" id="p-color-fondo"/>
+          <input type="color" id="p-color-fondo" oninput="previsualizarColores()"/>
         </div>
         <div class="color-field">
           <label>Color de texto</label>
-          <input type="color" id="p-color-texto"/>
+          <input type="color" id="p-color-texto" oninput="previsualizarColores()"/>
         </div>
       </div>
+      <div style="font-size:0.72rem;color:var(--gris);margin-top:2px;">La vista previa se aplica al instante. Nada se guarda hasta que toques "Guardar personalización".</div>
       <button class="btn-guardar" style="width:100%;margin-top:12px;" onclick="guardarPersonalizacion()">Guardar personalización</button>
     </div>
     <div class="admin-stats" id="admin-stats"></div>
@@ -751,6 +803,17 @@ const DEFAULT_SETTINGS = {
 };
 let currentSettings = DEFAULT_SETTINGS;
 
+/* Paletas de color predefinidas: combinaciones ya probadas para que
+   todo combine bien sin que el usuario tenga que adivinar. */
+const PALETAS = [
+  { nombre: 'Dorado clásico', colorDorado: '#c9a84c', colorRosa: '#e8789a', colorFondo: '#0a0a0a', colorTexto: '#f8f4ee' },
+  { nombre: 'Rosa noche',     colorDorado: '#e6a5c4', colorRosa: '#ff5f8f', colorFondo: '#120910', colorTexto: '#fbeef2' },
+  { nombre: 'Esmeralda',      colorDorado: '#3ecf8e', colorRosa: '#8ee6c0', colorFondo: '#07120d', colorTexto: '#eafbf3' },
+  { nombre: 'Violeta real',   colorDorado: '#b48cf0', colorRosa: '#f0a0e0', colorFondo: '#0e0a17', colorTexto: '#f5eefb' },
+  { nombre: 'Rojo pasión',    colorDorado: '#e0524a', colorRosa: '#ff8f7a', colorFondo: '#140807', colorTexto: '#fdeeee' },
+  { nombre: 'Azul medianoche',colorDorado: '#5aa9e6', colorRosa: '#8fd3f4', colorFondo: '#060c14', colorTexto: '#eef6fb' },
+];
+
 function aplicarPersonalizacion(s) {
   const root = document.documentElement;
   root.style.setProperty('--dorado', s.colorDorado);
@@ -791,6 +854,77 @@ function llenarFormPersonalizacion() {
   document.getElementById('p-color2').value = currentSettings.colorRosa;
   document.getElementById('p-color-fondo').value = currentSettings.colorFondo;
   document.getElementById('p-color-texto').value = currentSettings.colorTexto;
+  renderPaletas();
+}
+
+/* Aplica los 4 colores en vivo (sin guardar en base de datos) para que
+   el usuario vea el resultado real mientras experimenta. */
+function previsualizarColores() {
+  const preview = {
+    ...currentSettings,
+    colorDorado: document.getElementById('p-color1').value,
+    colorRosa: document.getElementById('p-color2').value,
+    colorFondo: document.getElementById('p-color-fondo').value,
+    colorTexto: document.getElementById('p-color-texto').value
+  };
+  aplicarPersonalizacion(preview);
+  marcarPaletaActiva();
+}
+
+function renderPaletas() {
+  const wrap = document.getElementById('paletas-grid');
+  let h = '';
+  PALETAS.forEach((p, i) => {
+    h += `<div class="paleta-card" data-idx="${i}" onclick="aplicarPaleta(${i})" title="${p.nombre}">
+      <div class="paleta-swatches">
+        <span style="background:${p.colorFondo}"></span>
+        <span style="background:${p.colorDorado}"></span>
+        <span style="background:${p.colorRosa}"></span>
+        <span style="background:${p.colorTexto}"></span>
+      </div>
+      <div class="paleta-nombre">${p.nombre}</div>
+    </div>`;
+  });
+  wrap.innerHTML = h;
+  marcarPaletaActiva();
+}
+
+function aplicarPaleta(i) {
+  const p = PALETAS[i];
+  document.getElementById('p-color1').value = p.colorDorado;
+  document.getElementById('p-color2').value = p.colorRosa;
+  document.getElementById('p-color-fondo').value = p.colorFondo;
+  document.getElementById('p-color-texto').value = p.colorTexto;
+  previsualizarColores();
+}
+
+/* Resalta visualmente la paleta que coincide con los valores actuales
+   de los selectores de color (si el usuario ajustó algo a mano, ninguna queda marcada). */
+function marcarPaletaActiva() {
+  const actuales = {
+    colorDorado: document.getElementById('p-color1').value,
+    colorRosa: document.getElementById('p-color2').value,
+    colorFondo: document.getElementById('p-color-fondo').value,
+    colorTexto: document.getElementById('p-color-texto').value
+  };
+  document.querySelectorAll('.paleta-card').forEach(card => {
+    const p = PALETAS[Number(card.dataset.idx)];
+    const coincide = p.colorDorado === actuales.colorDorado && p.colorRosa === actuales.colorRosa &&
+      p.colorFondo === actuales.colorFondo && p.colorTexto === actuales.colorTexto;
+    card.classList.toggle('activa', coincide);
+  });
+}
+
+/* Restaura los 4 colores a los valores originales del sistema y guarda
+   de una vez, para que el usuario tenga un solo clic de "vuelta atrás". */
+async function restaurarColoresOriginales() {
+  document.getElementById('p-color1').value = DEFAULT_SETTINGS.colorDorado;
+  document.getElementById('p-color2').value = DEFAULT_SETTINGS.colorRosa;
+  document.getElementById('p-color-fondo').value = DEFAULT_SETTINGS.colorFondo;
+  document.getElementById('p-color-texto').value = DEFAULT_SETTINGS.colorTexto;
+  previsualizarColores();
+  await guardarPersonalizacion();
+  toast('✓ Colores originales restaurados');
 }
 
 async function guardarPersonalizacion() {
@@ -983,6 +1117,7 @@ function renderTabla() {
 function cerrarAdmin() {
   document.getElementById('admin-panel').classList.remove('active');
   document.body.style.overflow = '';
+  aplicarPersonalizacion(currentSettings);
   cargarProductos();
 }
 
