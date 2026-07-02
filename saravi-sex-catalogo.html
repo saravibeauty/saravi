@@ -20,6 +20,22 @@
     --gris: #888;
     --gris2: #555;
     --radio: 14px;
+    /* Sombra/contraste automático del hero (se recalcula en JS según el fondo elegido) */
+    --sombra-texto: rgba(0,0,0,0.3);
+    --sombra-texto-fuerte: rgba(0,0,0,0.5);
+    --badge-overlay: rgba(255,255,255,0.06);
+    --badge-borde: rgba(255,255,255,0.2);
+
+    /* Paleta FIJA del panel de administración: nunca cambia con la personalización
+       del catálogo, así el admin siempre se ve igual sin importar el tema elegido. */
+    --adm-fondo: #0a0a0a;
+    --adm-fondo2: #111111;
+    --adm-fondo3: #1a1a1a;
+    --adm-dorado: #c9a84c;
+    --adm-rosa: #e8789a;
+    --adm-texto: #f8f4ee;
+    --adm-gris: #888;
+    --adm-gris2: #555;
   }
 
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -71,9 +87,10 @@
   }
   .hero-badge {
     display: inline-block;
-    background: rgba(201,168,76,0.1);
-    border: 1px solid rgba(201,168,76,0.3);
+    background: color-mix(in srgb, var(--dorado) 14%, var(--badge-overlay));
+    border: 1px solid color-mix(in srgb, var(--dorado) 40%, var(--badge-borde));
     color: var(--dorado);
+    text-shadow: 0 1px 2px var(--sombra-texto-fuerte);
     font-size: 0.72rem; font-weight: 600;
     letter-spacing: 2px; text-transform: uppercase;
     padding: 6px 16px; border-radius: 20px;
@@ -90,8 +107,9 @@
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     background-clip: text;
     white-space: pre-line;
+    filter: drop-shadow(0 2px 5px var(--sombra-texto));
   }
-  .hero p { color: var(--gris); font-size: 0.95rem; max-width: 460px; margin: 0 auto 30px; }
+  .hero p { color: var(--gris); font-size: 0.95rem; max-width: 460px; margin: 0 auto 30px; text-shadow: 0 1px 2px var(--sombra-texto); }
 
   /* BUSCADOR Y FILTROS */
   .controls {
@@ -246,23 +264,23 @@
   }
   .admin-overlay.active { display: flex; }
   .login-box {
-    background: var(--negro2);
+    background: var(--adm-fondo2);
     border: 1px solid rgba(201,168,76,0.25);
     border-radius: 18px; padding: 40px; width: 100%; max-width: 360px; text-align:center;
   }
   .login-box h2 {
     font-family: 'Playfair Display', serif; font-size: 1.6rem;
-    background: linear-gradient(135deg, var(--dorado), var(--rosa));
+    background: linear-gradient(135deg, var(--adm-dorado), var(--adm-rosa));
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     background-clip: text; margin-bottom: 8px;
   }
-  .login-box p { color: var(--gris); font-size: 0.83rem; margin-bottom: 28px; }
+  .login-box p { color: var(--adm-gris); font-size: 0.83rem; margin-bottom: 28px; }
   .form-group { margin-bottom: 16px; text-align: left; }
-  .form-group label { font-size: 0.78rem; color: var(--gris); display:block; margin-bottom:6px; }
+  .form-group label { font-size: 0.78rem; color: var(--adm-gris); display:block; margin-bottom:6px; }
   .form-group input {
-    width: 100%; background: var(--negro3);
+    width: 100%; background: var(--adm-fondo3);
     border: 1px solid rgba(255,255,255,0.1);
-    color: var(--blanco); padding: 11px 14px;
+    color: var(--adm-texto); padding: 11px 14px;
     border-radius: 10px; font-size: 0.88rem;
     font-family: 'Inter', sans-serif; outline: none;
     transition: border-color 0.2s;
@@ -270,7 +288,7 @@
   .form-group input:focus { border-color: rgba(201,168,76,0.5); }
   .btn-login {
     width: 100%; padding: 13px;
-    background: linear-gradient(135deg, var(--dorado), #a0782c);
+    background: linear-gradient(135deg, var(--adm-dorado), #a0782c);
     border: none; color: #000; font-weight: 700;
     font-size: 0.9rem; border-radius: 10px; cursor: pointer;
     font-family: 'Inter', sans-serif; letter-spacing: 0.5px;
@@ -279,19 +297,19 @@
   .btn-login:hover { opacity: 0.88; }
   .btn-cancel {
     margin-top: 12px; background: transparent; border: none;
-    color: var(--gris); font-size: 0.82rem; cursor: pointer;
+    color: var(--adm-gris); font-size: 0.82rem; cursor: pointer;
     font-family: 'Inter', sans-serif;
   }
-  .error-msg { color: var(--rosa); font-size: 0.8rem; margin-top: 8px; }
+  .error-msg { color: var(--adm-rosa); font-size: 0.8rem; margin-top: 8px; }
 
-  /* PANEL ADMIN */
+  /* PANEL ADMIN — paleta fija (--adm-*), no cambia con la personalización del catálogo */
   .admin-panel {
     display: none; position: fixed; inset: 0; z-index: 250;
-    background: var(--negro); overflow-y: auto;
+    background: var(--adm-fondo); overflow-y: auto;
   }
   .admin-panel.active { display: block; }
   .admin-header {
-    background: var(--negro2);
+    background: var(--adm-fondo2);
     border-bottom: 1px solid rgba(201,168,76,0.2);
     padding: 16px 24px;
     display: flex; align-items: center; justify-content: space-between;
@@ -299,20 +317,20 @@
   }
   .admin-header h2 {
     font-family: 'Playfair Display', serif; font-size: 1.3rem;
-    background: linear-gradient(135deg, var(--dorado), var(--rosa));
+    background: linear-gradient(135deg, var(--adm-dorado), var(--adm-rosa));
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   .admin-actions { display:flex; gap:10px; }
   .btn-nuevo {
-    background: linear-gradient(135deg, var(--dorado), #a0782c);
+    background: linear-gradient(135deg, var(--adm-dorado), #a0782c);
     border: none; color: #000; font-weight: 700;
     padding: 9px 20px; border-radius: 9px;
     font-size: 0.83rem; cursor: pointer; font-family: 'Inter', sans-serif;
   }
   .btn-salir {
     background: transparent; border: 1px solid rgba(255,255,255,0.15);
-    color: var(--gris); padding: 9px 20px; border-radius: 9px;
+    color: var(--adm-gris); padding: 9px 20px; border-radius: 9px;
     font-size: 0.83rem; cursor: pointer; font-family: 'Inter', sans-serif;
   }
   .admin-content { padding: 24px; max-width: 1200px; margin: 0 auto; }
@@ -321,21 +339,21 @@
     gap: 16px; margin-bottom: 28px;
   }
   .stat-card {
-    background: var(--negro2);
+    background: var(--adm-fondo2);
     border: 1px solid rgba(255,255,255,0.07);
     border-radius: 12px; padding: 18px 20px;
   }
-  .stat-label { font-size: 0.72rem; color: var(--gris); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .stat-label { font-size: 0.72rem; color: var(--adm-gris); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
   .stat-val {
     font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700;
-    background: linear-gradient(135deg, var(--dorado), var(--rosa));
+    background: linear-gradient(135deg, var(--adm-dorado), var(--adm-rosa));
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  /* PERSONALIZACION */
+  /* PERSONALIZACION (el propio cajón de personalización mantiene look fijo del admin) */
   .personalizacion-box {
-    background: var(--negro2);
+    background: var(--adm-fondo2);
     border: 1px solid rgba(255,255,255,0.07);
     border-radius: 12px; padding: 20px; margin-bottom: 28px;
   }
@@ -344,16 +362,16 @@
     display: grid; grid-template-columns: repeat(2, 1fr);
     gap: 12px; margin-bottom: 8px;
   }
-  .color-field label { font-size: 0.78rem; color: var(--gris); display:block; margin-bottom:6px; }
+  .color-field label { font-size: 0.78rem; color: var(--adm-gris); display:block; margin-bottom:6px; }
   .color-field input[type="color"] {
     width: 100%; height: 44px; border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.1); background: var(--negro3);
+    border: 1px solid rgba(255,255,255,0.1); background: var(--adm-fondo3);
     cursor: pointer; padding: 4px;
   }
   .personalizacion-box textarea {
-    width: 100%; background: var(--negro3);
+    width: 100%; background: var(--adm-fondo3);
     border: 1px solid rgba(255,255,255,0.1);
-    color: var(--blanco); padding: 10px 14px;
+    color: var(--adm-texto); padding: 10px 14px;
     border-radius: 10px; font-size: 0.85rem;
     font-family: 'Inter', sans-serif; outline: none; resize: vertical;
     min-height: 70px; transition: border-color 0.2s;
@@ -363,7 +381,7 @@
   /* PALETAS PREDEFINIDAS */
   .paletas-wrap { margin: 18px 0 20px; }
   .paletas-label {
-    font-size: 0.78rem; color: var(--gris); margin-bottom: 10px;
+    font-size: 0.78rem; color: var(--adm-gris); margin-bottom: 10px;
     display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
   }
   .paletas-grid {
@@ -376,19 +394,19 @@
     border-radius: 12px;
     border: 1.5px solid rgba(255,255,255,0.08);
     padding: 8px; cursor: pointer;
-    background: var(--negro3);
+    background: var(--adm-fondo3);
     transition: border-color 0.2s, transform 0.15s;
     display: flex; flex-direction: column; gap: 6px; align-items: center;
   }
   .paleta-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.25); }
-  .paleta-card.activa { border-color: var(--dorado); box-shadow: 0 0 0 1px var(--dorado); }
+  .paleta-card.activa { border-color: var(--adm-dorado); box-shadow: 0 0 0 1px var(--adm-dorado); }
   .paleta-swatches { display: flex; width: 100%; height: 30px; border-radius: 7px; overflow: hidden; }
   .paleta-swatches span { flex: 1; height: 100%; }
-  .paleta-nombre { font-size: 0.64rem; color: var(--gris); text-align: center; line-height: 1.2; }
+  .paleta-nombre { font-size: 0.64rem; color: var(--adm-gris); text-align: center; line-height: 1.2; }
   .btn-restaurar {
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.15);
-    color: var(--gris);
+    color: var(--adm-gris);
     padding: 6px 14px; border-radius: 8px;
     font-size: 0.72rem; font-weight: 500;
     cursor: pointer; transition: all 0.2s;
@@ -396,13 +414,13 @@
     display: inline-flex; align-items: center; gap: 5px;
     white-space: nowrap;
   }
-  .btn-restaurar:hover { background: rgba(255,255,255,0.12); color: var(--blanco); }
+  .btn-restaurar:hover { background: rgba(255,255,255,0.12); color: var(--adm-texto); }
 
-  /* TABLA ADMIN */
+  /* TABLA ADMIN — colores fijos, no dependen del tema del catálogo */
   .table-wrap { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
   thead th {
-    background: var(--negro3); color: var(--dorado);
+    background: var(--adm-fondo3); color: var(--adm-dorado);
     padding: 12px 14px; text-align: left;
     font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;
     border-bottom: 1px solid rgba(201,168,76,0.2);
@@ -415,26 +433,26 @@
   tbody tr:hover { background: rgba(255,255,255,0.03); }
   tbody td { padding: 12px 14px; vertical-align: middle; color: #ccc; }
   .td-img img { width: 44px; height: 44px; object-fit: cover; border-radius: 8px; }
-  .td-nombre { max-width: 220px; font-weight: 500; color: var(--blanco); }
-  .td-precio { color: var(--dorado); font-weight: 600; white-space: nowrap; }
-  .td-id { color: var(--gris2); font-size: 0.75rem; }
+  .td-nombre { max-width: 220px; font-weight: 500; color: var(--adm-texto); }
+  .td-precio { color: var(--adm-dorado); font-weight: 600; white-space: nowrap; }
+  .td-id { color: var(--adm-gris2); font-size: 0.75rem; }
   .td-actions { white-space: nowrap; }
   .btn-edit {
     background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.3);
-    color: var(--dorado); padding: 5px 12px; border-radius: 7px;
+    color: var(--adm-dorado); padding: 5px 12px; border-radius: 7px;
     font-size: 0.75rem; cursor: pointer; font-family: 'Inter', sans-serif;
     margin-right: 6px; transition: background 0.2s;
   }
   .btn-edit:hover { background: rgba(201,168,76,0.2); }
   .btn-del {
     background: rgba(232,120,154,0.1); border: 1px solid rgba(232,120,154,0.3);
-    color: var(--rosa); padding: 5px 12px; border-radius: 7px;
+    color: var(--adm-rosa); padding: 5px 12px; border-radius: 7px;
     font-size: 0.75rem; cursor: pointer; font-family: 'Inter', sans-serif;
     transition: background 0.2s;
   }
   .btn-del:hover { background: rgba(232,120,154,0.2); }
 
-  /* MODAL EDITAR / CREAR */
+  /* MODAL EDITAR / CREAR — también fijo, es parte del flujo de admin */
   .edit-overlay {
     display: none; position: fixed; inset: 0;
     background: rgba(0,0,0,0.85); z-index: 400;
@@ -442,21 +460,21 @@
   }
   .edit-overlay.active { display: flex; }
   .edit-box {
-    background: var(--negro2);
+    background: var(--adm-fondo2);
     border: 1px solid rgba(201,168,76,0.2);
     border-radius: 18px; padding: 32px; width: 100%; max-width: 560px;
     max-height: 90vh; overflow-y: auto;
   }
   .edit-box h3 {
     font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: 24px;
-    background: linear-gradient(135deg, var(--dorado), var(--rosa));
+    background: linear-gradient(135deg, var(--adm-dorado), var(--adm-rosa));
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   }
   .edit-box .form-group { margin-bottom: 14px; }
   .edit-box textarea {
-    width: 100%; background: var(--negro3);
+    width: 100%; background: var(--adm-fondo3);
     border: 1px solid rgba(255,255,255,0.1);
-    color: var(--blanco); padding: 10px 14px;
+    color: var(--adm-texto); padding: 10px 14px;
     border-radius: 10px; font-size: 0.85rem;
     font-family: 'Inter', sans-serif; outline: none; resize: vertical;
     min-height: 90px; transition: border-color 0.2s;
@@ -465,7 +483,7 @@
   .edit-actions { display:flex; gap:10px; margin-top: 20px; }
   .btn-guardar {
     flex: 1; padding: 12px;
-    background: linear-gradient(135deg, var(--dorado), #a0782c);
+    background: linear-gradient(135deg, var(--adm-dorado), #a0782c);
     border: none; color: #000; font-weight: 700;
     font-size: 0.88rem; border-radius: 10px; cursor: pointer;
     font-family: 'Inter', sans-serif;
@@ -473,7 +491,7 @@
   .btn-cancelar {
     padding: 12px 20px; background: transparent;
     border: 1px solid rgba(255,255,255,0.15);
-    color: var(--gris); font-size: 0.88rem;
+    color: var(--adm-gris); font-size: 0.88rem;
     border-radius: 10px; cursor: pointer; font-family: 'Inter', sans-serif;
   }
 
@@ -508,19 +526,19 @@
   }
   .btn-subir-img:hover { background: rgba(232,120,154,0.2); }
 
-  /* MULTI IMAGEN - SLOTS */
+  /* MULTI IMAGEN - SLOTS (dentro del editor de admin, colores fijos) */
   .img-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
   .img-slot {
     position: relative; aspect-ratio: 1/1; border-radius: 10px;
-    background: var(--negro3); border: 1.5px dashed rgba(255,255,255,0.15);
+    background: var(--adm-fondo3); border: 1.5px dashed rgba(255,255,255,0.15);
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; overflow: hidden; transition: border-color 0.2s;
   }
   .img-slot:hover { border-color: rgba(201,168,76,0.4); }
   .img-slot.has-img { border-style: solid; border-color: rgba(201,168,76,0.3); }
   .img-slot img { width: 100%; height: 100%; object-fit: cover; }
-  .img-slot .slot-plus { font-size: 1.6rem; color: var(--gris2); }
-  .img-slot .slot-txt { font-size: 0.62rem; color: var(--gris2); margin-top: 2px; }
+  .img-slot .slot-plus { font-size: 1.6rem; color: var(--adm-gris2); }
+  .img-slot .slot-txt { font-size: 0.62rem; color: var(--adm-gris2); margin-top: 2px; }
   .img-slot .slot-empty { display: flex; flex-direction: column; align-items: center; }
   .img-slot .slot-remove {
     position: absolute; top: 4px; right: 4px;
@@ -566,11 +584,11 @@
     padding: 3px 9px; border-radius: 20px; z-index: 5;
   }
 
-  /* TOAST */
+  /* TOAST (mensajes del sistema/admin, colores fijos) */
   .toast {
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-    background: var(--negro2); border: 1px solid rgba(201,168,76,0.3);
-    color: var(--blanco); padding: 12px 24px; border-radius: 10px;
+    background: var(--adm-fondo2); border: 1px solid rgba(201,168,76,0.3);
+    color: var(--adm-texto); padding: 12px 24px; border-radius: 10px;
     font-size: 0.85rem; z-index: 999;
     opacity: 0; transition: opacity 0.3s; pointer-events:none;
   }
@@ -715,7 +733,7 @@ sin límites"></textarea>
           <input type="color" id="p-color-texto" oninput="previsualizarColores()"/>
         </div>
       </div>
-      <div style="font-size:0.72rem;color:var(--gris);margin-top:2px;">La vista previa se aplica al instante. Nada se guarda hasta que toques "Guardar personalización".</div>
+      <div style="font-size:0.72rem;color:var(--adm-gris);margin-top:2px;">La vista previa se aplica al instante. Nada se guarda hasta que toques "Guardar personalización".</div>
       <button class="btn-guardar" style="width:100%;margin-top:12px;" onclick="guardarPersonalizacion()">Guardar personalización</button>
     </div>
     <div class="admin-stats" id="admin-stats"></div>
@@ -762,7 +780,7 @@ sin límites"></textarea>
       <label>Fotos del producto (máx. 3)</label>
       <div class="img-slots" id="img-slots"></div>
       <input type="file" id="img-file-input" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="onArchivoSeleccionado(this)"/>
-      <div id="upload-status" style="font-size:0.75rem;margin-top:2px;color:var(--dorado);display:none;"></div>
+      <div id="upload-status" style="font-size:0.75rem;margin-top:2px;color:var(--adm-dorado);display:none;"></div>
     </div>
     <div class="edit-actions">
       <button class="btn-guardar" onclick="guardarProducto()">Guardar cambios</button>
@@ -803,6 +821,34 @@ const DEFAULT_SETTINGS = {
 };
 let currentSettings = DEFAULT_SETTINGS;
 
+/* ---- Utilidades de color: permiten calcular automáticamente si un fondo
+   es claro u oscuro, y generar tonos derivados, para que el catálogo se vea
+   bien combine el usuario los colores que combine (incluyendo temas blancos). ---- */
+function hexARgb(hex) {
+  let h = hex.replace('#','');
+  if(h.length === 3) h = h.split('').map(c => c+c).join('');
+  const num = parseInt(h, 16);
+  return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+}
+function rgbAHex(r,g,b) {
+  const c = v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2,'0');
+  return '#' + c(r) + c(g) + c(b);
+}
+function luminanciaRelativa(hex) {
+  const { r, g, b } = hexARgb(hex);
+  const lin = v => { v/=255; return v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4); };
+  return 0.2126*lin(r) + 0.7152*lin(g) + 0.0722*lin(b);
+}
+function esColorClaro(hex) {
+  return luminanciaRelativa(hex) > 0.6;
+}
+// delta positivo = aclara hacia blanco, negativo = oscurece hacia negro (rango sugerido -20..20)
+function ajustarBrillo(hex, delta) {
+  const { r, g, b } = hexARgb(hex);
+  const mezclar = c => delta >= 0 ? c + (255-c)*(delta/100) : c + c*(delta/100);
+  return rgbAHex(mezclar(r), mezclar(g), mezclar(b));
+}
+
 /* Paletas de color predefinidas: combinaciones ya probadas para que
    todo combine bien sin que el usuario tenga que adivinar. */
 const PALETAS = [
@@ -812,16 +858,35 @@ const PALETAS = [
   { nombre: 'Violeta real',   colorDorado: '#b48cf0', colorRosa: '#f0a0e0', colorFondo: '#0e0a17', colorTexto: '#f5eefb' },
   { nombre: 'Rojo pasión',    colorDorado: '#e0524a', colorRosa: '#ff8f7a', colorFondo: '#140807', colorTexto: '#fdeeee' },
   { nombre: 'Azul medianoche',colorDorado: '#5aa9e6', colorRosa: '#8fd3f4', colorFondo: '#060c14', colorTexto: '#eef6fb' },
+  // ---- Fondo blanco / claro (para quienes prefieren un catálogo luminoso) ----
+  { nombre: 'Blanco elegante', colorDorado: '#b8860b', colorRosa: '#d6336c', colorFondo: '#ffffff', colorTexto: '#1a1a1a' },
+  { nombre: 'Blanco lavanda',  colorDorado: '#7c5cbf', colorRosa: '#a655d1', colorFondo: '#faf8ff', colorTexto: '#241b3d' },
+  { nombre: 'Blanco menta',    colorDorado: '#0d9488', colorRosa: '#d6336c', colorFondo: '#f6fdfb', colorTexto: '#0b2b26' },
+  { nombre: 'Blanco coral',    colorDorado: '#c2410c', colorRosa: '#e0524a', colorFondo: '#fffaf7', colorTexto: '#341210' },
 ];
 
 function aplicarPersonalizacion(s) {
   const root = document.documentElement;
+  const fondoClaro = esColorClaro(s.colorFondo);
+
   root.style.setProperty('--dorado', s.colorDorado);
   root.style.setProperty('--dorado2', s.colorDorado);
   root.style.setProperty('--dorado3', s.colorDorado);
   root.style.setProperty('--rosa', s.colorRosa);
   root.style.setProperty('--negro', s.colorFondo);
+  // Tarjetas, header y buscador se ajustan un poco respecto al fondo (más claro si el
+  // tema es oscuro, un poco más oscuro si el tema es blanco) para que combine todo.
+  root.style.setProperty('--negro2', ajustarBrillo(s.colorFondo, fondoClaro ? -4 : 6));
+  root.style.setProperty('--negro3', ajustarBrillo(s.colorFondo, fondoClaro ? -8 : 12));
   root.style.setProperty('--blanco', s.colorTexto);
+
+  // Contraste automático del hero: sin importar qué colores elija el usuario,
+  // el badge/título/subtítulo siempre deben poder leerse.
+  root.style.setProperty('--sombra-texto', fondoClaro ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.3)');
+  root.style.setProperty('--sombra-texto-fuerte', fondoClaro ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.5)');
+  root.style.setProperty('--badge-overlay', fondoClaro ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.07)');
+  root.style.setProperty('--badge-borde', fondoClaro ? 'rgba(0,0,0,0.18)' : 'rgba(255,255,255,0.2)');
+
   document.getElementById('logo-nombre1').textContent = s.logoNombre1;
   document.getElementById('logo-nombre2').textContent = s.logoNombre2;
   document.getElementById('hero-badge').textContent = s.badge;
