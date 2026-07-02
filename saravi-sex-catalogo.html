@@ -201,7 +201,8 @@
     display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
     flex: 1;
   }
-  .card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+  .card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; gap: 8px; }
+  .card-footer-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
   .card-price {
     font-family: 'Playfair Display', serif;
     font-size: 1.15rem; font-weight: 700;
@@ -283,7 +284,7 @@
   .login-box p { color: var(--adm-gris); font-size: 0.83rem; margin-bottom: 28px; }
   .form-group { margin-bottom: 16px; text-align: left; }
   .form-group label { font-size: 0.78rem; color: var(--adm-gris); display:block; margin-bottom:6px; }
-  .form-group input {
+  .form-group input, .form-group select {
     width: 100%; background: var(--adm-fondo3);
     border: 1px solid rgba(255,255,255,0.1);
     color: var(--adm-texto); padding: 11px 14px;
@@ -291,7 +292,7 @@
     font-family: 'Inter', sans-serif; outline: none;
     transition: border-color 0.2s;
   }
-  .form-group input:focus { border-color: rgba(201,168,76,0.5); }
+  .form-group input:focus, .form-group select:focus { border-color: rgba(201,168,76,0.5); }
   .btn-login {
     width: 100%; padding: 13px;
     background: linear-gradient(135deg, var(--adm-dorado), #a0782c);
@@ -600,6 +601,122 @@
   }
   .toast.show { opacity: 1; }
 
+  /* SWITCHES (admin, colores fijos) */
+  .toggle-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 14px 0; border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .toggle-info { flex: 1; }
+  .toggle-title { font-size: 0.85rem; font-weight: 600; color: var(--adm-texto); margin-bottom: 3px; }
+  .toggle-desc { font-size: 0.72rem; color: var(--adm-gris); line-height: 1.4; }
+  .switch { position: relative; display: inline-block; width: 46px; height: 26px; flex-shrink: 0; cursor: pointer; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch-track {
+    position: absolute; inset: 0; background: rgba(255,255,255,0.15);
+    border-radius: 20px; transition: background 0.2s;
+  }
+  .switch-track::before {
+    content: ''; position: absolute; width: 20px; height: 20px; left: 3px; top: 3px;
+    background: #fff; border-radius: 50%; transition: transform 0.2s;
+  }
+  .switch input:checked + .switch-track { background: var(--adm-dorado); }
+  .switch input:checked + .switch-track::before { transform: translateX(20px); }
+
+  /* BOTONES WHATSAPP (storefront, se adaptan al tema) */
+  .btn-carrito-add {
+    background: rgba(201,168,76,0.12);
+    border: 1px solid rgba(201,168,76,0.35);
+    color: var(--dorado); width: 34px; height: 34px; border-radius: 8px;
+    font-size: 1rem; cursor: pointer; display:flex; align-items:center; justify-content:center;
+    transition: background 0.2s; flex-shrink: 0;
+  }
+  .btn-carrito-add:hover { background: rgba(201,168,76,0.22); }
+  .btn-agregar-carrito, .btn-consultar-wpp {
+    width: 100%; padding: 12px; border-radius: 10px; font-size: 0.85rem; font-weight: 600;
+    cursor: pointer; font-family: 'Inter', sans-serif; display:flex; align-items:center; justify-content:center; gap: 8px;
+    margin-top: 6px; border: none;
+  }
+  .btn-agregar-carrito { background: linear-gradient(135deg, var(--dorado), #a0782c); color: #000; }
+  .btn-consultar-wpp { background: #25D366; color: #fff; }
+
+  /* CARRITO FLOTANTE */
+  .cart-fab {
+    position: fixed; bottom: 24px; right: 24px; z-index: 150;
+    width: 58px; height: 58px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--dorado), #a0782c);
+    border: none; font-size: 1.5rem; cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cart-fab-badge {
+    position: absolute; top: -4px; right: -4px;
+    background: var(--rosa); color: #fff; font-size: 0.72rem; font-weight: 700;
+    min-width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--negro);
+  }
+
+  /* MODAL CARRITO */
+  .cart-box {
+    background: var(--negro2);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 18px; padding: 28px; width: 100%;
+    max-height: 88vh; overflow-y: auto;
+  }
+  .cart-box h3 {
+    font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 18px; color: var(--blanco);
+  }
+  .cart-item { display: flex; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .cart-item img { width: 54px; height: 54px; object-fit: cover; border-radius: 8px; background: var(--negro3); flex-shrink: 0; }
+  .cart-item-info { flex: 1; min-width: 0; }
+  .cart-item-name { font-size: 0.83rem; font-weight: 600; color: var(--blanco); margin-bottom: 4px; }
+  .cart-item-price { font-size: 0.78rem; color: var(--gris); }
+  .cart-qty { display: flex; align-items: center; gap: 8px; }
+  .cart-qty button {
+    width: 26px; height: 26px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15);
+    background: var(--negro3); color: var(--blanco); cursor: pointer; font-size: 0.9rem;
+  }
+  .cart-qty-num { font-size: 0.85rem; font-weight: 600; color: var(--blanco); min-width: 16px; text-align: center; }
+  .cart-item-del { background: none; border: none; color: var(--gris); cursor: pointer; font-size: 1rem; padding: 4px; }
+  .cart-total-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 0; margin-top: 6px; border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  .cart-total-label { font-size: 0.75rem; color: var(--gris); text-transform: uppercase; letter-spacing: 1px; }
+  .cart-total-val {
+    font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700;
+    background: linear-gradient(135deg, var(--dorado), var(--rosa));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .cart-pagos { margin: 14px 0; display: flex; flex-direction: column; gap: 8px; }
+  .cart-pago-card {
+    background: var(--negro3); border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 10px; padding: 10px 12px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  }
+  .cart-pago-info { font-size: 0.78rem; color: var(--blanco); min-width: 0; }
+  .cart-pago-info b { color: var(--dorado); display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+  .cart-pago-copy {
+    background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.3);
+    color: var(--dorado); border-radius: 7px; padding: 6px 10px; font-size: 0.72rem;
+    cursor: pointer; flex-shrink: 0; font-family: 'Inter', sans-serif;
+  }
+  .cart-form .form-group { margin-bottom: 12px; }
+  .cart-form label { font-size: 0.75rem; color: var(--gris); display: block; margin-bottom: 5px; }
+  .cart-form input, .cart-form select, .cart-form textarea {
+    width: 100%; background: var(--negro3);
+    border: 1px solid rgba(255,255,255,0.1); color: var(--blanco);
+    padding: 10px 13px; border-radius: 9px; font-size: 0.85rem;
+    font-family: 'Inter', sans-serif; outline: none;
+  }
+  .cart-empty { text-align: center; padding: 40px 10px; color: var(--gris); }
+  .cart-disclaimer { font-size: 0.72rem; color: var(--gris); text-align: center; margin-top: 10px; }
+
+  @media(max-width:600px) {
+    .cart-fab { bottom: 18px; right: 16px; width: 52px; height: 52px; font-size: 1.3rem; }
+    .cart-box { padding: 20px; }
+  }
+
   @media(max-width:600px) {
     header { padding: 0 14px; height: 58px; gap: 8px; }
     .logo { font-size: 1.22rem; }
@@ -749,6 +866,66 @@ sin límites"></textarea>
       <div style="font-size:0.72rem;color:var(--adm-gris);margin-top:2px;">La vista previa se aplica al instante. Nada se guarda hasta que toques "Guardar personalización".</div>
       <button class="btn-guardar" style="width:100%;margin-top:12px;" onclick="guardarPersonalizacion()">Guardar personalización</button>
     </div>
+
+    <!-- AJUSTES DE TIENDA: moneda + WhatsApp -->
+    <div class="personalizacion-box">
+      <div class="stat-label">🛒 Ajustes de tienda</div>
+      <div class="form-group">
+        <label>Símbolo de moneda</label>
+        <input type="text" id="a-moneda" placeholder="$" maxlength="6"/>
+      </div>
+
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <div class="toggle-title">Habilitar pedidos por WhatsApp</div>
+          <div class="toggle-desc">Muestra "Agregar al carrito" en el catálogo. El cliente arma su pedido y lo envía por WhatsApp.</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="a-pedidos-wpp"/>
+          <span class="switch-track"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <div class="toggle-title">Consultas por WhatsApp</div>
+          <div class="toggle-desc">Muestra un botón en cada producto para que el cliente pregunte por él directamente.</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="a-consultas-wpp"/>
+          <span class="switch-track"></span>
+        </label>
+      </div>
+
+      <div class="form-group" style="margin-top:14px;">
+        <label>Número de WhatsApp de la tienda</label>
+        <input type="text" id="a-whatsapp" placeholder="Ej: 573001234567 (con indicativo de país, sin + ni espacios)"/>
+      </div>
+      <div style="font-size:0.72rem;color:var(--adm-gris);margin-top:2px;">Necesario para que funcionen los pedidos y las consultas por WhatsApp.</div>
+      <button class="btn-guardar" style="width:100%;margin-top:12px;" onclick="guardarAjustesTienda()">Guardar ajustes de tienda</button>
+    </div>
+
+    <!-- METODOS DE PAGO -->
+    <div class="personalizacion-box">
+      <div class="stat-label" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <span>💳 Métodos de pago</span>
+        <button type="button" class="btn-restaurar" onclick="abrirEditarMetodo(null)" style="background:rgba(201,168,76,0.12);border-color:rgba(201,168,76,0.35);color:var(--adm-dorado);">+ Nuevo método de pago</button>
+      </div>
+      <div style="font-size:0.75rem;color:var(--adm-gris);margin-bottom:14px;">Estos métodos se muestran a tus clientes en el carrito antes de crear el pedido, para que puedan pagar y luego enviarte el comprobante.</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Banco</th><th>Titular</th><th>Número</th><th>Acciones</th></tr>
+          </thead>
+          <tbody id="metodos-tbody"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="metodos-empty" style="display:none;padding:30px 10px;">
+        <div class="empty-icon">💳</div>
+        <p>Aún no has agregado métodos de pago</p>
+      </div>
+    </div>
+
     <div class="admin-stats" id="admin-stats"></div>
     <div class="controls" style="padding:0 0 16px;">
       <div class="search-wrap">
@@ -802,6 +979,53 @@ sin límites"></textarea>
   </div>
 </div>
 
+<!-- MODAL EDITAR / CREAR METODO DE PAGO -->
+<div class="edit-overlay" id="metodo-overlay">
+  <div class="edit-box">
+    <h3 id="metodo-title">Nuevo método de pago</h3>
+    <div class="form-group">
+      <label>Banco / plataforma</label>
+      <select id="m-banco-select" onchange="onCambioBancoSelect()">
+        <option value="">Selecciona una opción...</option>
+      </select>
+    </div>
+    <div class="form-group" id="m-banco-otro-wrap" style="display:none;">
+      <label>Nombre del banco / plataforma</label>
+      <input type="text" id="m-banco-otro" placeholder="Ej: Mi banco"/>
+    </div>
+    <div class="form-group">
+      <label>Nombre del titular</label>
+      <input type="text" id="m-titular" placeholder="Ej: Natalia Gómez"/>
+    </div>
+    <div class="form-group">
+      <label>Cédula</label>
+      <input type="text" id="m-cedula" placeholder="Ej: 1004567890"/>
+    </div>
+    <div class="form-group">
+      <label>Número de cuenta / celular</label>
+      <input type="text" id="m-numero" placeholder="Ej: 3001234567"/>
+    </div>
+    <div class="edit-actions">
+      <button class="btn-guardar" onclick="guardarMetodoPago()">Guardar método</button>
+      <button class="btn-cancelar" onclick="cerrarEditarMetodo()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- CARRITO FLOTANTE -->
+<button class="cart-fab" id="cart-fab" onclick="abrirCarrito()" style="display:none;">
+  🛍
+  <span class="cart-fab-badge" id="cart-fab-badge">0</span>
+</button>
+
+<!-- MODAL CARRITO -->
+<div class="overlay" id="cart-overlay" onclick="cerrarCarritoClick(event)">
+  <div class="modal-wrap" style="position:relative;width:100%;max-width:520px;">
+    <button class="modal-close" onclick="cerrarCarrito()">✕</button>
+    <div class="cart-box" id="cart-box"></div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -833,6 +1057,49 @@ const DEFAULT_SETTINGS = {
   subtitulo: 'Productos íntimos de alta calidad seleccionados para tu disfrute y bienestar personal.'
 };
 let currentSettings = DEFAULT_SETTINGS;
+
+/* ---- AJUSTES DE TIENDA: moneda + WhatsApp (pedidos y consultas) ---- */
+const DEFAULT_STORE_SETTINGS = {
+  simboloMoneda: '$',
+  pedidosWhatsapp: false,
+  consultasWhatsapp: false,
+  whatsappNumero: ''
+};
+let storeSettings = DEFAULT_STORE_SETTINGS;
+
+const BANCOS_COLOMBIA = [
+  'Nequi', 'Daviplata', 'Bancolombia', 'Davivienda', 'BBVA Colombia',
+  'Banco de Bogotá', 'Banco Popular', 'Banco Caja Social', 'Banco Agrario de Colombia',
+  'Banco AV Villas', 'Scotiabank Colpatria', 'Itaú', 'Banco Falabella', 'Banco Pichincha',
+  'Movii', 'RappiPay', 'Lulo Bank', 'Ualá', 'Powwi', 'Otro'
+];
+
+const DEPARTAMENTOS_COLOMBIA = [
+  'Amazonas','Antioquia','Arauca','Atlántico','Bolívar','Boyacá','Caldas','Caquetá',
+  'Casanare','Cauca','Cesar','Chocó','Córdoba','Cundinamarca','Guainía','Guaviare',
+  'Huila','La Guajira','Magdalena','Meta','Nariño','Norte de Santander','Putumayo',
+  'Quindío','Risaralda','San Andrés y Providencia','Santander','Sucre','Tolima',
+  'Valle del Cauca','Vaupés','Vichada','Bogotá D.C.'
+];
+
+let metodosPago = [];
+let editandoMetodoId = null;
+
+/* ---- CARRITO: se guarda en localStorage (este archivo se aloja en el sitio del
+   usuario, no es un artifact de Claude, así que localStorage es válido y persiste
+   el carrito del cliente aunque recargue la página). ---- */
+const CARRITO_KEY = 'saravi_carrito_v1';
+let carrito = [];
+
+function cargarCarritoLocal() {
+  try {
+    const raw = localStorage.getItem(CARRITO_KEY);
+    carrito = raw ? JSON.parse(raw) : [];
+  } catch(e) { carrito = []; }
+}
+function guardarCarritoLocal() {
+  try { localStorage.setItem(CARRITO_KEY, JSON.stringify(carrito)); } catch(e) {}
+}
 
 /* ---- Utilidades de color: permiten calcular automáticamente si un fondo
    es claro u oscuro, y generar tonos derivados, para que el catálogo se vea
@@ -1031,6 +1298,154 @@ async function guardarPersonalizacion() {
   }
 }
 
+/* ---- AJUSTES DE TIENDA (moneda + WhatsApp) ---- */
+async function cargarAjustesTienda() {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/config?key=eq.store_settings&select=value`, { headers });
+    const rows = await res.json();
+    storeSettings = (rows.length && rows[0].value) ? { ...DEFAULT_STORE_SETTINGS, ...JSON.parse(rows[0].value) } : DEFAULT_STORE_SETTINGS;
+  } catch(e) {
+    storeSettings = DEFAULT_STORE_SETTINGS;
+  }
+}
+
+function llenarFormAjustesTienda() {
+  document.getElementById('a-moneda').value = storeSettings.simboloMoneda;
+  document.getElementById('a-pedidos-wpp').checked = !!storeSettings.pedidosWhatsapp;
+  document.getElementById('a-consultas-wpp').checked = !!storeSettings.consultasWhatsapp;
+  document.getElementById('a-whatsapp').value = storeSettings.whatsappNumero;
+}
+
+async function guardarAjustesTienda() {
+  const pedidos = document.getElementById('a-pedidos-wpp').checked;
+  const consultas = document.getElementById('a-consultas-wpp').checked;
+  const numero = document.getElementById('a-whatsapp').value.replace(/\D/g,'');
+
+  if((pedidos || consultas) && !numero) {
+    toast('Agrega el número de WhatsApp de la tienda para activar esta función');
+    return;
+  }
+
+  const s = {
+    simboloMoneda: document.getElementById('a-moneda').value.trim() || DEFAULT_STORE_SETTINGS.simboloMoneda,
+    pedidosWhatsapp: pedidos,
+    consultasWhatsapp: consultas,
+    whatsappNumero: numero
+  };
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/config?on_conflict=key`, {
+    method: 'POST',
+    headers: { ...headers, 'Prefer': 'resolution=merge-duplicates,return=representation' },
+    body: JSON.stringify({ key: 'store_settings', value: JSON.stringify(s) })
+  });
+  if(res.ok) {
+    storeSettings = s;
+    document.getElementById('a-whatsapp').value = numero;
+    toast('✓ Ajustes de tienda guardados');
+  } else {
+    toast('Error al guardar los ajustes de tienda');
+  }
+}
+
+/* ---- METODOS DE PAGO (CRUD) ---- */
+async function cargarMetodosPago() {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/catalogo_metodos_pago?order=created_at.asc`, { headers });
+    metodosPago = await res.json();
+  } catch(e) { metodosPago = []; }
+}
+
+function renderMetodosTabla() {
+  const tbody = document.getElementById('metodos-tbody');
+  const vacio = document.getElementById('metodos-empty');
+  if(!metodosPago.length) {
+    tbody.innerHTML = '';
+    vacio.style.display = 'block';
+    return;
+  }
+  vacio.style.display = 'none';
+  tbody.innerHTML = metodosPago.map(m => `
+    <tr>
+      <td>${m.banco}</td>
+      <td>${m.titular}</td>
+      <td>${m.numero}</td>
+      <td class="td-actions">
+        <button class="btn-edit" onclick="abrirEditarMetodo('${m.id}')">✏ Editar</button>
+        <button class="btn-del" onclick="eliminarMetodoPago('${m.id}','${m.banco.replace(/'/g,"\\'")}')">🗑 Eliminar</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function llenarSelectBancos() {
+  const sel = document.getElementById('m-banco-select');
+  sel.innerHTML = '<option value="">Selecciona una opción...</option>' +
+    BANCOS_COLOMBIA.map(b => `<option value="${b}">${b}</option>`).join('');
+}
+
+function onCambioBancoSelect() {
+  const val = document.getElementById('m-banco-select').value;
+  document.getElementById('m-banco-otro-wrap').style.display = (val === 'Otro') ? 'block' : 'none';
+}
+
+function abrirEditarMetodo(id) {
+  editandoMetodoId = id;
+  const m = id ? metodosPago.find(x => x.id === id) : null;
+  document.getElementById('metodo-title').textContent = m ? 'Editar método de pago' : 'Nuevo método de pago';
+  llenarSelectBancos();
+
+  const esConocido = m && BANCOS_COLOMBIA.includes(m.banco);
+  document.getElementById('m-banco-select').value = m ? (esConocido ? m.banco : 'Otro') : '';
+  document.getElementById('m-banco-otro-wrap').style.display = (m && !esConocido) ? 'block' : 'none';
+  document.getElementById('m-banco-otro').value = (m && !esConocido) ? m.banco : '';
+  document.getElementById('m-titular').value = m?.titular || '';
+  document.getElementById('m-cedula').value = m?.cedula || '';
+  document.getElementById('m-numero').value = m?.numero || '';
+
+  document.getElementById('metodo-overlay').classList.add('active');
+}
+
+function cerrarEditarMetodo() {
+  document.getElementById('metodo-overlay').classList.remove('active');
+}
+
+async function guardarMetodoPago() {
+  const seleccion = document.getElementById('m-banco-select').value;
+  const banco = seleccion === 'Otro' ? document.getElementById('m-banco-otro').value.trim() : seleccion;
+  const titular = document.getElementById('m-titular').value.trim();
+  const cedula = document.getElementById('m-cedula').value.trim();
+  const numero = document.getElementById('m-numero').value.trim();
+
+  if(!banco || !titular || !numero) { toast('Completa banco, titular y número'); return; }
+
+  const body = { banco, titular, cedula, numero, updated_at: new Date().toISOString() };
+  let res;
+  if(editandoMetodoId) {
+    res = await fetch(`${SUPABASE_URL}/rest/v1/catalogo_metodos_pago?id=eq.${editandoMetodoId}`, { method:'PATCH', headers, body: JSON.stringify(body) });
+  } else {
+    res = await fetch(`${SUPABASE_URL}/rest/v1/catalogo_metodos_pago`, { method:'POST', headers, body: JSON.stringify(body) });
+  }
+  if(res.ok) {
+    cerrarEditarMetodo();
+    toast('✓ Método de pago guardado');
+    await cargarMetodosPago();
+    renderMetodosTabla();
+  } else {
+    toast('Error al guardar el método de pago');
+  }
+}
+
+async function eliminarMetodoPago(id, nombre) {
+  if(!confirm(`¿Eliminar el método de pago "${nombre}"?`)) return;
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/catalogo_metodos_pago?id=eq.${id}`, { method:'DELETE', headers });
+  if(res.ok) {
+    toast('Método de pago eliminado');
+    await cargarMetodosPago();
+    renderMetodosTabla();
+  } else {
+    toast('Error al eliminar');
+  }
+}
+
 async function cargarProductos() {
   mostrarSkeletons();
   const res = await fetch(`${SUPABASE_URL}/rest/v1/productos?activo=eq.true&order=id.asc`, { headers });
@@ -1079,6 +1494,9 @@ function renderGrid(lista) {
     const img = portada
       ? `<img src="${portada}" alt="${p.nombre}" loading="lazy" onerror="this.style.display='none';this.parentElement.querySelector('.no-img').style.display='block'">`
       : '';
+    const btnCarrito = storeSettings.pedidosWhatsapp
+      ? `<button class="btn-carrito-add" title="Agregar al carrito" onclick="event.stopPropagation();agregarAlCarrito(${p.id})">🛍</button>`
+      : '';
     h += `<div class="card" onclick="abrirProducto(${p.id})">
       <div class="card-img">${img}<div class="no-img" style="display:${portada?'none':'block'}">🛍</div></div>
       <div class="card-body">
@@ -1087,7 +1505,10 @@ function renderGrid(lista) {
         <div class="card-desc">${p.descripcion||''}</div>
         <div class="card-footer">
           <div class="card-price">${formatPrecio(p.precio)}</div>
-          <button class="btn-ver" onclick="event.stopPropagation();abrirProducto(${p.id})">Ver más</button>
+          <div class="card-footer-actions">
+            ${btnCarrito}
+            <button class="btn-ver" onclick="event.stopPropagation();abrirProducto(${p.id})">Ver más</button>
+          </div>
         </div>
       </div>
     </div>`;
@@ -1096,7 +1517,7 @@ function renderGrid(lista) {
 }
 
 function formatPrecio(n) {
-  return '$ ' + Number(n).toLocaleString('es-CO');
+  return (storeSettings.simboloMoneda || '$') + ' ' + Number(n).toLocaleString('es-CO');
 }
 
 async function abrirProducto(id) {
@@ -1112,6 +1533,12 @@ async function abrirProducto(id) {
   } else {
     galeriaHtml = `<div class="gallery-track" style="display:flex;align-items:center;justify-content:center;min-height:260px;"><div style="font-size:3rem;opacity:0.2;">🛍</div></div>`;
   }
+  const btnAgregar = storeSettings.pedidosWhatsapp
+    ? `<button class="btn-agregar-carrito" onclick="agregarAlCarrito(${p.id})">🛍 Agregar al carrito</button>`
+    : '';
+  const btnConsultar = (storeSettings.consultasWhatsapp && storeSettings.whatsappNumero)
+    ? `<button class="btn-consultar-wpp" onclick="consultarPorWhatsapp(${p.id})">💬 Consultar por WhatsApp</button>`
+    : '';
   document.getElementById('modal-content').innerHTML = `
     <div class="modal-img">${galeriaHtml}</div>
     <div class="modal-body">
@@ -1119,6 +1546,8 @@ async function abrirProducto(id) {
       <div class="modal-name">${p.nombre}</div>
       <div class="modal-desc">${(p.descripcion||'').replace(/\n/g,'<br>')}</div>
       <div class="modal-price">${formatPrecio(p.precio)}</div>
+      ${btnAgregar}
+      ${btnConsultar}
     </div>`;
   document.getElementById('overlay').classList.add('active');
   document.body.style.overflow = 'hidden';
@@ -1135,11 +1564,206 @@ async function abrirProducto(id) {
   }
 }
 
+function consultarPorWhatsapp(id) {
+  const p = todosProductos.find(x => x.id === id);
+  if(!p || !storeSettings.whatsappNumero) return;
+  const msg = `Hola, quiero consultar sobre: ${p.nombre} (ID: ${p.producto_id})`;
+  window.open(`https://wa.me/${storeSettings.whatsappNumero}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
 function cerrarModal(e, forzar) {
   if(forzar || e?.target === document.getElementById('overlay')) {
     document.getElementById('overlay').classList.remove('active');
     document.body.style.overflow = '';
   }
+}
+
+/* ---- CARRITO DE COMPRAS ---- */
+function agregarAlCarrito(id) {
+  const p = todosProductos.find(x => x.id === id);
+  if(!p) return;
+  const existente = carrito.find(it => it.id === id);
+  if(existente) {
+    existente.cantidad += 1;
+  } else {
+    carrito.push({
+      id: p.id,
+      producto_id: p.producto_id,
+      nombre: p.nombre,
+      precio: Number(p.precio),
+      imagen: imagenesDe(p)[0] || '',
+      cantidad: 1
+    });
+  }
+  guardarCarritoLocal();
+  actualizarBadgeCarrito();
+  toast('✓ Agregado al carrito');
+}
+
+function cambiarCantidadCarrito(id, delta) {
+  const it = carrito.find(x => x.id === id);
+  if(!it) return;
+  it.cantidad += delta;
+  if(it.cantidad <= 0) carrito = carrito.filter(x => x.id !== id);
+  guardarCarritoLocal();
+  actualizarBadgeCarrito();
+  renderCarrito();
+}
+
+function quitarDelCarrito(id) {
+  carrito = carrito.filter(x => x.id !== id);
+  guardarCarritoLocal();
+  actualizarBadgeCarrito();
+  renderCarrito();
+}
+
+function calcularTotalCarrito() {
+  return carrito.reduce((acc, it) => acc + it.precio * it.cantidad, 0);
+}
+
+function actualizarBadgeCarrito() {
+  const fab = document.getElementById('cart-fab');
+  const badge = document.getElementById('cart-fab-badge');
+  const totalItems = carrito.reduce((acc, it) => acc + it.cantidad, 0);
+  if(storeSettings.pedidosWhatsapp && totalItems > 0) {
+    fab.style.display = 'flex';
+    badge.textContent = totalItems;
+  } else {
+    fab.style.display = 'none';
+  }
+}
+
+function copiarNumero(texto, btnEl) {
+  const hacerCopia = () => {
+    const original = btnEl.textContent;
+    btnEl.textContent = '✓ Copiado';
+    setTimeout(() => { btnEl.textContent = original; }, 1500);
+  };
+  if(navigator.clipboard) {
+    navigator.clipboard.writeText(texto).then(hacerCopia).catch(() => toast('No se pudo copiar'));
+  } else {
+    const tmp = document.createElement('textarea');
+    tmp.value = texto; document.body.appendChild(tmp); tmp.select();
+    try { document.execCommand('copy'); hacerCopia(); } catch(e) { toast('No se pudo copiar'); }
+    document.body.removeChild(tmp);
+  }
+}
+
+function abrirCarrito() {
+  renderCarrito();
+  document.getElementById('cart-overlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function cerrarCarrito() {
+  document.getElementById('cart-overlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
+function cerrarCarritoClick(e) {
+  if(e.target === document.getElementById('cart-overlay')) cerrarCarrito();
+}
+
+function renderCarrito() {
+  const box = document.getElementById('cart-box');
+  if(!carrito.length) {
+    box.innerHTML = `<h3>Tu carrito</h3><div class="cart-empty"><div class="empty-icon">🛍</div><p>Aún no has agregado productos</p></div>`;
+    return;
+  }
+
+  const itemsHtml = carrito.map(it => `
+    <div class="cart-item">
+      ${it.imagen ? `<img src="${it.imagen}" alt="${it.nombre}">` : `<div style="width:54px;height:54px;border-radius:8px;background:var(--negro3);display:flex;align-items:center;justify-content:center;font-size:1.4rem;opacity:.3;flex-shrink:0;">🛍</div>`}
+      <div class="cart-item-info">
+        <div class="cart-item-name">${it.nombre}</div>
+        <div class="cart-item-price">${formatPrecio(it.precio)} c/u</div>
+      </div>
+      <div class="cart-qty">
+        <button onclick="cambiarCantidadCarrito(${it.id},-1)">−</button>
+        <span class="cart-qty-num">${it.cantidad}</span>
+        <button onclick="cambiarCantidadCarrito(${it.id},1)">+</button>
+      </div>
+      <button class="cart-item-del" title="Quitar" onclick="quitarDelCarrito(${it.id})">🗑</button>
+    </div>
+  `).join('');
+
+  const pagosHtml = metodosPago.length ? `
+    <div class="cart-pagos">
+      ${metodosPago.map(m => `
+        <div class="cart-pago-card">
+          <div class="cart-pago-info"><b>${m.banco} — ${m.titular}</b>${m.numero}</div>
+          <button class="cart-pago-copy" onclick="copiarNumero('${m.numero}', this)">Copiar</button>
+        </div>
+      `).join('')}
+    </div>
+  ` : '';
+
+  box.innerHTML = `
+    <h3>Tu carrito</h3>
+    <div class="cart-items">${itemsHtml}</div>
+    <div class="cart-total-row">
+      <span class="cart-total-label">Total estimado</span>
+      <span class="cart-total-val">${formatPrecio(calcularTotalCarrito())}</span>
+    </div>
+    ${pagosHtml ? `<div class="stat-label" style="color:var(--gris);margin-bottom:0;">Métodos de pago</div>${pagosHtml}` : ''}
+    <div class="cart-form" style="margin-top:16px;">
+      <div class="form-group">
+        <label>Nombre y apellido</label>
+        <input type="text" id="c-nombre" placeholder="Nombre y apellido"/>
+      </div>
+      <div class="form-group">
+        <label>Ciudad</label>
+        <input type="text" id="c-ciudad" placeholder="Ciudad"/>
+      </div>
+      <div class="form-group">
+        <label>Departamento</label>
+        <select id="c-departamento">
+          <option value="">Selecciona un departamento...</option>
+          ${DEPARTAMENTOS_COLOMBIA.map(d => `<option value="${d}">${d}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Dirección completa</label>
+        <input type="text" id="c-direccion" placeholder="Calle, número, barrio..."/>
+      </div>
+      <div class="form-group">
+        <label>Correo electrónico (opcional)</label>
+        <input type="email" id="c-correo" placeholder="tucorreo@ejemplo.com"/>
+      </div>
+      <div class="form-group">
+        <label>Número de WhatsApp</label>
+        <input type="text" id="c-whatsapp" placeholder="Ej: 3001234567"/>
+      </div>
+    </div>
+    <button class="btn-agregar-carrito" style="margin-top:6px;" onclick="crearOrdenWhatsapp()">Crear orden</button>
+    <div class="cart-disclaimer">Al confirmar se abrirá WhatsApp para enviar el pedido a la tienda.</div>
+  `;
+}
+
+function crearOrdenWhatsapp() {
+  if(!carrito.length) { toast('Tu carrito está vacío'); return; }
+  if(!storeSettings.whatsappNumero) { toast('La tienda no ha configurado su número de WhatsApp'); return; }
+
+  const nombre = document.getElementById('c-nombre').value.trim();
+  const ciudad = document.getElementById('c-ciudad').value.trim();
+  const departamento = document.getElementById('c-departamento').value;
+  const direccion = document.getElementById('c-direccion').value.trim();
+  const correo = document.getElementById('c-correo').value.trim();
+  const whatsapp = document.getElementById('c-whatsapp').value.trim();
+
+  if(!nombre || !ciudad || !departamento || !direccion || !whatsapp) {
+    toast('Completa todos los campos obligatorios');
+    return;
+  }
+
+  const lineasProductos = carrito.map(it => `• ${it.nombre} x${it.cantidad} — ${formatPrecio(it.precio * it.cantidad)}`).join('\n');
+  const mensaje = `🛍️ *Nuevo pedido*\n\n${lineasProductos}\n\n💰 Total estimado: ${formatPrecio(calcularTotalCarrito())}\n\n👤 Datos del cliente:\nNombre: ${nombre}\nCiudad: ${ciudad}\nDepartamento: ${departamento}\nDirección: ${direccion}\nCorreo: ${correo || 'No indicado'}\nWhatsApp: ${whatsapp}`;
+
+  window.open(`https://wa.me/${storeSettings.whatsappNumero}?text=${encodeURIComponent(mensaje)}`, '_blank');
+
+  carrito = [];
+  guardarCarritoLocal();
+  actualizarBadgeCarrito();
+  cerrarCarrito();
+  toast('✓ Pedido enviado por WhatsApp');
 }
 
 /* ADMIN */
@@ -1158,6 +1782,9 @@ async function abrirAdmin() {
   document.getElementById('admin-panel').classList.add('active');
   document.body.style.overflow = 'hidden';
   llenarFormPersonalizacion();
+  llenarFormAjustesTienda();
+  await cargarMetodosPago();
+  renderMetodosTabla();
   const res = await fetch(`${SUPABASE_URL}/rest/v1/productos?order=id.asc`, { headers });
   todosProductos = await res.json();
   const total = todosProductos.length;
@@ -1345,10 +1972,21 @@ document.addEventListener('keydown', e => {
   if(e.key === 'Escape') {
     cerrarModal(null, true);
     cerrarEditar();
+    cerrarCarrito();
+    cerrarEditarMetodo();
   }
 });
 
-cargarPersonalizacion().then(() => cargarProductos());
+cargarCarritoLocal();
+Promise.all([
+  cargarPersonalizacion(),
+  cargarAjustesTienda(),
+  cargarMetodosPago()
+]).then(() => {
+  actualizarBadgeCarrito();
+  cargarProductos();
+});
 </script>
 </body>
+
 </html>
