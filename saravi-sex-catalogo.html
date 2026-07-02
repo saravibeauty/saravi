@@ -561,6 +561,15 @@
     font-size: 0.55rem; font-weight: 700; padding: 1px 6px;
     border-radius: 5px; letter-spacing: 0.3px;
   }
+  .img-slot .slot-ia-btn {
+    position: absolute; bottom: 3px; right: 3px;
+    background: rgba(201,168,76,0.92); color: #000; border: none;
+    font-size: 0.62rem; font-weight: 700; padding: 3px 7px;
+    border-radius: 6px; cursor: pointer; z-index: 3;
+    display: none; align-items: center; gap: 3px;
+    font-family: 'Inter', sans-serif;
+  }
+  .img-slot.has-img .slot-ia-btn { display: flex; }
 
   /* GALERIA MODAL PRODUCTO */
   .modal-gallery { position: relative; width: 100%; flex-shrink: 0; }
@@ -598,6 +607,7 @@
     color: var(--adm-texto); padding: 12px 24px; border-radius: 10px;
     font-size: 0.85rem; z-index: 999;
     opacity: 0; transition: opacity 0.3s; pointer-events:none;
+    max-width: calc(100vw - 32px); text-align: center;
   }
   .toast.show { opacity: 1; }
 
@@ -711,6 +721,93 @@
   }
   .cart-empty { text-align: center; padding: 40px 10px; color: var(--gris); }
   .cart-disclaimer { font-size: 0.72rem; color: var(--gris); text-align: center; margin-top: 10px; }
+
+  /* PANEL IA (imagen y descripcion) — mobile-first, botones grandes para dedo */
+  .ia-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.88); z-index: 500;
+    align-items: flex-end; justify-content: center;
+  }
+  .ia-overlay.active { display: flex; }
+  @media(min-width:600px) { .ia-overlay { align-items: center; } }
+  .ia-box {
+    background: var(--adm-fondo2);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 18px 18px 0 0;
+    padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+    width: 100%; max-width: 480px;
+    max-height: 92vh; overflow-y: auto;
+  }
+  @media(min-width:600px) { .ia-box { border-radius: 18px; margin: 20px; } }
+  .ia-box h3 {
+    font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: 4px;
+    background: linear-gradient(135deg, var(--adm-dorado), var(--adm-rosa));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .ia-sub { font-size: 0.76rem; color: var(--adm-gris); margin-bottom: 18px; line-height: 1.4; }
+  .ia-presets { display: flex; flex-direction: column; gap: 10px; }
+  .ia-preset-btn {
+    width: 100%; text-align: left; display: flex; align-items: center; gap: 12px;
+    background: var(--adm-fondo3); border: 1px solid rgba(255,255,255,0.1);
+    color: var(--adm-texto); padding: 16px; border-radius: 12px;
+    font-size: 0.88rem; font-weight: 500; cursor: pointer;
+    font-family: 'Inter', sans-serif; transition: border-color 0.2s, background 0.2s;
+  }
+  .ia-preset-btn:active { background: rgba(201,168,76,0.12); }
+  .ia-preset-btn .ia-emoji { font-size: 1.3rem; flex-shrink: 0; }
+  .ia-preset-btn .ia-preset-txt { flex: 1; }
+  .ia-preset-btn .ia-preset-desc { font-size: 0.72rem; color: var(--adm-gris); margin-top: 2px; font-weight: 400; }
+  .ia-libre-wrap { margin-top: 4px; }
+  .ia-libre-wrap textarea {
+    width: 100%; background: var(--adm-fondo3);
+    border: 1px solid rgba(255,255,255,0.1); color: var(--adm-texto);
+    padding: 12px 14px; border-radius: 10px; font-size: 0.85rem;
+    font-family: 'Inter', sans-serif; outline: none; resize: vertical; min-height: 80px;
+  }
+  .ia-estado { text-align: center; padding: 30px 10px; }
+  .ia-spinner {
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 3px solid rgba(201,168,76,0.2); border-top-color: var(--adm-dorado);
+    margin: 0 auto 14px; animation: girar 0.8s linear infinite;
+  }
+  @keyframes girar { to { transform: rotate(360deg); } }
+  .ia-estado-txt { font-size: 0.85rem; color: var(--adm-texto); }
+  .ia-error-box {
+    background: rgba(232,120,154,0.1); border: 1px solid rgba(232,120,154,0.3);
+    color: var(--adm-rosa); padding: 14px; border-radius: 10px; font-size: 0.82rem;
+    text-align: center; margin-bottom: 14px; line-height: 1.4;
+  }
+  .ia-preview-img {
+    width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 16px;
+    background: var(--adm-fondo3); aspect-ratio: 1/1;
+  }
+  .ia-preview-img img { width: 100%; height: 100%; object-fit: cover; }
+  .ia-preview-actions { display: flex; flex-direction: column; gap: 10px; }
+  .btn-ia-usar {
+    width: 100%; padding: 14px; border-radius: 10px; border: none;
+    background: linear-gradient(135deg, var(--adm-dorado), #a0782c);
+    color: #000; font-weight: 700; font-size: 0.88rem; cursor: pointer;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-ia-reintentar, .btn-ia-cerrar {
+    width: 100%; padding: 13px; border-radius: 10px;
+    background: transparent; border: 1px solid rgba(255,255,255,0.15);
+    color: var(--adm-gris); font-size: 0.85rem; cursor: pointer; font-family: 'Inter', sans-serif;
+  }
+  .ia-back-btn {
+    background: none; border: none; color: var(--adm-gris); font-size: 0.78rem;
+    cursor: pointer; margin-bottom: 10px; font-family: 'Inter', sans-serif; padding: 4px 0;
+  }
+
+  .btn-ia-desc {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.3);
+    color: var(--adm-dorado); padding: 9px 16px; border-radius: 9px;
+    font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: background 0.2s;
+    font-family: 'Inter', sans-serif; margin-top: 8px; width: 100%; justify-content: center;
+  }
+  .btn-ia-desc:hover { background: rgba(201,168,76,0.2); }
+  .btn-ia-desc:disabled { opacity: 0.5; cursor: default; }
 
   @media(max-width:600px) {
     .cart-fab { bottom: 18px; right: 16px; width: 52px; height: 52px; font-size: 1.3rem; }
@@ -961,6 +1058,7 @@ sin límites"></textarea>
     <div class="form-group">
       <label>Descripción</label>
       <textarea id="e-desc" placeholder="Descripción del producto..."></textarea>
+      <button type="button" class="btn-ia-desc" id="btn-generar-desc" onclick="generarDescripcionIA()">✨ Generar descripción con IA</button>
     </div>
     <div class="form-group">
       <label>Precio (COP)</label>
@@ -1010,6 +1108,11 @@ sin límites"></textarea>
       <button class="btn-cancelar" onclick="cerrarEditarMetodo()">Cancelar</button>
     </div>
   </div>
+</div>
+
+<!-- PANEL IA: MEJORAR FOTO -->
+<div class="ia-overlay" id="ia-overlay">
+  <div class="ia-box" id="ia-box"></div>
 </div>
 
 <!-- CARRITO FLOTANTE -->
@@ -1863,6 +1966,7 @@ function renderSlots() {
       ${tieneImg ? `<img src="${preview}" alt="foto ${i+1}">` : `<div class="slot-empty"><span class="slot-plus">＋</span><span class="slot-txt">Foto ${i+1}</span></div>`}
       ${i===0 && tieneImg ? '<span class="slot-main-tag">Portada</span>' : ''}
       <button type="button" class="slot-remove" onclick="event.stopPropagation();quitarSlot(${i})">✕</button>
+      <button type="button" class="slot-ia-btn" onclick="event.stopPropagation();abrirPanelIAImagen(${i})">✨ IA</button>
     </div>`;
   });
   wrap.innerHTML = h;
@@ -1961,6 +2065,251 @@ async function subirImagenStorage(file, productoId, index) {
   return `${SUPABASE_URL}/storage/v1/object/public/saravi-sex-imagenes/${nombreArchivo}`;
 }
 
+/* ---- IA: MEJORAR FOTO CON PRESETS (proxy Supabase Edge Function -> Gemini) ---- */
+const IA_PRESETS = [
+  { id: 'fondo_blanco', emoji: '🤍', titulo: 'Fondo blanco liso', desc: 'Estilo catálogo / e-commerce' },
+  { id: 'estudio_suave', emoji: '🎀', titulo: 'Estudio con luz suave', desc: 'Look más premium/boutique' },
+  { id: 'con_modelo', emoji: '👤', titulo: 'Con modelo mostrando el producto', desc: 'Puede ser rechazado por filtros de Google según el producto' },
+  { id: 'libre', emoji: '✍️', titulo: 'Prompt libre', desc: 'Escribe tu propia instrucción' },
+];
+
+// Convierte el contenido actual de un slot (file local o url ya subida) a base64 + mimeType
+async function obtenerBase64DeSlot(i) {
+  const slot = slotsImagenes[i];
+  if(slot.file) {
+    const dataUrl = await new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = reject;
+      r.readAsDataURL(slot.file);
+    });
+    const [meta, data] = dataUrl.split(',');
+    const mimeType = meta.match(/data:(.*);base64/)[1];
+    return { data, mimeType };
+  } else if(slot.url) {
+    const res = await fetch(slot.url);
+    const blob = await res.blob();
+    const dataUrl = await new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = reject;
+      r.readAsDataURL(blob);
+    });
+    const [meta, data] = dataUrl.split(',');
+    const mimeType = meta.match(/data:(.*);base64/)[1] || blob.type || 'image/jpeg';
+    return { data, mimeType };
+  }
+  return null;
+}
+
+function abrirPanelIAImagen(slotIndex) {
+  slotActivo = slotIndex;
+  document.getElementById('ia-overlay').classList.add('active');
+  renderIAPresets();
+}
+
+function cerrarPanelIA() {
+  document.getElementById('ia-overlay').classList.remove('active');
+}
+
+function renderIAPresets() {
+  const box = document.getElementById('ia-box');
+  box.innerHTML = `
+    <h3>✨ Mejorar foto con IA</h3>
+    <div class="ia-sub">Elige cómo quieres transformar esta foto. Podrás ver el resultado antes de reemplazarla.</div>
+    <div class="ia-presets">
+      ${IA_PRESETS.map(p => `
+        <button type="button" class="ia-preset-btn" onclick="onSeleccionarPreset('${p.id}')">
+          <span class="ia-emoji">${p.emoji}</span>
+          <span class="ia-preset-txt">${p.titulo}<div class="ia-preset-desc">${p.desc}</div></span>
+        </button>
+      `).join('')}
+    </div>
+    <button type="button" class="btn-ia-cerrar" style="margin-top:14px;" onclick="cerrarPanelIA()">Cancelar</button>
+  `;
+}
+
+function onSeleccionarPreset(presetId) {
+  if(presetId === 'libre') {
+    renderIALibre();
+  } else {
+    ejecutarGeneracionImagenIA(presetId, null);
+  }
+}
+
+function renderIALibre() {
+  const box = document.getElementById('ia-box');
+  box.innerHTML = `
+    <button type="button" class="ia-back-btn" onclick="renderIAPresets()">‹ Volver</button>
+    <h3>✍️ Prompt libre</h3>
+    <div class="ia-sub">Describe cómo quieres que se vea la foto (ej: "fondo rosa pastel con pétalos").</div>
+    <div class="ia-libre-wrap">
+      <textarea id="ia-prompt-libre" placeholder="Ej: fondo rosa pastel con pétalos, iluminación suave..."></textarea>
+    </div>
+    <button type="button" class="btn-ia-usar" style="margin-top:14px;" onclick="ejecutarGeneracionImagenIA('libre', document.getElementById('ia-prompt-libre').value)">Generar imagen</button>
+    <button type="button" class="btn-ia-cerrar" style="margin-top:10px;" onclick="cerrarPanelIA()">Cancelar</button>
+  `;
+}
+
+function renderIACargando(mensaje) {
+  const box = document.getElementById('ia-box');
+  box.innerHTML = `
+    <div class="ia-estado">
+      <div class="ia-spinner"></div>
+      <div class="ia-estado-txt">${mensaje}</div>
+    </div>
+  `;
+}
+
+function renderIAError(mensaje, alReintentar) {
+  const box = document.getElementById('ia-box');
+  box.innerHTML = `
+    <h3>✨ Mejorar foto con IA</h3>
+    <div class="ia-error-box">⚠️ ${mensaje}</div>
+    <div class="ia-preview-actions">
+      <button type="button" class="btn-ia-usar" onclick="(${alReintentar ? alReintentar.toString() : 'renderIAPresets'})()">Intentar de nuevo</button>
+      <button type="button" class="btn-ia-cerrar" onclick="cerrarPanelIA()">Cerrar</button>
+    </div>
+  `;
+}
+
+let resultadoIAPendiente = null;
+
+async function ejecutarGeneracionImagenIA(preset, promptLibre) {
+  if(preset === 'libre' && !(promptLibre || '').trim()) {
+    toast('Escribe una instrucción para el prompt libre');
+    return;
+  }
+  const slot = slotsImagenes[slotActivo];
+  if(!slot.file && !slot.url) {
+    toast('Primero sube una foto en este espacio');
+    return;
+  }
+
+  renderIACargando('⏳ Preparando imagen...');
+  try {
+    const { data, mimeType } = await obtenerBase64DeSlot(slotActivo);
+    renderIACargando('⏳ Generando imagen con IA... puede tardar unos segundos');
+
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/generar-imagen-ia`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'apikey': SUPABASE_KEY
+      },
+      body: JSON.stringify({ imageBase64: data, mimeType, preset, promptLibre })
+    });
+    const resultado = await res.json();
+
+    if(!res.ok || resultado.error) {
+      renderIAError(resultado.error || 'No se pudo generar la imagen. Intenta de nuevo.', () => onSeleccionarPreset(preset));
+      return;
+    }
+
+    resultadoIAPendiente = resultado;
+    renderIAPreview(resultado, preset);
+  } catch(e) {
+    renderIAError('Sin conexión o error inesperado. Revisa tu internet e intenta de nuevo.', () => onSeleccionarPreset(preset));
+  }
+}
+
+function renderIAPreview(resultado, preset) {
+  const box = document.getElementById('ia-box');
+  const previewSrc = `data:${resultado.mimeType};base64,${resultado.imageBase64}`;
+  box.innerHTML = `
+    <h3>✨ Resultado</h3>
+    <div class="ia-sub">Así quedaría la foto. Puedes usarla, descartarla o probar otra vez.</div>
+    <div class="ia-preview-img"><img src="${previewSrc}" alt="Resultado IA"></div>
+    <div class="ia-preview-actions">
+      <button type="button" class="btn-ia-usar" onclick="usarResultadoIA()">Usar esta imagen</button>
+      <button type="button" class="btn-ia-reintentar" onclick="onSeleccionarPreset('${preset}')">Probar otra vez</button>
+      <button type="button" class="btn-ia-cerrar" onclick="descartarResultadoIA()">Descartar</button>
+    </div>
+  `;
+}
+
+function usarResultadoIA() {
+  if(!resultadoIAPendiente) return;
+  const { imageBase64, mimeType } = resultadoIAPendiente;
+  const ext = mimeType.includes('png') ? 'png' : (mimeType.includes('webp') ? 'webp' : 'jpg');
+  const file = base64AFile(imageBase64, mimeType, `ia-generada-${Date.now()}.${ext}`);
+  const dataUrl = `data:${mimeType};base64,${imageBase64}`;
+  slotsImagenes[slotActivo] = { url: null, file, _localPreview: dataUrl };
+  renderSlots();
+  resultadoIAPendiente = null;
+  cerrarPanelIA();
+  toast('✓ Imagen aplicada. Recuerda guardar el producto.');
+}
+
+function descartarResultadoIA() {
+  resultadoIAPendiente = null;
+  cerrarPanelIA();
+}
+
+function base64AFile(base64Data, mimeType, filename) {
+  const byteChars = atob(base64Data);
+  const byteArrays = [];
+  for(let offset = 0; offset < byteChars.length; offset += 1024) {
+    const slice = byteChars.slice(offset, offset + 1024);
+    const byteNumbers = new Array(slice.length);
+    for(let i = 0; i < slice.length; i++) byteNumbers[i] = slice.charCodeAt(i);
+    byteArrays.push(new Uint8Array(byteNumbers));
+  }
+  const blob = new Blob(byteArrays, { type: mimeType });
+  return new File([blob], filename, { type: mimeType });
+}
+
+/* ---- IA: DESCRIPCIÓN AUTOMÁTICA POR RECONOCIMIENTO DE IMAGEN ---- */
+async function generarDescripcionIA() {
+  const slotsConImagen = slotsImagenes.filter(s => s.file || s.url);
+  if(!slotsConImagen.length) {
+    toast('Sube al menos una foto antes de generar la descripción');
+    return;
+  }
+
+  const btn = document.getElementById('btn-generar-desc');
+  const textoOriginal = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '⏳ Analizando fotos...';
+
+  try {
+    const imagenesBase64 = [];
+    for(let i=0;i<slotsImagenes.length;i++) {
+      if(slotsImagenes[i].file || slotsImagenes[i].url) {
+        const { data, mimeType } = await obtenerBase64DeSlot(i);
+        imagenesBase64.push({ data, mimeType });
+      }
+    }
+
+    const nombreProducto = document.getElementById('e-nombre').value.trim();
+
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/generar-descripcion-ia`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'apikey': SUPABASE_KEY
+      },
+      body: JSON.stringify({ imagenes: imagenesBase64, nombreProducto })
+    });
+    const resultado = await res.json();
+
+    if(!res.ok || resultado.error) {
+      toast(resultado.error || 'No se pudo generar la descripción');
+      return;
+    }
+
+    document.getElementById('e-desc').value = resultado.descripcion;
+    toast('✓ Descripción generada. Revísala antes de guardar.');
+  } catch(e) {
+    toast('Sin conexión o error inesperado al generar la descripción');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = textoOriginal;
+  }
+}
+
 function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
@@ -1974,6 +2323,7 @@ document.addEventListener('keydown', e => {
     cerrarEditar();
     cerrarCarrito();
     cerrarEditarMetodo();
+    cerrarPanelIA();
   }
 });
 
