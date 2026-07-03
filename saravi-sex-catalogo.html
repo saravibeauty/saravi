@@ -939,6 +939,53 @@
   }
   .hero-preview-mini .mini-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); }
   .hero-preview-mini .mini-txt { position: relative; z-index: 1; color: #fff; font-size: 0.78rem; font-weight: 600; text-align: center; padding: 0 10px; }
+
+  /* BOTON COMPARTIR EN TARJETA DE PRODUCTO */
+  .card-img { position: relative; }
+  .btn-compartir-card {
+    position: absolute; top: 8px; right: 8px; z-index: 3;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.25);
+    color: #fff; font-size: 0.9rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(3px); transition: background 0.2s;
+  }
+  .btn-compartir-card:hover { background: rgba(0,0,0,0.75); }
+  .btn-compartir-modal {
+    width: 100%; padding: 11px; border-radius: 10px; font-size: 0.82rem; font-weight: 600;
+    cursor: pointer; font-family: 'Inter', sans-serif; display:flex; align-items:center; justify-content:center; gap: 8px;
+    margin-top: 6px; border: 1px solid rgba(255,255,255,0.15); background: transparent; color: var(--blanco);
+  }
+
+  /* MENU DE COMPARTIR (fallback sin Web Share nativo) */
+  .compartir-opciones { display: flex; flex-direction: column; gap: 10px; }
+  .compartir-opt-btn {
+    width: 100%; display: flex; align-items: center; gap: 12px;
+    padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
+    background: var(--adm-fondo3); color: var(--adm-texto); font-size: 0.86rem; font-weight: 500;
+    cursor: pointer; font-family: 'Inter', sans-serif;
+  }
+  .compartir-opt-btn .ia-emoji { font-size: 1.2rem; }
+
+  /* PANEL ADMIN: TEXTO DE VENTA IA */
+  .btn-venta-icono {
+    background: rgba(94,196,255,0.1); border: 1px solid rgba(94,196,255,0.35);
+    color: #5ec4ff; padding: 5px 12px; border-radius: 7px;
+    font-size: 0.75rem; cursor: pointer; font-family: 'Inter', sans-serif;
+    margin-right: 6px; transition: background 0.2s;
+  }
+  .btn-venta-icono:hover { background: rgba(94,196,255,0.2); }
+  .venta-resumen { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; }
+  .venta-resumen img { width: 64px; height: 64px; object-fit: cover; border-radius: 10px; background: var(--adm-fondo3); flex-shrink: 0; }
+  .venta-resumen-info { min-width: 0; }
+  .venta-resumen-nombre { font-size: 0.88rem; font-weight: 600; color: var(--adm-texto); margin-bottom: 3px; }
+  .venta-resumen-precio { font-size: 0.82rem; color: var(--adm-dorado); font-weight: 600; }
+  .venta-texto-resultado {
+    width: 100%; background: var(--adm-fondo3); border: 1px solid rgba(255,255,255,0.1);
+    color: var(--adm-texto); padding: 14px; border-radius: 10px; font-size: 0.85rem;
+    font-family: 'Inter', sans-serif; outline: none; resize: vertical; min-height: 140px;
+    line-height: 1.5; margin-bottom: 14px;
+  }
 </style>
 </head>
 <body>
@@ -1312,6 +1359,16 @@ sin límites"></textarea>
 <!-- PANEL IA: MEJORAR FOTO -->
 <div class="ia-overlay" id="ia-overlay">
   <div class="ia-box" id="ia-box"></div>
+</div>
+
+<!-- MENU COMPARTIR PRODUCTO (fallback sin Web Share nativo) -->
+<div class="ia-overlay" id="compartir-overlay">
+  <div class="ia-box" id="compartir-box"></div>
+</div>
+
+<!-- PANEL ADMIN: TEXTO DE VENTA CON IA -->
+<div class="ia-overlay" id="venta-overlay">
+  <div class="ia-box" id="venta-box"></div>
 </div>
 
 <!-- CARRITO FLOTANTE -->
@@ -2002,6 +2059,151 @@ function renderFooter() {
   `;
 }
 
+/* ---- IA: TEXTO DE VENTA PARA WHATSAPP / FACEBOOK / INSTAGRAM (admin) ---- */
+async function abrirTextoVentaIA(id) {
+  const p = todosProductos.find(x => x.id === id);
+  if(!p) return;
+  const imgs = imagenesDe(p);
+  if(!imgs.length) { toast('Este producto no tiene fotos. Sube al menos una para generar el texto.'); return; }
+
+  document.getElementById('venta-overlay').classList.add('active');
+  renderVentaInicio(p);
+}
+
+function cerrarVentaIA() {
+  document.getElementById('venta-overlay').classList.remove('active');
+}
+
+function renderVentaInicio(p) {
+  const box = document.getElementById('venta-box');
+  const portada = imagenesDe(p)[0];
+  box.innerHTML = `
+    <h3>📢 Texto de venta con IA</h3>
+    <div class="ia-sub">Genera un texto listo para publicar en WhatsApp, Facebook o Instagram, pensado para vender este producto.</div>
+    <div class="venta-resumen">
+      <img src="${portada}" alt="${p.nombre}">
+      <div class="venta-resumen-info">
+        <div class="venta-resumen-nombre">${p.nombre}</div>
+        <div class="venta-resumen-precio">${formatPrecio(p.precio)}</div>
+      </div>
+    </div>
+    <button type="button" class="btn-ia-usar" onclick="ejecutarGenerarVenta(${p.id})">✨ Generar texto de venta</button>
+    <button type="button" class="btn-ia-cerrar" style="margin-top:10px;" onclick="cerrarVentaIA()">Cancelar</button>
+  `;
+}
+
+function renderVentaCargando() {
+  const box = document.getElementById('venta-box');
+  box.innerHTML = `
+    <div class="ia-estado">
+      <div class="ia-spinner"></div>
+      <div class="ia-estado-txt">⏳ Analizando producto y generando texto...</div>
+    </div>
+  `;
+}
+
+async function ejecutarGenerarVenta(id) {
+  const p = todosProductos.find(x => x.id === id);
+  if(!p) return;
+  renderVentaCargando();
+  try {
+    const portada = imagenesDe(p)[0];
+    const res1 = await fetch(portada);
+    const blob = await res1.blob();
+    const dataUrl = await new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = reject;
+      r.readAsDataURL(blob);
+    });
+    const [meta, data] = dataUrl.split(',');
+    const mimeType = meta.match(/data:(.*);base64/)[1] || blob.type || 'image/jpeg';
+
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/generar-texto-venta-ia`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'apikey': SUPABASE_KEY
+      },
+      body: JSON.stringify({
+        imageBase64: data,
+        mimeType,
+        nombre: p.nombre,
+        descripcion: p.descripcion,
+        precioFormateado: formatPrecio(p.precio),
+        productoId: p.producto_id
+      })
+    });
+    const resultado = await res.json();
+
+    if(!res.ok || resultado.error) {
+      renderVentaError(resultado.error || 'No se pudo generar el texto. Intenta de nuevo.', id);
+      return;
+    }
+
+    renderVentaResultado(p, resultado.texto);
+  } catch(e) {
+    renderVentaError('Sin conexión o error inesperado. Intenta de nuevo.', id);
+  }
+}
+
+function renderVentaError(mensaje, id) {
+  const box = document.getElementById('venta-box');
+  box.innerHTML = `
+    <h3>📢 Texto de venta con IA</h3>
+    <div class="ia-error-box">⚠️ ${mensaje}</div>
+    <div class="ia-preview-actions">
+      <button type="button" class="btn-ia-usar" onclick="ejecutarGenerarVenta(${id})">Intentar de nuevo</button>
+      <button type="button" class="btn-ia-cerrar" onclick="cerrarVentaIA()">Cerrar</button>
+    </div>
+  `;
+}
+
+function renderVentaResultado(p, texto) {
+  const box = document.getElementById('venta-box');
+  const url = enlaceProducto(p);
+  box.innerHTML = `
+    <h3>📢 Texto de venta</h3>
+    <div class="ia-sub">Puedes editarlo antes de compartirlo. El enlace del producto se agrega automáticamente al compartir.</div>
+    <textarea class="venta-texto-resultado" id="venta-texto-editable">${texto}</textarea>
+    <button type="button" class="compartir-opt-btn" style="margin-bottom:10px;" onclick="compartirTextoVenta('whatsapp','${p.producto_id}')">
+      <span class="ia-emoji">💬</span> Compartir por WhatsApp
+    </button>
+    <button type="button" class="compartir-opt-btn" style="margin-bottom:10px;" onclick="compartirTextoVenta('facebook','${p.producto_id}')">
+      <span class="ia-emoji">📘</span> Compartir por Facebook
+    </button>
+    <button type="button" class="compartir-opt-btn" style="margin-bottom:10px;" onclick="compartirTextoVenta('nativo','${p.producto_id}')">
+      <span class="ia-emoji">📤</span> Más opciones (Instagram y otras)
+    </button>
+    <button type="button" class="compartir-opt-btn" onclick="copiarNumero(document.getElementById('venta-texto-editable').value, this)">
+      <span class="ia-emoji">🔗</span> Copiar texto
+    </button>
+    <button type="button" class="btn-ia-reintentar" style="margin-top:10px;" onclick="ejecutarGenerarVenta(${p.id})">Generar otra versión</button>
+    <button type="button" class="btn-ia-cerrar" style="margin-top:10px;" onclick="cerrarVentaIA()">Cerrar</button>
+  `;
+}
+
+async function compartirTextoVenta(canal, productoId) {
+  const p = todosProductos.find(x => x.producto_id === productoId);
+  const texto = document.getElementById('venta-texto-editable').value;
+  const url = p ? enlaceProducto(p) : '';
+  const mensajeCompleto = `${texto}\n${url}`;
+
+  if(canal === 'whatsapp') {
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensajeCompleto)}`, '_blank');
+  } else if(canal === 'facebook') {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(texto)}`, '_blank');
+  } else if(canal === 'nativo') {
+    if(navigator.share) {
+      try { await navigator.share({ title: p?.nombre || '', text: mensajeCompleto }); }
+      catch(e) { /* cancelado por el usuario */ }
+    } else {
+      toast('Tu navegador no soporta el menú nativo. Usa Copiar texto y pégalo en Instagram.');
+    }
+  }
+}
+
 /* ---- METODOS DE PAGO (CRUD) ---- */
 async function cargarMetodosPago() {
   try {
@@ -2107,6 +2309,7 @@ async function cargarProductos() {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/productos?activo=eq.true&order=id.asc`, { headers });
   todosProductos = await res.json();
   filtrar();
+  revisarProductoEnURL();
 }
 
 function mostrarSkeletons() {
@@ -2165,7 +2368,9 @@ function renderGrid(lista) {
       ? `<button class="btn-carrito-add" title="Agregar al carrito" onclick="event.stopPropagation();agregarAlCarrito(${p.id})">🛍</button>`
       : '';
     h += `<div class="card" onclick="abrirProducto(${p.id})">
-      <div class="card-img">${img}<div class="no-img" style="display:${portada?'none':'block'}">🛍</div></div>
+      <div class="card-img">${img}<div class="no-img" style="display:${portada?'none':'block'}">🛍</div>
+        <button class="btn-compartir-card" title="Compartir" onclick="event.stopPropagation();compartirProducto(${p.id})">↗</button>
+      </div>
       <div class="card-body">
         <div class="card-id">ID: ${p.producto_id}</div>
         <div class="card-name">${p.nombre}</div>
@@ -2215,6 +2420,7 @@ async function abrirProducto(id) {
       <div class="modal-price">${formatPrecio(p.precio)}</div>
       ${btnAgregar}
       ${btnConsultar}
+      <button class="btn-compartir-modal" onclick="compartirProducto(${p.id})">↗ Compartir producto</button>
     </div>`;
   document.getElementById('overlay').classList.add('active');
   document.body.style.overflow = 'hidden';
@@ -2236,6 +2442,64 @@ function consultarPorWhatsapp(id) {
   if(!p || !storeSettings.whatsappNumero) return;
   const msg = `Hola, quiero consultar sobre: ${p.nombre} (ID: ${p.producto_id})`;
   window.open(`https://wa.me/${storeSettings.whatsappNumero}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+/* ---- COMPARTIR PRODUCTO (cliente) ---- */
+function enlaceProducto(p) {
+  const url = new URL(window.location.href);
+  url.search = '';
+  url.searchParams.set('producto', p.producto_id);
+  return url.toString();
+}
+
+async function compartirProducto(id) {
+  const p = todosProductos.find(x => x.id === id);
+  if(!p) return;
+  const url = enlaceProducto(p);
+  const texto = `${p.nombre} — ${formatPrecio(p.precio)}`;
+
+  if(navigator.share) {
+    try {
+      await navigator.share({ title: p.nombre, text: texto, url });
+    } catch(e) { /* el usuario canceló, no hacer nada */ }
+    return;
+  }
+  abrirMenuCompartirFallback(texto, url);
+}
+
+function abrirMenuCompartirFallback(texto, url) {
+  const box = document.getElementById('compartir-box');
+  const mensaje = `${texto}\n${url}`;
+  box.innerHTML = `
+    <h3>↗ Compartir producto</h3>
+    <div class="ia-sub">Elige por dónde quieres compartirlo.</div>
+    <div class="compartir-opciones">
+      <button type="button" class="compartir-opt-btn" onclick="window.open('https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}','_blank')">
+        <span class="ia-emoji">💬</span> WhatsApp
+      </button>
+      <button type="button" class="compartir-opt-btn" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(texto)}','_blank')">
+        <span class="ia-emoji">📘</span> Facebook
+      </button>
+      <button type="button" class="compartir-opt-btn" onclick="copiarNumero('${mensaje.replace(/'/g,"\\'")}', this)">
+        <span class="ia-emoji">🔗</span> Copiar enlace
+      </button>
+    </div>
+    <button type="button" class="btn-ia-cerrar" style="margin-top:14px;" onclick="cerrarMenuCompartir()">Cerrar</button>
+  `;
+  document.getElementById('compartir-overlay').classList.add('active');
+}
+
+function cerrarMenuCompartir() {
+  document.getElementById('compartir-overlay').classList.remove('active');
+}
+
+// Si la URL trae ?producto=ID, abre ese producto automáticamente (para links compartidos)
+function revisarProductoEnURL() {
+  const params = new URLSearchParams(window.location.search);
+  const productoId = params.get('producto');
+  if(!productoId) return;
+  const p = todosProductos.find(x => x.producto_id === productoId);
+  if(p) abrirProducto(p.id);
 }
 
 function cerrarModal(e, forzar) {
@@ -2489,6 +2753,7 @@ function renderTabla() {
       <td class="td-nombre">${p.nombre}</td>
       <td class="td-precio">${formatPrecio(p.precio)}</td>
       <td class="td-actions">
+        <button class="btn-venta-icono" onclick="abrirTextoVentaIA(${p.id})">📢 Venta IA</button>
         <button class="btn-edit" onclick="abrirEditar(${p.id})">✏ Editar</button>
         <button class="btn-del" onclick="eliminarProducto(${p.id},'${p.nombre.replace(/'/g,"\\'")}')">🗑 Eliminar</button>
       </td>
@@ -2912,6 +3177,8 @@ document.addEventListener('keydown', e => {
     cerrarCarrito();
     cerrarEditarMetodo();
     cerrarPanelIA();
+    cerrarMenuCompartir();
+    cerrarVentaIA();
   }
 });
 
