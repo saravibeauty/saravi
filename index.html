@@ -189,9 +189,22 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 .form-buttons{display:flex;gap:8px;margin-top:20px;}
 .form-buttons .btn{flex:1;}
 @media(min-width:900px){
-  .admin-body.apanel-active{display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start;padding:var(--sp-6) var(--sp-6) 60px;}
-  .form-panel{margin-bottom:0;position:sticky;top:76px;max-height:calc(100vh - 96px);overflow-y:auto;}
+  .admin-body.apanel-active{padding:var(--sp-6) var(--sp-6) 60px;}
 }
+
+/* ============ MODAL PRODUCTO ============ */
+.catalog-header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px;}
+.modal-overlay{position:fixed;inset:0;background:rgba(20,20,22,.5);backdrop-filter:blur(6px);z-index:500;display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;}
+.modal-overlay.show{display:flex;}
+.modal-panel{width:100%;max-width:560px;background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);position:relative;margin:auto 0;padding:24px 24px 22px;animation:modalIn .32s var(--spring) both;}
+.modal-close{position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;border:none;background:rgba(60,60,67,.08);color:var(--ink-2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2;transition:background .2s var(--ease);}
+.modal-close:hover{background:rgba(60,60,67,.15);}
+@keyframes modalIn{from{opacity:0;transform:translateY(24px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+@media(max-width:600px){
+  .modal-overlay{padding:0;align-items:flex-end;}
+  .modal-panel{max-width:100%;border-radius:20px 20px 0 0;max-height:92vh;overflow-y:auto;animation:modalInMobile .32s var(--spring) both;}
+}
+@keyframes modalInMobile{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
 
 .vendors-panel,.pedidos-panel,.anuncios-panel,.retiros-admin-panel{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:20px;margin:var(--sp-5);}
 @media(min-width:640px){.vendors-panel,.pedidos-panel,.anuncios-panel,.retiros-admin-panel{padding:26px 28px;margin:var(--sp-6);}}
@@ -216,33 +229,37 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 .result-count{font-size:13px;color:var(--muted);white-space:nowrap;}
 .toolbar-actions{display:flex;gap:8px;flex-shrink:0;}
 
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
-@media(min-width:520px){.grid{grid-template-columns:repeat(3,1fr);}}
-@media(min-width:1180px){.grid{grid-template-columns:repeat(4,1fr);}}
-.card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;transition:transform .3s var(--spring),box-shadow .24s var(--ease);animation:fadeUp .3s ease both;}
+.grid{display:grid;grid-template-columns:1fr;gap:12px;}
+@media(min-width:640px){.grid{grid-template-columns:repeat(2,1fr);gap:16px;}}
+@media(min-width:1000px){.grid{grid-template-columns:repeat(3,1fr);}}
+@media(min-width:1400px){.grid{grid-template-columns:repeat(4,1fr);}}
+
+.card{display:flex;flex-direction:row;background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;transition:transform .3s var(--spring),box-shadow .24s var(--ease);animation:fadeUp .3s ease both;}
 .card:hover{transform:translateY(-3px);box-shadow:var(--shadow);}
-.card-img{width:100%;aspect-ratio:1/.9;background:var(--surface-2);display:flex;align-items:center;justify-content:center;overflow:hidden;}
-.card-img img{width:100%;height:100%;object-fit:cover;transition:transform .3s ease;}
-.card:hover .card-img img{transform:scale(1.04);}
-.card-img .noimg{font-size:34px;opacity:.22;}
-.card-body{padding:12px 14px 14px;}
-.card-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
-.card-name{font-size:13.5px;font-weight:700;letter-spacing:-.2px;line-height:1.3;margin-bottom:3px;min-height:35px;}
-.card-id{font-size:11px;color:var(--muted);margin-bottom:10px;font-family:ui-monospace,'SF Mono',monospace;}
-.card-divider{border:none;border-top:1px solid var(--line);margin:10px 0;}
-.card-city{font-size:12px;color:var(--muted);margin-bottom:8px;}
-.card-city b{color:var(--ink);font-weight:600;}
-.price-rows{display:flex;flex-direction:column;gap:3px;margin-bottom:10px;}
-.price-row{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);}
-.price-row b{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink);}
-.price-row.internal{font-style:italic;opacity:.75;}
-.price-public{background:var(--accent-tint);border-radius:9px;padding:8px 12px;text-align:center;margin-bottom:12px;}
-.price-public .pub-label{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:2px;font-weight:600;}
-.price-public .pub-price{font-size:17px;font-weight:800;color:var(--accent-ink);letter-spacing:-.4px;font-variant-numeric:tabular-nums;}
-.card-actions{display:flex;gap:6px;}
+.card-media{width:104px;flex-shrink:0;background:var(--surface-2);overflow:hidden;}
+.card-media img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease;}
+.card:hover .card-media img{transform:scale(1.04);}
+.card-media .noimg{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:28px;opacity:.22;}
+.card-body{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap:7px;}
+.card-badges{display:flex;gap:6px;flex-wrap:wrap;}
+.card-name{font-size:14px;font-weight:700;letter-spacing:-.2px;line-height:1.32;}
+.card-id{font-size:11px;color:var(--muted);font-family:ui-monospace,'SF Mono',monospace;}
+.card-price-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.price-block{background:var(--surface-2);border-radius:9px;padding:7px 9px;text-align:center;}
+.price-block span{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:700;margin-bottom:2px;}
+.price-block b{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink);}
+.price-block.highlight{background:var(--accent-tint);}
+.price-block.highlight b{color:var(--accent-ink);}
+.card-gain{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11px;color:var(--muted);}
+.card-gain b{color:var(--ink);font-weight:700;}
+.card-actions{display:flex;gap:6px;margin-top:auto;padding-top:2px;}
 .card-actions .btn{flex:1;}
 .confirm-row{display:flex;gap:6px;width:100%;}
 .confirm-row .btn{flex:1;}
+@media(min-width:520px){
+  .card{flex-direction:column;}
+  .card-media{width:100%;aspect-ratio:1/.85;}
+}
 
 /* PEDIDOS */
 .pedidos-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--line);}
@@ -433,7 +450,31 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 
       <!-- Panel Catálogo (por defecto) -->
       <div class="admin-body apanel apanel-active" id="apanel-catalogo">
-        <aside class="form-panel">
+        <section class="catalog-section" style="width:100%;">
+          <div class="catalog-header">
+            <div><div class="apanel-eyebrow">Inventario</div><div class="apanel-title">📦 Catálogo de productos</div></div>
+            <button class="btn btn-primary" id="openAddProductBtn">+ Nuevo producto</button>
+          </div>
+          <div class="toolbar">
+            <div class="search-wrap">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="search" id="searchInput" placeholder="Buscar por nombre, ID o ciudad…">
+            </div>
+            <span class="result-count" id="resultCount"></span>
+            <div class="toolbar-actions">
+              <button class="btn btn-ghost btn-sm" id="printBtn">Imprimir</button>
+              <button class="btn btn-secondary btn-sm" id="exportCsvBtn">Exportar CSV</button>
+            </div>
+          </div>
+          <div class="grid" id="grid"></div>
+          <div class="empty" id="emptyState" style="display:none"><div class="empty-icon">📦</div><strong>Sin productos aún</strong><p>Agrega el primero desde el botón "+ Nuevo producto".</p></div>
+        </section>
+      </div>
+
+      <!-- MODAL: agregar / editar producto -->
+      <div class="modal-overlay" id="productModalOverlay">
+        <div class="modal-panel" id="productModalPanel">
+          <button type="button" class="modal-close" id="closeProductModalBtn">×</button>
           <div class="form-panel-head"><h2 id="formTitle">Agregar producto</h2><p>Completa la ficha antes de publicarlo.</p></div>
           <form id="productForm">
             <div class="form-section-label">🖼️ Creativo y copy</div>
@@ -506,6 +547,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
               <div class="calc-row"><span>Precio bodega</span><b id="calcBodega">$0</b></div>
               <div class="calc-row"><span>Tu ganancia</span><b id="calcGanancia">$0</b></div>
               <div class="calc-row"><span>Vendedor paga</span><b id="calcVendedorPaga">$0</b></div>
+              <div class="calc-row"><span>Ganancia vendedor</span><b id="calcGananciaVendedor" style="color:var(--blue);">$0</b></div>
               <div class="calc-row" id="calcEnvioRow" style="display:none;"><span>Envío incluido</span><b id="calcEnvio" style="color:#B36B00;">$0</b></div>
               <div class="calc-row total"><span>Precio público sugerido</span><b id="calcPublico">$0</b></div>
               <div class="calc-row" id="calcOferta2Row" style="display:none;border-top:1px dashed rgba(191,90,242,.2);margin-top:6px;padding-top:8px;"><span>Oferta x2 (precio al cliente)</span><b id="calcOferta2" style="color:var(--blue);">$0</b></div>
@@ -517,23 +559,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
             </div>
           </form>
           <div id="savingIndicator" style="display:none;text-align:center;padding:10px;font-size:13px;color:var(--muted);"><div style="display:inline-flex;align-items:center;gap:8px;"><div class="spinner"></div> Guardando en Supabase…</div></div>
-        </aside>
-
-        <section class="catalog-section">
-          <div class="toolbar">
-            <div class="search-wrap">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input type="search" id="searchInput" placeholder="Buscar por nombre, ID o ciudad…">
-            </div>
-            <span class="result-count" id="resultCount"></span>
-            <div class="toolbar-actions">
-              <button class="btn btn-ghost btn-sm" id="printBtn">Imprimir</button>
-              <button class="btn btn-secondary btn-sm" id="exportCsvBtn">Exportar CSV</button>
-            </div>
-          </div>
-          <div class="grid" id="grid"></div>
-          <div class="empty" id="emptyState" style="display:none"><div class="empty-icon">📦</div><strong>Sin productos aún</strong><p>Agrega el primero desde el formulario.</p></div>
-        </section>
+        </div>
       </div>
     </main>
   </div>
@@ -567,6 +593,8 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);const publicPrice=vendorPrice*(1+(p.margin||0)/100)+(p.shipping||0);return{vendorPrice,publicPrice,gain:vendorPrice-(p.price||0),shipping:p.shipping||0};}
   function setLoading(show){$('#appLoading').style.display=show?'flex':'none';}
   function setSaving(show){$('#savingIndicator').style.display=show?'block':'none';$('#saveBtn').disabled=show;}
+  function openProductModal(){$('#productModalOverlay').classList.add('show');document.body.style.overflow='hidden';}
+  function closeProductModal(){$('#productModalOverlay').classList.remove('show');document.body.style.overflow='';}
 
   const ESTADO_LABELS={reservado:{label:'Reservado',icon:'🟣'},nuevo:{label:'Nuevo',icon:'🔵'},confirmado:{label:'Confirmado',icon:'🟢'},despachado:{label:'Despachado',icon:'🟡'},entregado:{label:'Entregado',icon:'✅'},cancelado:{label:'Cancelado',icon:'🔴'}};
   function estadoBadge(estado){const e=ESTADO_LABELS[estado]||{label:estado,icon:'⚪'};return `<span class="badge badge-estado-${estado}">${e.icon} ${e.label}</span>`;}
@@ -722,15 +750,16 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     const envioActivo=$('#envioToggle').checked;
     const envio=envioActivo?(parseFloat($('#envioInput').value)||0):0;
     const prices=calcPrices({price:bodega,commission:parseFloat($('#commissionInput').value)||0,margin:parseFloat($('#marginInput').value)||0,shipping:envio});
+    const gananciaVendedor = prices.publicPrice - prices.vendorPrice - prices.shipping;
     $('#calcBodega').textContent=currency.format(bodega);
     $('#calcGanancia').textContent=currency.format(prices.gain);
     $('#calcVendedorPaga').textContent=currency.format(prices.vendorPrice);
+    $('#calcGananciaVendedor').textContent=currency.format(gananciaVendedor);
     $('#calcPublico').textContent=currency.format(prices.publicPrice);
     $('#calcEnvioRow').style.display=envioActivo&&envio>0?'flex':'none';
     $('#calcEnvio').textContent=currency.format(envio);
     const o2activa=$('#oferta2Toggle').checked;
     const o3activa=$('#oferta3Toggle').checked;
-    const gananciaVendedor = prices.publicPrice - prices.vendorPrice - prices.shipping;
     const oferta2 = prices.publicPrice + prices.vendorPrice + gananciaVendedor;
     const oferta3 = oferta2 + prices.vendorPrice + gananciaVendedor;
     $('#oferta2Preview').style.display=o2activa?'block':'none';
@@ -765,7 +794,11 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     $('#oferta3Toggle').checked=false;$('#oferta3Preview').style.display='none';$('#calcOferta3Row').style.display='none';
     updateCalcPreview();
   }
-  $('#cancelEditBtn').addEventListener('click',resetForm);
+  $('#cancelEditBtn').addEventListener('click',()=>{resetForm();closeProductModal();});
+  $('#openAddProductBtn').addEventListener('click',()=>{resetForm();openProductModal();});
+  $('#closeProductModalBtn').addEventListener('click',closeProductModal);
+  $('#productModalOverlay').addEventListener('click',e=>{if(e.target.id==='productModalOverlay')closeProductModal();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#productModalOverlay').classList.contains('show'))closeProductModal();});
   $('#productForm').addEventListener('submit',async e=>{
     e.preventDefault();const name=$('#nameInput').value.trim(),id=$('#idInput').value.trim(),category=$('#categoryInput').value.trim();const city=$('#cityInput').value.trim(),price=parseFloat($('#priceInput').value),stock=parseInt($('#stockInput').value,10);const commission=parseFloat($('#commissionInput').value)||0,margin=parseFloat($('#marginInput').value)||0;const copy=$('#copyInput').value.trim();
     const shipping=$('#envioToggle').checked?(parseFloat($('#envioInput').value)||0):0;
@@ -779,14 +812,41 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     const oferta2precio = o2activa ? prices2.publicPrice + prices2.vendorPrice + gananciaVendedor2 : 0;
     const oferta3precio = o3activa ? oferta2precio + prices2.vendorPrice + gananciaVendedor2 : 0;
     const productObj={id,name,category,city,price,stock,commission,margin,copy,image:imageData||'',shipping,oferta2_activa:o2activa,oferta2_precio:oferta2precio,oferta3_activa:o3activa,oferta3_precio:oferta3precio};setSaving(true);
-    try{await saveProduct(productObj);await loadProducts();showToast(editingId?'✅ Producto actualizado.':'✅ Producto guardado.');resetForm();render();}catch(err){showToast('❌ Error al guardar: '+err.message);}finally{setSaving(false);}
+    try{
+      await saveProduct(productObj);
+      if(editingId!==null&&id!==editingId){await deleteProduct(editingId);}
+      await loadProducts();
+      showToast(editingId?'✅ Producto actualizado.':'✅ Producto guardado.');
+      resetForm();closeProductModal();render();
+    }catch(err){showToast('❌ Error al guardar: '+err.message);}finally{setSaving(false);}
   });
 
   // ── ADMIN GRID ──
   function render(){const query=$('#searchInput').value.trim().toLowerCase();const filtered=products.filter(p=>!query||(p.name.toLowerCase().includes(query)||p.id.toLowerCase().includes(query)||(p.city||'').toLowerCase().includes(query)));const grid=$('#grid');grid.innerHTML='';filtered.forEach(p=>grid.appendChild(buildCard(p)));$('#emptyState').style.display=products.length===0?'block':'none';$('#resultCount').textContent=query?`${filtered.length} resultado(s)`:'';$('#statCount').textContent=products.length;$('#statCities').textContent=new Set(products.map(p=>(p.city||'').toLowerCase())).size;$('#statValue').textContent=currency.format(products.reduce((s,p)=>s+(p.price||0)*(p.stock||0),0));$('#statStock').textContent=products.reduce((s,p)=>s+(p.stock||0),0);}
-  function buildCard(p){const card=document.createElement('div');card.className='card';const prices=calcPrices(p);let stockBadge=(p.stock||0)<=0?`<span class="badge badge-out">Agotado</span>`:(p.stock||0)<=5?`<span class="badge badge-low">Quedan ${p.stock}</span>`:`<span class="badge badge-ok">Stock: ${p.stock}</span>`;const imgHtml=p.image?`<img src="${esc(p.image)}" alt="${esc(p.name)}">`:`<div class="noimg">🫙</div>`;const shippingRow=prices.shipping>0?`<div class="price-row internal"><span>📦 Envío incluido</span><b style="color:#B36B00">${currency.format(prices.shipping)}</b></div>`:'';card.innerHTML=`<div class="card-img">${imgHtml}</div><div class="card-body"><div class="card-badges"><span class="badge badge-cat">${esc(p.category||'Sin categoría')}</span>${stockBadge}</div><div class="card-name">${esc(p.name)}</div><div class="card-id">#${esc(p.id)}</div><hr class="card-divider"><div class="card-city">Bodega · <b>${esc(p.city||'')}</b></div><div class="price-rows"><div class="price-row internal"><span>Precio bodega</span><b>${currency.format(p.price)}</b></div><div class="price-row internal"><span>Ganancia (${p.commission||0}%)</span><b>${currency.format(prices.gain)}</b></div><div class="price-row"><span>Vendedor paga</span><b>${currency.format(prices.vendorPrice)}</b></div>${shippingRow}</div><div class="price-public"><div class="pub-label">Precio al público${prices.shipping>0?' (envío inc.)':''}</div><div class="pub-price">${currency.format(prices.publicPrice)}</div></div><div class="card-actions" data-actions="${esc(p.id)}"></div></div>`;renderCardActions(card.querySelector('[data-actions]'),p);return card;}
+  function buildCard(p){
+    const card=document.createElement('div');card.className='card';
+    const prices=calcPrices(p);
+    const vendorGain = prices.publicPrice - prices.vendorPrice - prices.shipping;
+    const stockBadge=(p.stock||0)<=0?`<span class="badge badge-out">Agotado</span>`:(p.stock||0)<=5?`<span class="badge badge-low">Quedan ${p.stock}</span>`:`<span class="badge badge-ok">Stock: ${p.stock}</span>`;
+    const imgHtml=p.image?`<img src="${esc(p.image)}" alt="${esc(p.name)}">`:`<div class="noimg">🫙</div>`;
+    card.innerHTML=`
+      <div class="card-media">${imgHtml}</div>
+      <div class="card-body">
+        <div class="card-badges"><span class="badge badge-cat">${esc(p.category||'Sin categoría')}</span>${stockBadge}</div>
+        <div class="card-name">${esc(p.name)}</div>
+        <div class="card-id">#${esc(p.id)} · ${esc(p.city||'')}</div>
+        <div class="card-price-grid">
+          <div class="price-block"><span>Bodega</span><b>${currency.format(p.price)}</b></div>
+          <div class="price-block highlight"><span>Público${prices.shipping>0?' + envío':''}</span><b>${currency.format(prices.publicPrice)}</b></div>
+        </div>
+        <div class="card-gain"><span>Vendedor paga: <b>${currency.format(prices.vendorPrice)}</b></span><span>Gana: <b>${currency.format(vendorGain)}</b></span><span>Tu ganancia: <b>${currency.format(prices.gain)}</b></span></div>
+        <div class="card-actions" data-actions="${esc(p.id)}"></div>
+      </div>`;
+    renderCardActions(card.querySelector('[data-actions]'),p);
+    return card;
+  }
   function renderCardActions(container,p){if(deleteConfirmId===p.id){container.innerHTML=`<div class="confirm-row"><button class="btn btn-danger btn-sm" data-confirm-del="${p.id}">Eliminar</button><button class="btn btn-ghost btn-sm" data-cancel-del="${p.id}">Cancelar</button></div>`;}else{container.innerHTML=`<button class="btn btn-secondary btn-sm" data-edit="${p.id}">Editar</button><button class="btn btn-danger btn-sm" data-del="${p.id}">Eliminar</button>`;}}
-  $('#grid').addEventListener('click',async e=>{const editId=e.target.getAttribute('data-edit'),delId=e.target.getAttribute('data-del');const confirmDelId=e.target.getAttribute('data-confirm-del'),cancelDelId=e.target.getAttribute('data-cancel-del');if(editId!==null){const p=products.find(x=>x.id===editId);if(!p)return;editingId=p.id;$('#nameInput').value=p.name;$('#idInput').value=p.id;$('#idInput').disabled=true;$('#categoryInput').value=p.category||'';$('#cityInput').value=p.city||'';$('#priceInput').value=p.price;$('#stockInput').value=p.stock??'';$('#commissionInput').value=p.commission??15;$('#marginInput').value=p.margin??20;
+  $('#grid').addEventListener('click',async e=>{const editId=e.target.getAttribute('data-edit'),delId=e.target.getAttribute('data-del');const confirmDelId=e.target.getAttribute('data-confirm-del'),cancelDelId=e.target.getAttribute('data-cancel-del');if(editId!==null){const p=products.find(x=>x.id===editId);if(!p)return;editingId=p.id;$('#nameInput').value=p.name;$('#idInput').value=p.id;$('#categoryInput').value=p.category||'';$('#cityInput').value=p.city||'';$('#priceInput').value=p.price;$('#stockInput').value=p.stock??'';$('#commissionInput').value=p.commission??15;$('#marginInput').value=p.margin??20;
     const shipping=p.shipping||0;
     $('#envioToggle').checked=shipping>0;
     $('#envioValueWrap').style.display=shipping>0?'block':'none';
@@ -797,7 +857,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     $('#oferta3Toggle').checked=!!(p.oferta3_activa);
     $('#oferta3Preview').style.display=p.oferta3_activa?'block':'none';
     $('#calcOferta3Row').style.display=p.oferta3_activa?'flex':'none';
-    const copy=p.copy||'';$('#copyInput').value=copy;$('#copyCount').textContent=copy.length+' / 500';updateCalcPreview();pendingImageData=null;if(p.image){$('#imgPreview').src=p.image;$('#dzPreviewWrap').style.display='block';$('#dzPlaceholder').style.display='none';}else{$('#dzPreviewWrap').style.display='none';$('#dzPlaceholder').style.display='block';}$('#formTitle').textContent='Editar producto';$('#saveBtn').textContent='Actualizar';$('#cancelEditBtn').style.display='block';window.scrollTo({top:0,behavior:'smooth'});}if(delId!==null){deleteConfirmId=delId;render();}if(confirmDelId!==null){try{await deleteProduct(confirmDelId);products=products.filter(p=>p.id!==confirmDelId);deleteConfirmId=null;render();showToast('Producto eliminado.');}catch(err){showToast('Error al eliminar: '+err.message);}}if(cancelDelId!==null){deleteConfirmId=null;render();}});
+    const copy=p.copy||'';$('#copyInput').value=copy;$('#copyCount').textContent=copy.length+' / 500';updateCalcPreview();pendingImageData=null;if(p.image){$('#imgPreview').src=p.image;$('#dzPreviewWrap').style.display='block';$('#dzPlaceholder').style.display='none';}else{$('#dzPreviewWrap').style.display='none';$('#dzPlaceholder').style.display='block';}$('#formTitle').textContent='Editar producto';$('#saveBtn').textContent='Actualizar';$('#cancelEditBtn').style.display='block';openProductModal();}if(delId!==null){deleteConfirmId=delId;render();}if(confirmDelId!==null){try{await deleteProduct(confirmDelId);products=products.filter(p=>p.id!==confirmDelId);deleteConfirmId=null;render();showToast('Producto eliminado.');}catch(err){showToast('Error al eliminar: '+err.message);}}if(cancelDelId!==null){deleteConfirmId=null;render();}});
   $('#searchInput').addEventListener('input',render);
 
   // ── EXPORT ──
