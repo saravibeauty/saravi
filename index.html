@@ -262,10 +262,11 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 }
 
 /* PEDIDOS */
-.pedidos-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--line);}
-.pedidos-filters select{padding:9px 12px;border:1.5px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:13px;background:var(--surface-2);color:var(--ink);}
+.pedidos-filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--line);}
+.pedidos-filters select{padding:9px 12px;border:1.5px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:13px;background:var(--surface-2);color:var(--ink);flex:1 1 140px;min-width:0;}
 .pedidos-filters select:focus{outline:none;border-color:var(--accent);}
-.pedido-row{background:var(--surface-2);border-radius:var(--radius-sm);margin-bottom:12px;overflow:hidden;border-left:4px solid var(--line);}
+.pedidos-count{font-size:12px;color:var(--muted);white-space:nowrap;margin-left:auto;padding-left:4px;}
+.pedido-row{background:var(--surface-2);border-radius:var(--radius-sm);margin-bottom:10px;overflow:hidden;border-left:4px solid var(--line);transition:box-shadow .2s var(--ease);}
 .pedido-row.tipo-inmediata{border-left-color:var(--blue);}
 .pedido-row.tipo-campana{border-left-color:var(--accent);}
 .pedido-row.estado-nuevo{border-left-color:var(--blue);}
@@ -274,18 +275,46 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 .pedido-row.estado-despachado{border-left-color:var(--amber);}
 .pedido-row.estado-entregado{border-left-color:#1a9e4a;}
 .pedido-row.estado-cancelado{border-left-color:var(--red);opacity:.65;}
-.pedido-row-top{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:14px 16px;}
-.pedido-nombre{font-size:14px;font-weight:700;}
-.pedido-meta{font-size:11.5px;color:var(--muted);margin-top:2px;}
-.pedido-total{font-size:15px;font-weight:800;color:var(--accent-ink);font-variant-numeric:tabular-nums;text-align:right;}
-.pedido-metodo{font-size:11px;color:var(--muted);text-align:right;margin-top:2px;}
-.pedido-tipo-tag{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 8px;border-radius:20px;margin-top:4px;display:inline-block;}
+.pedido-row.expanded{box-shadow:var(--shadow-sm);}
+
+/* Fila resumen (siempre visible, tap para expandir) */
+.pedido-summary{display:flex;align-items:center;gap:10px;padding:11px 12px;cursor:pointer;-webkit-user-select:none;user-select:none;}
+.pedido-summary:hover{background:rgba(0,0,0,.015);}
+.pedido-summary-icon{font-size:19px;flex-shrink:0;line-height:1;}
+.pedido-summary-main{flex:1;min-width:0;}
+.pedido-summary-name{font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pedido-summary-sub{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+.pedido-summary-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;}
+.pedido-summary-total{font-size:13.5px;font-weight:800;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.pedido-chevron{width:16px;height:16px;color:var(--muted);flex-shrink:0;transition:transform .25s var(--ease);}
+.pedido-row.expanded .pedido-chevron{transform:rotate(180deg);}
+
+/* Detalle (oculto por defecto) */
+.pedido-details{display:none;padding:2px 12px 12px;border-top:1px dashed var(--line);margin:0 12px;}
+.pedido-row.expanded .pedido-details{display:block;}
+.pedido-detail-grid{display:grid;grid-template-columns:1fr;gap:8px 14px;padding-top:10px;}
+@media(min-width:520px){.pedido-detail-grid{grid-template-columns:1fr 1fr;}}
+.pedido-detail-item{font-size:12.5px;min-width:0;}
+.pedido-detail-item span{display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:700;margin-bottom:2px;}
+.pedido-detail-item b{color:var(--ink-2);font-weight:600;word-break:break-word;}
+.pedido-tags-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px;}
+.pedido-tipo-tag{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 8px;border-radius:20px;display:inline-block;}
 .pedido-tipo-inmediata{background:var(--blue-tint);color:var(--blue);}
 .pedido-tipo-campana{background:var(--accent-tint);color:var(--accent-ink);}
-.pedido-actions{padding:10px 16px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line);}
+.pedido-actions{padding:12px 0 4px;margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line);}
 .pedido-actions .estado-label{font-size:12px;color:var(--muted);}
-.status-select{padding:7px 10px;border:1.5px solid var(--line);border-radius:8px;font-family:inherit;font-size:12px;font-weight:600;background:var(--surface);color:var(--ink);cursor:pointer;transition:border-color var(--ease);}
+.status-select{padding:7px 10px;border:1.5px solid var(--line);border-radius:8px;font-family:inherit;font-size:12px;font-weight:600;background:var(--surface);color:var(--ink);cursor:pointer;transition:border-color var(--ease);flex:1 1 auto;min-width:0;}
 .status-select:focus{outline:none;border-color:var(--accent);}
+@media(max-width:480px){
+  .pedido-summary-name{max-width:150px;}
+  .pedido-actions{flex-direction:column;align-items:stretch;}
+  .pedido-actions .estado-label{margin-bottom:-4px;}
+  .pedido-actions .btn-update-status{width:100%;}
+}
+
+/* Botón cargar más */
+.pedidos-load-more{display:flex;justify-content:center;margin-top:6px;}
+.pedidos-load-more .btn{width:100%;max-width:280px;}
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
 @keyframes fadeDown{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
@@ -404,6 +433,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
           <select id="filtroTipo"><option value="">Todos los tipos</option><option value="inmediata">🚀 Entrega inmediata</option><option value="campana">📅 Cierre de campaña</option></select>
           <select id="filtroEstado"><option value="">Todos los estados</option><option value="nuevo">Nuevo</option><option value="reservado">Reservado</option><option value="confirmado">Confirmado</option><option value="despachado">Despachado</option><option value="entregado">Entregado</option><option value="cancelado">Cancelado</option></select>
           <button class="btn btn-ghost btn-sm" id="pedidosRefreshBtn">⟳ Actualizar</button>
+          <span class="pedidos-count" id="pedidosCount"></span>
         </div>
         <div id="pedidosList"><p style="font-size:13px;color:var(--muted);">Cargando pedidos…</p></div>
       </section>
@@ -712,7 +742,11 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   }
   document.querySelectorAll('[data-apanel]').forEach(btn=>{btn.addEventListener('click',()=>switchAdminPanel(btn.getAttribute('data-apanel')));});
 
-  $('#pedidosRefreshBtn').addEventListener('click',async()=>{await loadPedidos();renderPedidos();showToast('✅ Pedidos actualizados.');});
+  const PEDIDOS_PAGE_SIZE=15;
+  let pedidosRenderLimit=PEDIDOS_PAGE_SIZE;
+  const pedidosExpanded=new Set();
+
+  $('#pedidosRefreshBtn').addEventListener('click',async()=>{pedidosRenderLimit=PEDIDOS_PAGE_SIZE;await loadPedidos();renderPedidos();showToast('✅ Pedidos actualizados.');});
 
   // ── VENDEDORES ──
   function renderVendorsList(){const list=$('#vendorsList');if(!vendors.length){list.innerHTML='<p style="font-size:13px;color:var(--muted);margin-top:12px;">Aún no has creado vendedores.</p>';return;}list.innerHTML=vendors.map(v=>`<div class="vendor-row"><div><strong>${esc(v.name)}</strong><div class="pin-label">PIN: ${esc(v.pin)}</div></div><button class="btn btn-danger btn-sm" data-del-vendor="${v.id}">Eliminar</button></div>`).join('');}
@@ -725,9 +759,12 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   function renderPedidos(){
     const list=$('#pedidosList');const filtroTipo=$('#filtroTipo').value;const filtroEstado=$('#filtroEstado').value;
     let filtered=pedidos;if(filtroTipo)filtered=filtered.filter(p=>(p.tipo_pedido||'inmediata')===filtroTipo);if(filtroEstado)filtered=filtered.filter(p=>(p.estado||'nuevo')===filtroEstado);
+    $('#statPedidos').textContent=pedidos.length;
+    $('#pedidosCount').textContent=filtered.length?`${filtered.length} pedido(s)`:'';
     if(!filtered.length){list.innerHTML='<p style="font-size:13px;color:var(--muted);">No hay pedidos con esos filtros.</p>';return;}
+    const toRender=filtered.slice(0,pedidosRenderLimit);
     list.innerHTML='';
-    filtered.forEach(p=>{
+    toRender.forEach(p=>{
       const fecha=p.created_at?new Date(p.created_at).toLocaleDateString('es-CO',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'';
       const tipo=p.tipo_pedido||'inmediata';const estado=p.estado||'nuevo';
       const metodoBadge=p.metodo_pago==='contraentrega'?'📦 Contraentrega':p.metodo_pago==='dia_cierre'?'📅 Día del cierre':'💵 Contado';
@@ -735,14 +772,52 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
       const estadosInmediata=['nuevo','confirmado','despachado','entregado','cancelado'];const estadosCampana=['reservado','confirmado','despachado','entregado','cancelado'];
       const estadoOpts=tipo==='campana'?estadosCampana:estadosInmediata;
       const optsHtml=estadoOpts.map(e=>`<option value="${e}" ${estado===e?'selected':''}>${ESTADO_LABELS[e]?ESTADO_LABELS[e].icon+' '+ESTADO_LABELS[e].label:e}</option>`).join('');
-      const el=document.createElement('div');el.className=`pedido-row estado-${estado} tipo-${tipo}`;el.dataset.pedidoId=p.id;
-      el.innerHTML=`<div class="pedido-row-top"><div style="font-size:26px;">${tipo==='campana'?'📅':'📦'}</div><div><div class="pedido-nombre">${esc(p.nombre)}</div><div class="pedido-meta">${esc(p.product_name)} · Cant. ${p.cantidad||1} · ${esc(p.ciudad||'')} · ${fecha}</div><div class="pedido-meta">🛍️ Vendedor: ${p.vendor_name?esc(p.vendor_name):'<span style="opacity:.5">Venta directa</span>'}</div><div class="pedido-meta">${esc(p.telefono||'')} · ${esc(p.correo||'')}</div>${p.direccion?`<div class="pedido-meta">📍 ${esc(p.direccion)}</div>`:''}${p.nota?`<div class="pedido-meta">📝 ${esc(p.nota)}</div>`:''}<div style="margin-top:6px;">${tipoTag} ${estadoBadge(estado)}</div></div><div><div class="pedido-total">${currency.format(p.total||0)}</div><div class="pedido-metodo">${metodoBadge}</div></div></div><div class="pedido-actions"><span class="estado-label">Cambiar estado:</span><select class="status-select" data-pedido-id="${p.id}">${optsHtml}</select><button class="btn btn-primary btn-sm btn-update-status" data-pedido-id="${p.id}">Guardar</button></div>`;
+      const isExpanded=pedidosExpanded.has(String(p.id));
+      const el=document.createElement('div');el.className=`pedido-row estado-${estado} tipo-${tipo}${isExpanded?' expanded':''}`;el.dataset.pedidoId=p.id;
+      el.innerHTML=`
+        <div class="pedido-summary" data-toggle-pedido="${p.id}">
+          <div class="pedido-summary-icon">${tipo==='campana'?'📅':'📦'}</div>
+          <div class="pedido-summary-main">
+            <div class="pedido-summary-name">${esc(p.nombre)}</div>
+            <div class="pedido-summary-sub">${esc(p.product_name)} · Cant. ${p.cantidad||1} · ${fecha}</div>
+          </div>
+          <div class="pedido-summary-right">
+            <div class="pedido-summary-total">${currency.format(p.total||0)}</div>
+            ${estadoBadge(estado)}
+          </div>
+          <svg class="pedido-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="pedido-details">
+          <div class="pedido-detail-grid">
+            <div class="pedido-detail-item"><span>Producto</span><b>${esc(p.product_name)} · Cant. ${p.cantidad||1}</b></div>
+            <div class="pedido-detail-item"><span>Ciudad</span><b>${esc(p.ciudad||'—')}</b></div>
+            <div class="pedido-detail-item"><span>Vendedor</span><b>${p.vendor_name?esc(p.vendor_name):'Venta directa'}</b></div>
+            <div class="pedido-detail-item"><span>Contacto</span><b>${esc(p.telefono||'')}${p.correo?' · '+esc(p.correo):''}</b></div>
+            <div class="pedido-detail-item"><span>Método de pago</span><b>${metodoBadge}</b></div>
+            ${p.direccion?`<div class="pedido-detail-item"><span>📍 Dirección</span><b>${esc(p.direccion)}</b></div>`:''}
+            ${p.nota?`<div class="pedido-detail-item"><span>📝 Nota</span><b>${esc(p.nota)}</b></div>`:''}
+          </div>
+          <div class="pedido-tags-row">${tipoTag}</div>
+          <div class="pedido-actions">
+            <span class="estado-label">Cambiar estado:</span>
+            <select class="status-select" data-pedido-id="${p.id}">${optsHtml}</select>
+            <button class="btn btn-primary btn-sm btn-update-status" data-pedido-id="${p.id}">Guardar</button>
+          </div>
+        </div>`;
       list.appendChild(el);
     });
-    $('#statPedidos').textContent=pedidos.length;
+    if(filtered.length>toRender.length){
+      const wrap=document.createElement('div');wrap.className='pedidos-load-more';
+      wrap.innerHTML=`<button class="btn btn-ghost btn-sm" id="pedidosLoadMoreBtn">Ver más pedidos (${filtered.length-toRender.length} restantes)</button>`;
+      list.appendChild(wrap);
+      $('#pedidosLoadMoreBtn').addEventListener('click',()=>{pedidosRenderLimit+=PEDIDOS_PAGE_SIZE;renderPedidos();});
+    }
   }
-  $('#pedidosList').addEventListener('click',async e=>{const btn=e.target.closest('.btn-update-status');if(!btn)return;const pedidoId=btn.getAttribute('data-pedido-id');const select=document.querySelector(`.status-select[data-pedido-id="${pedidoId}"]`);if(!select)return;const nuevoEstado=select.value;btn.disabled=true;btn.textContent='…';try{await updatePedidoEstado(pedidoId,nuevoEstado);const idx=pedidos.findIndex(p=>String(p.id)===String(pedidoId));if(idx>-1)pedidos[idx].estado=nuevoEstado;const row=document.querySelector(`.pedido-row[data-pedido-id="${pedidoId}"]`);if(row){row.className=`pedido-row estado-${nuevoEstado} tipo-${pedidos[idx]?.tipo_pedido||'inmediata'}`;const badgeEl=row.querySelector('.badge[class*="badge-estado"]');if(badgeEl)badgeEl.outerHTML=estadoBadge(nuevoEstado);}showToast('✅ Estado actualizado: '+ESTADO_LABELS[nuevoEstado]?.label);}catch(err){showToast('❌ Error: '+err.message);}finally{btn.disabled=false;btn.textContent='Guardar';}});
-  $('#filtroTipo').addEventListener('change',()=>renderPedidos());$('#filtroEstado').addEventListener('change',()=>renderPedidos());
+  $('#pedidosList').addEventListener('click',async e=>{
+    const toggle=e.target.closest('[data-toggle-pedido]');
+    if(toggle){const row=toggle.closest('.pedido-row');const id=String(toggle.getAttribute('data-toggle-pedido'));if(pedidosExpanded.has(id)){pedidosExpanded.delete(id);row.classList.remove('expanded');}else{pedidosExpanded.add(id);row.classList.add('expanded');}return;}
+    const btn=e.target.closest('.btn-update-status');if(!btn)return;const pedidoId=btn.getAttribute('data-pedido-id');const select=document.querySelector(`.status-select[data-pedido-id="${pedidoId}"]`);if(!select)return;const nuevoEstado=select.value;btn.disabled=true;btn.textContent='…';try{await updatePedidoEstado(pedidoId,nuevoEstado);const idx=pedidos.findIndex(p=>String(p.id)===String(pedidoId));if(idx>-1)pedidos[idx].estado=nuevoEstado;const row=document.querySelector(`.pedido-row[data-pedido-id="${pedidoId}"]`);if(row){row.className=`pedido-row estado-${nuevoEstado} tipo-${pedidos[idx]?.tipo_pedido||'inmediata'} expanded`;const badgeEl=row.querySelector('.badge[class*="badge-estado"]');if(badgeEl)badgeEl.outerHTML=estadoBadge(nuevoEstado);}showToast('✅ Estado actualizado: '+ESTADO_LABELS[nuevoEstado]?.label);}catch(err){showToast('❌ Error: '+err.message);}finally{btn.disabled=false;btn.textContent='Guardar';}});
+  $('#filtroTipo').addEventListener('change',()=>{pedidosRenderLimit=PEDIDOS_PAGE_SIZE;renderPedidos();});$('#filtroEstado').addEventListener('change',()=>{pedidosRenderLimit=PEDIDOS_PAGE_SIZE;renderPedidos();});
 
   // ── CALC ──
   function updateCalcPreview(){
