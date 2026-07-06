@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Saravi · Confirmar pedido</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  --bg:#F2F2F7; --surface:#FFFFFF; --surface-2:#FAFAFA;
+  --ink:#1C1C1E; --ink-2:#3A3A3C; --muted:#8A8A8E;
+  --line:rgba(60,60,67,.13); --line-strong:rgba(60,60,67,.22);
+  --accent:#BF5AF2; --accent-ink:#7A2EB8; --accent-tint:rgba(191,90,242,.10);
+  --blue:#0A84FF; --blue-tint:rgba(10,132,255,.10);
+  --green:#30D158; --green-tint:rgba(48,209,88,.10);
+  --amber:#FF9F0A; --amber-tint:rgba(255,159,10,.12);
+  --red:#FF453A; --red-tint:rgba(255,69,58,.10);
+  --radius-sm:10px; --radius:16px; --radius-lg:22px;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.04),0 1px 1px rgba(0,0,0,.03);
+  --shadow:0 6px 20px rgba(0,0,0,.07),0 1px 4px rgba(0,0,0,.04);
+  --shadow-lg:0 20px 50px rgba(0,0,0,.16),0 6px 16px rgba(0,0,0,.06);
+  --ease:.22s cubic-bezier(.4,0,.2,1);
+  --safe-b:env(safe-area-inset-bottom);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{-webkit-text-size-adjust:100%;}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:3px;}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+button{font:inherit;}
+img{max-width:100%;display:block;}
+
+#appLoading{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+.mark{width:52px;height:52px;background:linear-gradient(135deg,#BF5AF2,#8B3DD8);border-radius:15px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(191,90,242,.35);}
+.spinner{width:20px;height:20px;border:2.5px solid rgba(191,90,242,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+#appLoading p{font-size:13px;color:var(--muted);}
+
+.wrap{max-width:520px;margin:0 auto;padding:20px 16px calc(140px + var(--safe-b));min-height:100dvh;}
+@media(min-width:600px){.wrap{padding:40px 20px 140px;}}
+
+.brand{display:flex;align-items:center;gap:9px;margin-bottom:20px;}
+.brand .dot{width:9px;height:9px;background:var(--accent);border-radius:50%;box-shadow:0 0 0 3px var(--accent-tint);}
+.brand b{font-size:17px;font-weight:800;letter-spacing:-.3px;}
+.brand span{font-size:11.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-left:2px;}
+
+.tag-inmediata{display:inline-flex;align-items:center;gap:6px;background:var(--blue-tint);border:1px solid rgba(10,132,255,.22);color:var(--blue);font-size:11.5px;font-weight:700;letter-spacing:.03em;padding:5px 12px;border-radius:50px;margin-bottom:16px;}
+
+/* PRODUCT CARD */
+.product-card{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:16px;animation:fadeUp .35s ease both;}
+.product-img{width:100%;aspect-ratio:1/.82;background:var(--surface-2);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.product-img img{width:100%;height:100%;object-fit:cover;}
+.product-img .noimg{font-size:56px;opacity:.18;}
+.product-body{padding:16px 18px 18px;}
+.product-name{font-size:17px;font-weight:800;letter-spacing:-.3px;margin-bottom:10px;line-height:1.3;}
+.product-price-row{display:flex;align-items:baseline;justify-content:space-between;background:var(--accent-tint);border-radius:12px;padding:12px 14px;}
+.product-price-row .pp-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:600;}
+.product-price-row .pp-amount{font-size:21px;font-weight:800;color:var(--accent-ink);letter-spacing:-.4px;font-variant-numeric:tabular-nums;}
+
+/* OFERTAS */
+.oferta-picker{margin-bottom:16px;}
+.oferta-picker .op-title{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;padding-left:2px;}
+.oferta-btn{width:100%;display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--radius-sm);padding:13px 16px;margin-bottom:8px;cursor:pointer;transition:border-color var(--ease),background var(--ease),transform var(--ease);text-align:left;}
+.oferta-btn:active{transform:scale(.98);}
+.oferta-btn.active{border-color:var(--accent);background:var(--accent-tint);box-shadow:0 0 0 3px var(--accent-tint);}
+.oferta-btn .ob-label{font-size:13.5px;font-weight:700;color:var(--ink-2);}
+.oferta-btn.active .ob-label{color:var(--accent-ink);}
+.oferta-btn .ob-price{font-size:14.5px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink);}
+.oferta-btn.active .ob-price{color:var(--accent-ink);}
+
+/* SECTIONS */
+.section-card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px;margin-bottom:14px;}
+.section-title{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:14px;}
+.field{margin-bottom:14px;}
+.field:last-child{margin-bottom:0;}
+.field label{display:block;font-size:11.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;}
+.field input,.field textarea{width:100%;padding:13px 14px;background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:16px;color:var(--ink);transition:border-color var(--ease),box-shadow var(--ease);}
+.field input:focus,.field textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-tint);}
+.field textarea{resize:none;min-height:70px;line-height:1.5;}
+.field-err{font-size:11.5px;color:var(--red);margin-top:6px;display:none;}
+.field-err.vis{display:block;}
+.field input.ferr,.field textarea.ferr{border-color:var(--red)!important;}
+
+.qty-row{display:flex;align-items:center;justify-content:space-between;}
+.qty-control{display:flex;align-items:center;gap:0;border:1.5px solid var(--line);border-radius:var(--radius-sm);overflow:hidden;background:var(--surface-2);}
+.qty-btn{width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:var(--accent-ink);font-size:20px;cursor:pointer;transition:background var(--ease);}
+.qty-btn:active{background:var(--accent-tint);}
+.qty-num{width:48px;text-align:center;font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;}
+
+.pago-group{display:flex;gap:8px;}
+.pago-btn{flex:1;padding:13px 10px;border-radius:var(--radius-sm);border:1.5px solid var(--line);background:var(--surface-2);color:var(--ink-2);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all var(--ease);text-align:center;}
+.pago-btn .pb-sub{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-top:2px;}
+.pago-btn.active{border-color:var(--accent);background:var(--accent-tint);color:var(--accent-ink);box-shadow:0 0 0 3px var(--accent-tint);}
+.pago-btn.active .pb-sub{color:var(--accent-ink);opacity:.75;}
+
+.shipping-note{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);justify-content:center;margin-top:14px;}
+
+/* STICKY BOTTOM BAR */
+.bottom-bar{position:fixed;left:0;right:0;bottom:0;z-index:300;background:rgba(255,255,255,.92);backdrop-filter:blur(20px) saturate(1.6);border-top:1px solid var(--line);padding:12px 16px calc(12px + var(--safe-b));box-shadow:0 -2px 16px rgba(0,0,0,.05);}
+.bottom-bar-inner{max-width:520px;margin:0 auto;}
+.bb-summary{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;font-size:12.5px;color:var(--muted);}
+.bb-summary b{font-size:19px;font-weight:800;color:var(--accent-ink);font-variant-numeric:tabular-nums;letter-spacing:-.3px;}
+.btn-confirm{width:100%;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:15px;font-family:inherit;font-size:15.5px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(191,90,242,.35);transition:opacity var(--ease),transform var(--ease);}
+.btn-confirm:active{transform:scale(.98);}
+.btn-confirm:disabled{opacity:.5;cursor:not-allowed;}
+
+/* SUCCESS / ERROR */
+.status-screen{min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center;}
+.status-icon{width:76px;height:76px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:34px;margin-bottom:20px;}
+.status-icon.ok{background:linear-gradient(135deg,var(--accent),#8B3DD8);color:#fff;box-shadow:0 10px 30px rgba(191,90,242,.35);}
+.status-icon.err{background:var(--red-tint);color:var(--red);}
+.status-title{font-size:21px;font-weight:800;letter-spacing:-.4px;margin-bottom:8px;}
+.status-text{font-size:14px;color:var(--muted);line-height:1.7;max-width:360px;margin-bottom:20px;}
+.status-box{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px 18px;text-align:left;max-width:360px;width:100%;}
+.status-box h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;}
+.status-box p{font-size:13.5px;color:var(--ink-2);line-height:1.7;}
+.status-box strong{color:var(--accent-ink);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+
+<div id="appLoading">
+  <div class="mark">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/><path d="M8.5 14.5s1.5 2 3.5 2 3.5-2 3.5-2"/><line x1="9" y1="9" x2="9.01" y2="9" stroke-width="3"/><line x1="15" y1="9" x2="15.01" y2="9" stroke-width="3"/></svg>
+  </div>
+  <div class="spinner"></div>
+  <p>Cargando tu pedido…</p>
+</div>
+
+<!-- ERROR -->
+<div class="status-screen" id="errorScreen" style="display:none;">
+  <div class="status-icon err">😕</div>
+  <div class="status-title">Producto no encontrado</div>
+  <p class="status-text">Este link ya no está disponible. Contacta a tu vendedor para conseguir el link correcto.</p>
+</div>
+
+<!-- FORM -->
+<div class="wrap" id="formScreen" style="display:none;">
+  <div class="brand"><span class="dot"></span><b>Saravi</b><span>Pedido</span></div>
+  <div class="tag-inmediata">🚀 Entrega inmediata</div>
+
+  <div class="product-card">
+    <div class="product-img" id="productImg"></div>
+    <div class="product-body">
+      <div class="product-name" id="productName"></div>
+      <div class="product-price-row"><span class="pp-label" id="ppLabel">Precio</span><span class="pp-amount" id="ppAmount"></span></div>
+    </div>
+  </div>
+
+  <div class="oferta-picker" id="ofertaPicker" style="display:none;">
+    <div class="op-title">Elige tu oferta</div>
+    <div id="ofertaBtns"></div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Tus datos</div>
+    <div class="field"><label>Nombre completo</label><input type="text" id="fNombre" placeholder="¿Cómo te llamas?"><div class="field-err" id="eNombre">Ingresa tu nombre</div></div>
+    <div class="field"><label>Teléfono / WhatsApp</label><input type="tel" id="fTelefono" placeholder="Ej: 300 123 4567"><div class="field-err" id="eTelefono">Ingresa tu teléfono</div></div>
+    <div class="field"><label>Correo electrónico</label><input type="email" id="fCorreo" placeholder="tu@correo.com"><div class="field-err" id="eCorreo">Ingresa un correo válido</div></div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Dirección de entrega</div>
+    <div class="field"><label>Ciudad</label><input type="text" id="fCiudad" placeholder="Tu ciudad"><div class="field-err" id="eCiudad">Ingresa la ciudad</div></div>
+    <div class="field"><label>Dirección completa</label><input type="text" id="fDireccion" placeholder="Calle, número, barrio"><div class="field-err" id="eDireccion">Ingresa la dirección</div></div>
+    <div class="field"><label>Nota (opcional)</label><textarea id="fNota" placeholder="Referencia, apto, instrucciones de entrega…"></textarea></div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Cantidad</div>
+    <div class="qty-row"><span style="font-size:13px;color:var(--ink-2);">Unidades a pedir</span>
+      <div class="qty-control"><button class="qty-btn" id="qtyMinus" type="button">−</button><div class="qty-num" id="qtyDisplay">1</div><button class="qty-btn" id="qtyPlus" type="button">+</button></div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">Método de pago</div>
+    <div class="pago-group">
+      <button class="pago-btn" id="btnContado" type="button">💵 Contado<span class="pb-sub">Transf. antes</span></button>
+      <button class="pago-btn active" id="btnContraentrega" type="button">📦 Contraentrega<span class="pb-sub">Pagas al recibir</span></button>
+    </div>
+    <div class="shipping-note">📦 Envío por Interrapidísimo a todo Colombia</div>
+  </div>
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar" id="bottomBar" style="display:none;">
+  <div class="bottom-bar-inner">
+    <div class="bb-summary"><span id="bbCantLabel">Total · 1 unidad</span><b id="bbTotal">$0</b></div>
+    <button class="btn-confirm" id="btnConfirmar">Confirmar pedido →</button>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div class="status-screen" id="successScreen" style="display:none;">
+  <div class="status-icon ok" id="successIcon">✓</div>
+  <div class="status-title" id="successTitle">¡Pedido confirmado!</div>
+  <div class="status-box" id="boxContraentrega" style="display:none;">
+    <h4>📦 Pago contraentrega</h4>
+    <p>Gracias <strong id="successNombreCE"></strong>, tu pedido está siendo alistado 🚀<br><br>En breve recibirás el <strong>código de guía</strong> para rastrear tu envío.<br><br>Recuerda tener el dinero en efectivo listo cuando llegue el mensajero de Interrapidísimo.</p>
+  </div>
+  <div class="status-box" id="boxContado" style="display:none;">
+    <h4>💳 Pago por transferencia</h4>
+    <p>¡Gracias <strong id="successNombreC"></strong> por tu compra! 🎉<br><br>En un instante te enviamos los <strong>medios de pago disponibles</strong> (Nequi, Daviplata, transferencia bancaria).<br><br>Recuerda enviar el comprobante para poder despachar tu pedido.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  const SUPABASE_URL  = 'https://dwkuidvxqegdblablwst.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3a3VpZHZ4cWVnZGJsYWJsd3N0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NzQ5NzcsImV4cCI6MjA5ODA1MDk3N30.6onUCOak6BHdKlCglFJQhJx0VnnjHaB3vsooNR6l8dk';
+  const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  const currency = new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0});
+  const FLETE = 20000;
+  const $=sel=>document.querySelector(sel);
+  function esc(str){const d=document.createElement('div');d.textContent=str==null?'':String(str);return d.innerHTML;}
+  function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);const publicPrice=vendorPrice*(1+(p.margin||0)/100)+(p.shipping||0);return{vendorPrice,publicPrice,gain:vendorPrice-(p.price||0),shipping:p.shipping||0};}
+
+  let product=null, vendorId=null, vendorName=null;
+  let qty=1, ofertaSel='normal', metodoPago='contraentrega';
+
+  const params=new URLSearchParams(window.location.search);
+  const productId=params.get('order');
+  vendorId=params.get('v');
+
+  async function init(){
+    if(!productId){showError();return;}
+    try{
+      const{data,error}=await db.from('products').select('*').eq('id',productId).single();
+      if(error||!data){showError();return;}
+      product=data;
+      if(vendorId){
+        try{const{data:vData}=await db.from('vendors').select('name').eq('id',vendorId).single();if(vData)vendorName=vData.name;}catch(e){}
+      }
+      $('#appLoading').style.display='none';
+      $('#formScreen').style.display='block';
+      $('#bottomBar').style.display='block';
+      renderProduct();
+      updateSummary();
+    }catch(err){showError();}
+  }
+  function showError(){$('#appLoading').style.display='none';$('#errorScreen').style.display='flex';}
+
+  function renderProduct(){
+    const prices=calcPrices(product);
+    $('#productImg').innerHTML=product.image?'<img src="'+product.image+'">':'<div class="noimg">🫙</div>';
+    $('#productName').textContent=product.name;
+    $('#ppAmount').textContent=currency.format(prices.publicPrice);
+    $('#ppLabel').textContent='Precio'+(prices.shipping>0?' (envío incluido)':'');
+
+    const hayOfertas=product.oferta2_activa||product.oferta3_activa;
+    $('#ofertaPicker').style.display=hayOfertas?'block':'none';
+    if(hayOfertas){
+      const box=$('#ofertaBtns');box.innerHTML='';
+      function mk(label,val,precio){
+        const btn=document.createElement('button');
+        btn.type='button';btn.className='oferta-btn'+(val==='normal'?' active':'');
+        btn.innerHTML='<span class="ob-label">'+label+'</span><span class="ob-price">'+currency.format(precio)+'</span>';
+        btn.addEventListener('click',()=>{
+          ofertaSel=val;
+          box.querySelectorAll('.oferta-btn').forEach(b=>b.classList.remove('active'));
+          btn.classList.add('active');
+          $('#ppAmount').textContent=currency.format(precio);
+          updateSummary();
+        });
+        box.appendChild(btn);
+      }
+      mk('1 unidad','normal',prices.publicPrice);
+      if(product.oferta2_activa)mk('Oferta x2 (2 unidades)','oferta2',product.oferta2_precio||0);
+      if(product.oferta3_activa)mk('Oferta x3 (3 unidades)','oferta3',product.oferta3_precio||0);
+    }
+  }
+
+  $('#qtyMinus').addEventListener('click',()=>{if(qty>1){qty--;$('#qtyDisplay').textContent=qty;updateSummary();}});
+  $('#qtyPlus').addEventListener('click',()=>{const max=product?(product.stock||99):99;if(qty<max){qty++;$('#qtyDisplay').textContent=qty;updateSummary();}});
+  $('#btnContado').addEventListener('click',()=>{metodoPago='contado';$('#btnContado').classList.add('active');$('#btnContraentrega').classList.remove('active');});
+  $('#btnContraentrega').addEventListener('click',()=>{metodoPago='contraentrega';$('#btnContraentrega').classList.add('active');$('#btnContado').classList.remove('active');});
+
+  function unitPrice(){
+    const prices=calcPrices(product);
+    if(ofertaSel==='oferta2')return product.oferta2_precio||0;
+    if(ofertaSel==='oferta3')return product.oferta3_precio||0;
+    return prices.publicPrice;
+  }
+  function updateSummary(){
+    if(!product)return;
+    const precioUnit=unitPrice();
+    const subtotal=precioUnit*qty;
+    const flete=product.shipping>0?0:FLETE;
+    const total=subtotal+flete;
+    const cantLabel=ofertaSel==='normal'?(qty+' unidad'+(qty>1?'es':'')):('paquete x'+(ofertaSel==='oferta2'?2:3)+' · '+qty);
+    $('#bbCantLabel').textContent='Total · '+cantLabel;
+    $('#bbTotal').textContent=currency.format(total);
+  }
+
+  $('#btnConfirmar').addEventListener('click',async()=>{
+    if(!product)return;
+    const nombre=$('#fNombre').value.trim(),telefono=$('#fTelefono').value.trim(),correo=$('#fCorreo').value.trim();
+    const ciudad=$('#fCiudad').value.trim(),direccion=$('#fDireccion').value.trim(),nota=$('#fNota').value.trim();
+    let ok=true;
+    function chk(val,id,errId){const i=$('#'+id),e=$('#'+errId);if(!val){i.classList.add('ferr');e.classList.add('vis');ok=false;}else{i.classList.remove('ferr');e.classList.remove('vis');}}
+    chk(nombre,'fNombre','eNombre');chk(telefono,'fTelefono','eTelefono');
+    const emailOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo);
+    $('#fCorreo').classList.toggle('ferr',!emailOk);$('#eCorreo').classList.toggle('vis',!emailOk);if(!emailOk)ok=false;
+    chk(ciudad,'fCiudad','eCiudad');chk(direccion,'fDireccion','eDireccion');
+    if(!ok){const first=document.querySelector('.ferr');if(first)first.scrollIntoView({behavior:'smooth',block:'center'});return;}
+
+    const precioUnit=unitPrice();
+    const prices=calcPrices(product);
+    let cantReal=qty;
+    if(ofertaSel==='oferta2')cantReal=qty*2;else if(ofertaSel==='oferta3')cantReal=qty*3;
+    const subtotal=precioUnit*qty;
+    const flete=product.shipping>0?0:FLETE;
+    const total=subtotal+flete;
+
+    const btn=$('#btnConfirmar');btn.disabled=true;btn.textContent='Enviando pedido…';
+    try{
+      const{error}=await db.from('pedidos').insert({
+        product_id:product.id,product_name:product.name,vendor_id:vendorId||null,vendor_name:vendorName||null,
+        nombre,telefono,correo,ciudad,direccion,nota,
+        cantidad:cantReal,precio_unitario:precioUnit,precio_publico:precioUnit,precio_vendedor:prices.vendorPrice,
+        ganancia_vendedor:(precioUnit-prices.vendorPrice)*cantReal,
+        flete,total,metodo_pago:metodoPago,estado:'nuevo',tipo_pedido:'inmediata',tipo_oferta:ofertaSel||'normal'
+      });
+      if(error)throw error;
+      $('#formScreen').style.display='none';$('#bottomBar').style.display='none';
+      $('#successScreen').style.display='flex';
+      if(metodoPago==='contraentrega'){$('#boxContraentrega').style.display='block';$('#successNombreCE').textContent=nombre;}
+      else{$('#boxContado').style.display='block';$('#successNombreC').textContent=nombre;$('#successTitle').textContent='¡Gracias por tu compra!';$('#successIcon').textContent='💜';}
+    }catch(err){
+      btn.disabled=false;btn.textContent='Confirmar pedido →';
+      alert('No se pudo enviar el pedido. Intenta de nuevo.');
+    }
+  });
+
+  init();
+})();
+</script>
+</body>
+</html>
