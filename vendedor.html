@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Saravi · Panel de vendedor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  --bg:#F2F2F7; --surface:#FFFFFF; --surface-2:#FAFAFA;
+  --ink:#1C1C1E; --ink-2:#3A3A3C; --muted:#8A8A8E;
+  --line:rgba(60,60,67,.13); --line-strong:rgba(60,60,67,.22);
+  --accent:#BF5AF2; --accent-ink:#7A2EB8; --accent-tint:rgba(191,90,242,.10);
+  --blue:#0A84FF; --blue-tint:rgba(10,132,255,.10);
+  --green:#30D158; --green-tint:rgba(48,209,88,.10);
+  --amber:#FF9F0A; --amber-tint:rgba(255,159,10,.12);
+  --red:#FF453A; --red-tint:rgba(255,69,58,.10);
+  --radius-sm:10px; --radius:16px; --radius-lg:22px;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.04),0 1px 1px rgba(0,0,0,.03);
+  --shadow:0 6px 20px rgba(0,0,0,.07),0 1px 4px rgba(0,0,0,.04);
+  --shadow-lg:0 20px 50px rgba(0,0,0,.16),0 6px 16px rgba(0,0,0,.06);
+  --ease:.22s cubic-bezier(.4,0,.2,1);
+  --safe-b:env(safe-area-inset-bottom);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{-webkit-text-size-adjust:100%;}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:3px;}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+button{font:inherit;}
+
+/* LOADING */
+#appLoading{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+.mark{width:52px;height:52px;background:linear-gradient(135deg,#BF5AF2,#8B3DD8);border-radius:15px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(191,90,242,.35);}
+.spinner{width:20px;height:20px;border:2.5px solid rgba(191,90,242,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+#appLoading p{font-size:13px;color:var(--muted);}
+
+/* GATE */
+.gate{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.gate-card{width:100%;max-width:380px;}
+.gate-logo{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:32px;}
+.gate-logo .wordmark{font-size:24px;font-weight:800;letter-spacing:-.5px;}
+.gate-title{font-size:26px;font-weight:800;letter-spacing:-.6px;margin-bottom:6px;text-align:center;}
+.gate-sub{color:var(--muted);font-size:14px;margin-bottom:28px;text-align:center;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+.field input{width:100%;padding:14px 16px;background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:16px;color:var(--ink);transition:border-color var(--ease),box-shadow var(--ease);}
+.field input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-tint);}
+.error-msg{font-size:12.5px;color:var(--red);margin-top:6px;display:none;}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-family:inherit;font-size:14.5px;font-weight:600;border:none;border-radius:var(--radius-sm);padding:13px 20px;cursor:pointer;transition:opacity var(--ease),transform var(--ease);white-space:nowrap;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:0 4px 14px rgba(191,90,242,.35);}
+.btn-primary:hover{opacity:.9;}
+.btn-ghost{background:rgba(0,0,0,.05);color:var(--ink-2);}
+.btn-ghost:hover{background:rgba(0,0,0,.08);}
+.btn-full{width:100%;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:50px;}
+.badge-cat{background:var(--accent-tint);color:var(--accent-ink);}
+.badge-ok{background:var(--green-tint);color:#1a9e4a;}
+.badge-low{background:var(--amber-tint);color:#B36B00;}
+.badge-out{background:var(--red-tint);color:var(--red);}
+
+.toast{position:fixed;bottom:calc(88px + var(--safe-b));left:50%;transform:translateX(-50%) translateY(16px);background:rgba(28,28,30,.92);backdrop-filter:blur(20px);color:#fff;padding:12px 22px;border-radius:50px;font-size:13.5px;font-weight:500;opacity:0;pointer-events:none;transition:all .25s cubic-bezier(.4,0,.2,1);z-index:9998;max-width:90vw;text-align:center;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+@media(min-width:601px){.toast{bottom:28px;}}
+
+.empty{text-align:center;padding:56px 20px;color:var(--muted);}
+.empty-icon{font-size:44px;margin-bottom:12px;}
+
+/* SHELL */
+#vendorScreen{display:flex;flex-direction:column;min-height:100vh;}
+.vendor-shell{display:flex;flex:1;min-height:0;}
+
+.vendor-nav{position:sticky;top:0;z-index:100;background:rgba(242,242,247,.85);backdrop-filter:blur(20px) saturate(1.6);border-bottom:1px solid var(--line);padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.nav-logo{display:flex;align-items:center;gap:7px;font-size:16px;font-weight:800;letter-spacing:-.3px;}
+.nav-logo .dot{width:9px;height:9px;background:var(--accent);border-radius:50%;box-shadow:0 0 0 3px var(--accent-tint);}
+
+.wallet-chip{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(48,209,88,.14),rgba(48,209,88,.06));border:1.5px solid rgba(48,209,88,.26);border-radius:50px;padding:6px 14px 6px 8px;user-select:none;}
+.wallet-icon{width:24px;height:24px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.wallet-info{display:flex;flex-direction:column;line-height:1.15;}
+.wallet-label{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#1a9e4a;opacity:.85;}
+.wallet-amount{font-size:13px;font-weight:800;color:#1a9e4a;font-variant-numeric:tabular-nums;letter-spacing:-.2px;}
+.wallet-loading{font-size:11px;color:var(--muted);animation:pulse 1s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+
+/* SIDEBAR (desktop) */
+.vsidebar{width:224px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:20px 0 0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;}
+.vsidebar-vendor{padding:6px 20px 16px;border-bottom:1px solid var(--line);margin-bottom:12px;}
+.vsv-label{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:2px;font-weight:600;}
+.vsv-name{font-size:15px;font-weight:800;letter-spacing:-.2px;}
+.vsidenav{list-style:none;padding:0 10px;flex:1;}
+.vsidenav li button{display:flex;align-items:center;gap:10px;width:100%;padding:11px 12px;border-radius:12px;font-size:14px;font-weight:600;color:var(--ink-2);border:none;background:none;cursor:pointer;text-align:left;transition:background var(--ease),color var(--ease);}
+.vsidenav li button:hover{background:var(--accent-tint);color:var(--accent-ink);}
+.vsidenav li button.vsnav-active{background:var(--accent-tint);color:var(--accent-ink);}
+.vsnav-icon{font-size:17px;width:22px;text-align:center;flex-shrink:0;}
+.vsidebar-bottom{padding:14px 10px;border-top:1px solid var(--line);}
+.vsidebar-bottom button{display:flex;align-items:center;gap:8px;width:100%;padding:11px 12px;border-radius:12px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:background var(--ease);}
+.vsidebar-bottom button:hover{background:rgba(255,69,58,.08);color:var(--red);}
+
+.vendor-main{flex:1;min-width:0;overflow-y:auto;}
+.vpanel{display:none;padding:20px 20px calc(100px + var(--safe-b));max-width:820px;}
+.vpanel.vpanel-active{display:block;animation:fadeUp .25s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.vpanel-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.vpanel-title{font-size:22px;font-weight:800;letter-spacing:-.5px;}
+.vpanel-eyebrow{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;font-weight:600;}
+
+/* INICIO / ANUNCIOS */
+.anuncio-card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px 18px;margin-bottom:12px;border-left:4px solid var(--accent);animation:fadeUp .3s ease both;}
+.anuncio-card.tipo-alerta{border-left-color:var(--red);}
+.anuncio-card.tipo-info{border-left-color:var(--blue);}
+.anuncio-card.tipo-logro{border-left-color:var(--green);}
+.anuncio-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.anuncio-emoji{font-size:20px;}
+.anuncio-titulo{font-size:14.5px;font-weight:700;}
+.anuncio-fecha{font-size:11px;color:var(--muted);margin-left:auto;}
+.anuncio-texto{font-size:13.5px;color:var(--ink-2);line-height:1.6;}
+.no-anuncios{text-align:center;padding:48px 20px;color:var(--muted);}
+.na-icon{font-size:38px;margin-bottom:10px;}
+
+.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px;}
+.qa-card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px;text-align:left;border:none;cursor:pointer;transition:transform var(--ease),box-shadow var(--ease);}
+.qa-card:active{transform:scale(.97);}
+.qa-icon{font-size:22px;margin-bottom:8px;}
+.qa-title{font-size:13.5px;font-weight:700;margin-bottom:2px;}
+.qa-sub{font-size:11.5px;color:var(--muted);}
+
+/* CATALOGO */
+.search-wrap{position:relative;flex:1;}
+.search-wrap svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;}
+.search-wrap input{width:100%;padding:12px 14px 12px 40px;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:15px;transition:border-color var(--ease),box-shadow var(--ease);box-shadow:var(--shadow-sm);}
+.search-wrap input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-tint);}
+.v-categories{display:flex;gap:8px;overflow-x:auto;padding:14px 0 4px;margin-bottom:6px;-webkit-overflow-scrolling:touch;}
+.v-categories::-webkit-scrollbar{display:none;}
+.chip{flex-shrink:0;padding:8px 16px;border-radius:50px;background:var(--surface);border:1.5px solid var(--line);font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:all var(--ease);white-space:nowrap;}
+.chip:hover{border-color:var(--accent);color:var(--accent);}
+.chip.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 3px 10px rgba(191,90,242,.32);}
+.vgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:14px;}
+@media(min-width:520px){.vgrid{grid-template-columns:repeat(3,1fr);}}
+@media(min-width:860px){.vgrid{grid-template-columns:repeat(4,1fr);}}
+.vcard{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;transition:transform var(--ease),box-shadow var(--ease);animation:fadeUp .3s ease both;cursor:pointer;}
+.vcard:active{transform:scale(.98);}
+.vcard-img{width:100%;aspect-ratio:1/.95;background:var(--surface-2);overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.vcard-img img{width:100%;height:100%;object-fit:cover;}
+.vcard-img .noimg{font-size:28px;opacity:.2;}
+.vcard-body{padding:10px 12px 12px;}
+.vcard-badges{display:flex;gap:5px;margin-bottom:7px;flex-wrap:wrap;}
+.vcard-name{font-size:13px;font-weight:700;line-height:1.3;margin-bottom:6px;min-height:34px;letter-spacing:-.1px;}
+.vcard-id-chip{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;color:var(--accent-ink);background:var(--accent-tint);border:1px dashed rgba(191,90,242,.35);border-radius:6px;padding:3px 8px;cursor:pointer;font-family:ui-monospace,'SF Mono',monospace;user-select:none;margin-bottom:8px;}
+.vcard-id-chip.copied{background:var(--green-tint);border-color:rgba(48,209,88,.4);color:#1a9e4a;}
+.vcard-price{background:var(--accent-tint);border-radius:9px;padding:6px 10px;text-align:center;margin-bottom:9px;}
+.vcard-price .vp-label{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:1px;font-weight:600;}
+.vcard-price .vp-amount{font-size:16px;font-weight:800;color:var(--accent-ink);letter-spacing:-.3px;font-variant-numeric:tabular-nums;}
+.vcard-money{display:flex;gap:6px;margin-bottom:9px;}
+.vm-row{flex:1;border-radius:8px;padding:6px 8px;display:flex;flex-direction:column;gap:2px;}
+.vm-row span{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;font-weight:700;}
+.vm-row b{font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;}
+.vm-pay{background:rgba(100,110,130,.08);}
+.vm-pay span{color:#5A6270;}
+.vm-pay b{color:#3A3A3C;}
+.vm-earn{background:var(--green-tint);}
+.vm-earn span{color:#1a9e4a;}
+.vm-earn b{color:#1a9e4a;}
+.oferta-mini{margin-bottom:6px;background:var(--blue-tint);border-radius:8px;padding:6px 10px;display:flex;justify-content:space-between;font-size:10.5px;}
+.oferta-mini span{color:var(--blue);font-weight:700;}
+.oferta-mini b{color:var(--blue);font-variant-numeric:tabular-nums;}
+.vcard-tap-hint{font-size:10.5px;color:var(--muted);text-align:center;margin-top:6px;opacity:.7;}
+
+/* BANCO */
+.banco-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+.banco-table-wrap{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;}
+.banco-table{width:100%;border-collapse:collapse;}
+.banco-table th{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;padding:12px 14px;text-align:left;border-bottom:1.5px solid var(--line);background:var(--surface-2);}
+.banco-table td{padding:13px 14px;font-size:13px;border-bottom:1px solid var(--line);vertical-align:middle;}
+.banco-table tr:last-child td{border-bottom:none;}
+.banco-nombre{font-weight:700;color:var(--accent-ink);font-size:13px;}
+.banco-num-chip{display:inline-block;background:var(--green-tint);border:1px solid rgba(48,209,88,.3);color:#1a9e4a;font-family:ui-monospace,'SF Mono',monospace;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;}
+.banco-actions{display:flex;gap:6px;align-items:center;}
+.banco-icon-btn{width:32px;height:32px;border-radius:9px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:background var(--ease);}
+.banco-icon-btn.edit{background:var(--blue-tint);color:var(--blue);}
+.banco-icon-btn.del{background:var(--red-tint);color:var(--red);}
+.banco-empty{text-align:center;padding:52px 20px;color:var(--muted);}
+.banco-empty .be-icon{font-size:42px;margin-bottom:12px;}
+.banco-empty strong{display:block;font-size:15px;font-weight:700;color:var(--ink-2);margin-bottom:6px;}
+
+/* MODAL BANCARIO */
+.modal-overlay{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;padding:0;}
+@media(min-width:601px){.modal-overlay{align-items:center;padding:20px;}}
+.modal-box{background:var(--surface);border-radius:var(--radius-lg) var(--radius-lg) 0 0;box-shadow:var(--shadow-lg);width:100%;max-width:460px;max-height:92vh;overflow-y:auto;animation:slideUpModal .3s cubic-bezier(.16,1,.3,1);}
+@media(min-width:601px){.modal-box{border-radius:var(--radius-lg);animation:popIn .28s cubic-bezier(.16,1,.3,1);}}
+@keyframes slideUpModal{from{transform:translateY(100%);}to{transform:translateY(0);}}
+@keyframes popIn{from{opacity:0;transform:scale(.94);}to{opacity:1;transform:scale(1);}}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:20px 22px 0;}
+.modal-head h3{font-size:17px;font-weight:800;letter-spacing:-.3px;}
+.modal-close{background:rgba(0,0,0,.06);border:none;border-radius:50%;width:30px;height:30px;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink-2);flex-shrink:0;}
+.modal-body{padding:18px 22px 8px;}
+.modal-foot{padding:12px 22px 22px;display:flex;gap:10px;}
+.modal-foot .btn{flex:1;}
+.mfield{margin-bottom:14px;}
+.mfield label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+.mfield label .req{color:var(--red);}
+.mfield select,.mfield input{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:15px;color:var(--ink);background:var(--surface-2);transition:border-color var(--ease),box-shadow var(--ease);}
+.mfield select:focus,.mfield input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-tint);}
+.mfield select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A8A8E' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:34px;}
+.mfield-err{font-size:11.5px;color:var(--red);margin-top:4px;display:none;}
+.mfield-err.vis{display:block;}
+.mfield input.err,.mfield select.err{border-color:var(--red)!important;}
+.mfield-extra{display:none;}
+.mfield-extra.vis{display:block;}
+
+/* RETIROS */
+.retiro-form-box{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:20px;margin-bottom:18px;}
+.retiro-form-box h3{font-size:14.5px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:1.5px solid var(--line);}
+.retiro-grid{display:grid;grid-template-columns:1fr;gap:14px;}
+@media(min-width:520px){.retiro-grid{grid-template-columns:1fr 1fr;}}
+.retiro-banco-sel{width:100%;padding:13px 14px;background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:15px;color:var(--ink);appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A8A8E' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:34px;cursor:pointer;}
+.retiro-banco-sel:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-tint);}
+.retiro-saldo-chip{display:inline-flex;align-items:center;gap:10px;background:var(--green-tint);border:1.5px solid rgba(48,209,88,.24);border-radius:50px;padding:9px 18px;font-size:15px;font-weight:800;color:#1a9e4a;margin-bottom:20px;font-variant-numeric:tabular-nums;}
+.retiro-saldo-chip .rs-label{font-size:10.5px;font-weight:600;color:#1a9e4a;opacity:.8;text-transform:uppercase;letter-spacing:.05em;}
+.retiro-actions{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:18px;padding-top:16px;border-top:1.5px solid var(--line);}
+.retiro-err{font-size:12px;color:var(--red);margin-top:5px;display:none;}
+.retiro-err.vis{display:block;}
+.input-err{border-color:var(--red)!important;box-shadow:0 0 0 3px rgba(255,69,58,.12)!important;}
+.retiro-hist-box{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;}
+.retiro-hist-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line);}
+.retiro-hist-head h3{font-size:14.5px;font-weight:700;}
+.retiro-row{display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--line);}
+.retiro-row:last-child{border-bottom:none;}
+.retiro-row-icon{width:36px;height:36px;border-radius:50%;background:var(--accent-tint);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.retiro-row-info{flex:1;min-width:0;}
+.retiro-row-banco{font-size:13px;font-weight:700;}
+.retiro-row-fecha{font-size:11px;color:var(--muted);margin-top:1px;}
+.retiro-row-concepto{font-size:11.5px;color:var(--ink-2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.retiro-row-monto{text-align:right;flex-shrink:0;}
+.retiro-row-monto b{display:block;font-size:14px;font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;}
+.retiro-row-estado{display:inline-block;font-size:9.5px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:3px;text-transform:uppercase;letter-spacing:.04em;}
+.re-estado-pendiente{background:var(--amber-tint);color:#B36B00;}
+.re-estado-aprobado{background:var(--green-tint);color:#1a9e4a;}
+.re-estado-rechazado{background:var(--red-tint);color:var(--red);}
+.retiro-empty{text-align:center;padding:40px 20px;color:var(--muted);}
+.retiro-empty .re-icon{font-size:34px;margin-bottom:10px;}
+
+.r-modal-overlay{position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;}
+.r-modal-box{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);width:100%;max-width:400px;animation:popIn .28s cubic-bezier(.16,1,.3,1);}
+.r-modal-icon{text-align:center;padding:28px 24px 0;font-size:44px;}
+.r-modal-body{padding:16px 28px 24px;text-align:center;}
+.r-modal-body h3{font-size:18px;font-weight:800;margin-bottom:8px;letter-spacing:-.3px;}
+.r-modal-body p{font-size:13.5px;color:var(--muted);line-height:1.6;}
+.r-modal-body .rm-amount{font-size:27px;font-weight:800;color:var(--accent-ink);font-variant-numeric:tabular-nums;margin:12px 0 4px;}
+.r-modal-body .rm-banco{font-size:13px;color:var(--ink-2);font-weight:600;margin-bottom:16px;background:var(--surface-2);padding:8px 14px;border-radius:9px;}
+.r-modal-foot{display:flex;gap:10px;padding:0 24px 24px;}
+.r-modal-foot .btn{flex:1;}
+.r-err-box{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);width:100%;max-width:360px;padding:36px 28px;text-align:center;animation:popIn .28s cubic-bezier(.16,1,.3,1);}
+.r-err-icon{font-size:50px;margin-bottom:14px;}
+.r-err-box h3{font-size:18px;font-weight:800;color:var(--red);margin-bottom:8px;}
+.r-err-box p{font-size:13.5px;color:var(--muted);line-height:1.6;margin-bottom:20px;}
+.r-ok-box{background:var(--surface);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);width:100%;max-width:400px;padding:36px 28px;text-align:center;animation:popIn .28s cubic-bezier(.16,1,.3,1);}
+.r-ok-icon{width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#8B3DD8);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:30px;box-shadow:0 0 30px rgba(191,90,242,.35);color:#fff;}
+.r-ok-box h3{font-size:18.5px;font-weight:800;margin-bottom:8px;letter-spacing:-.3px;}
+.r-ok-box p{font-size:13.5px;color:var(--muted);line-height:1.7;margin-bottom:16px;}
+.r-ok-detail{background:var(--surface-2);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:20px;text-align:left;}
+.r-ok-detail .rd-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid var(--line);}
+.r-ok-detail .rd-row:last-child{border-bottom:none;}
+.r-ok-detail .rd-row span{color:var(--muted);}
+.r-ok-detail .rd-row b{color:var(--ink);font-variant-numeric:tabular-nums;}
+
+/* PRODUCT MODAL */
+#productModal{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);overflow-y:auto;}
+.pmodal-inner{max-width:440px;margin:0 auto;background:var(--surface);border-radius:0;box-shadow:var(--shadow-lg);overflow:hidden;min-height:100dvh;}
+@media(min-width:601px){#productModal{padding:24px 16px;}.pmodal-inner{border-radius:var(--radius-lg);min-height:0;margin-top:20px;}}
+
+/* BOTTOM NAV (mobile) */
+.vendor-bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.92);backdrop-filter:blur(24px) saturate(1.8);border-top:1px solid var(--line);z-index:200;padding:6px 4px calc(6px + var(--safe-b));box-shadow:0 -2px 16px rgba(0,0,0,.05);}
+.vendor-bottom-nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;cursor:pointer;font-size:10px;font-weight:600;color:var(--muted);padding:6px 2px;transition:color var(--ease),transform var(--ease);border-radius:12px;}
+.vendor-bottom-nav button:active{transform:scale(.92);}
+.vendor-bottom-nav button .vbn-icon{font-size:21px;transition:transform var(--ease);}
+.vendor-bottom-nav button.vsnav-active{color:var(--accent-ink);}
+.vendor-bottom-nav button.vsnav-active .vbn-icon{transform:translateY(-1px);}
+
+@media(max-width:860px){.vsidebar{display:none;}}
+@media(min-width:861px){.vendor-bottom-nav{display:none;}.vpanel{padding:28px 32px 60px;}}
+@media(max-width:600px){
+  .wallet-amount{font-size:12px;}
+  .wallet-chip{padding:5px 10px 5px 7px;}
+  .banco-table th:nth-child(3),.banco-table td:nth-child(3),
+  .banco-table th:nth-child(5),.banco-table td:nth-child(5){display:none;}
+}
+</style>
+</head>
+<body>
+
+<div id="appLoading">
+  <div class="mark">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/><path d="M8.5 14.5s1.5 2 3.5 2 3.5-2 3.5-2"/><line x1="9" y1="9" x2="9.01" y2="9" stroke-width="3"/><line x1="15" y1="9" x2="15.01" y2="9" stroke-width="3"/></svg>
+  </div>
+  <div class="spinner"></div>
+  <p>Conectando con Saravi…</p>
+</div>
+
+<!-- GATE -->
+<div class="gate" id="gateScreen" style="display:none">
+  <div class="gate-card">
+    <div class="gate-logo">
+      <div class="mark" style="width:44px;height:44px;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/><path d="M8.5 14.5s1.5 2 3.5 2 3.5-2 3.5-2"/><line x1="9" y1="9" x2="9.01" y2="9" stroke-width="3"/><line x1="15" y1="9" x2="15.01" y2="9" stroke-width="3"/></svg>
+      </div>
+      <span class="wordmark">Saravi</span>
+    </div>
+    <h1 class="gate-title">Panel de vendedor</h1>
+    <p class="gate-sub">Ingresa con tu nombre y PIN para ver tu catálogo.</p>
+    <div class="field"><label>Tu nombre</label><input type="text" id="vendorNameInput" placeholder="Ej: María García"></div>
+    <div class="field"><label>PIN de acceso</label><input type="password" id="vendorPinInput" inputmode="numeric" placeholder="••••"><div class="error-msg" id="vendorLoginError">Nombre o PIN incorrecto.</div></div>
+    <button class="btn btn-primary btn-full" id="vendorLoginBtn">Entrar</button>
+  </div>
+</div>
+
+<!-- VENDOR SCREEN -->
+<div id="vendorScreen" style="display:none;flex-direction:column;min-height:100vh;">
+  <nav class="vendor-nav">
+    <div class="nav-logo"><span class="dot"></span> Saravi</div>
+    <div class="wallet-chip" id="walletChip" title="Ganancia acumulada de pedidos entregados">
+      <div class="wallet-icon">💰</div>
+      <div class="wallet-info"><span class="wallet-label">Mis ganancias</span><span class="wallet-amount" id="walletAmount"><span class="wallet-loading">…</span></span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span id="vendorUpdated" style="font-size:11.5px;color:var(--muted);display:none;"></span>
+      <button class="btn btn-ghost" style="padding:8px 10px;" id="vendorRefreshBtn">⟳</button>
+    </div>
+  </nav>
+  <div class="vendor-shell">
+    <aside class="vsidebar">
+      <div class="vsidebar-vendor"><div class="vsv-label">Vendedor</div><div class="vsv-name" id="sidebarVendorName">-</div></div>
+      <ul class="vsidenav">
+        <li><button class="vsnav-active" data-vpanel="inicio"><span class="vsnav-icon">🏠</span> Inicio</button></li>
+        <li><button data-vpanel="catalogo"><span class="vsnav-icon">🛍️</span> Catálogo</button></li>
+        <li><button data-vpanel="banco"><span class="vsnav-icon">🏦</span> Datos bancarios</button></li>
+        <li><button data-vpanel="retiros"><span class="vsnav-icon">💸</span> Retiros de saldo</button></li>
+        <li><button id="navCierreCampana"><span class="vsnav-icon">📊</span> Reporte de campaña</button></li>
+      </ul>
+      <div class="vsidebar-bottom"><button id="vendorLogoutBtn">🚪 Cerrar sesión</button></div>
+    </aside>
+    <main class="vendor-main">
+      <!-- INICIO -->
+      <div class="vpanel vpanel-active" id="vpanel-inicio">
+        <div class="vpanel-topbar"><div><div class="vpanel-eyebrow">Bienvenida</div><div class="vpanel-title" id="vendorGreeting">Hola 👋</div></div></div>
+        <div class="quick-actions">
+          <button class="qa-card" data-vpanel="catalogo"><div class="qa-icon">🛍️</div><div class="qa-title">Ver catálogo</div><div class="qa-sub">Comparte productos</div></button>
+          <button class="qa-card" data-vpanel="retiros"><div class="qa-icon">💸</div><div class="qa-title">Pedir retiro</div><div class="qa-sub">Cobra tu saldo</div></button>
+        </div>
+        <div id="anunciosContainer"><div class="no-anuncios"><div class="na-icon">📢</div><b>Sin anuncios por ahora</b><p style="margin-top:6px;font-size:13px;">Aquí aparecerán los mensajes de tu administrador.</p></div></div>
+      </div>
+      <!-- CATÁLOGO -->
+      <div class="vpanel" id="vpanel-catalogo">
+        <div class="vpanel-topbar"><div class="vpanel-title">Catálogo</div><button class="btn btn-ghost" id="stockToggleBtn">📦 Ocultar agotados</button></div>
+        <div class="search-wrap"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="search" id="vendorSearchInput" placeholder="Buscar producto…"></div>
+        <div class="v-categories" id="vendorCategories"></div>
+        <div class="vgrid" id="vendorGrid"></div>
+        <div class="empty" id="vendorEmptyState" style="display:none"><div class="empty-icon">🔍</div><strong>Sin resultados</strong><p>Prueba con otra categoría.</p></div>
+      </div>
+      <!-- DATOS BANCARIOS -->
+      <div class="vpanel" id="vpanel-banco">
+        <div class="banco-panel-header">
+          <div><div class="vpanel-eyebrow">Mi perfil financiero</div><div class="vpanel-title">Datos bancarios</div></div>
+          <button class="btn btn-primary" id="btnAgregarCuenta"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Agregar cuenta</button>
+        </div>
+        <div class="banco-table-wrap">
+          <div id="bancoLoading" style="text-align:center;padding:40px;color:var(--muted);font-size:13px;"><div class="spinner" style="margin:0 auto 10px;"></div>Cargando cuentas…</div>
+          <div id="bancoTableContainer" style="display:none;">
+            <table class="banco-table" id="bancoTable"><thead><tr><th>País</th><th>Banco</th><th>Número</th><th>Tipo</th><th>Identificación</th><th>Acciones</th></tr></thead><tbody id="bancoTbody"></tbody></table>
+          </div>
+          <div id="bancoEmpty" style="display:none;" class="banco-empty"><div class="be-icon">🏦</div><strong>Sin cuentas registradas</strong><p>Agrega tu primera cuenta bancaria para recibir pagos.</p></div>
+        </div>
+      </div>
+      <!-- RETIROS -->
+      <div class="vpanel" id="vpanel-retiros">
+        <div class="vpanel-topbar"><div><div class="vpanel-eyebrow">Mi cuenta</div><div class="vpanel-title">Retiros de saldo</div></div><button class="btn btn-ghost" id="btnRefreshRetiros">⟳ Actualizar</button></div>
+        <div class="retiro-saldo-chip"><span class="rs-label">Saldo disponible</span><span id="retiroSaldoVal">…</span></div>
+        <div class="retiro-form-box">
+          <h3>💸 Solicitar retiro</h3>
+          <div class="retiro-grid">
+            <div class="field"><label>Monto a retirar</label><input type="number" id="retiroMonto" min="1000" step="1000" placeholder="$0"><div class="retiro-err" id="errRetiroMonto">Ingresa un monto válido</div></div>
+            <div class="field"><label>Banco / Cuenta destino</label><select id="retiroBancoSel" class="retiro-banco-sel"><option value="">Seleccionar cuenta…</option></select><div class="retiro-err" id="errRetiroBanco">Selecciona una cuenta bancaria</div></div>
+          </div>
+          <div class="field" style="margin-top:4px;"><label>Concepto <span style="font-weight:400;text-transform:none;font-size:11px;color:var(--muted);">(opcional)</span></label><input type="text" id="retiroConcepto" placeholder="Ej: Ganancias semana 1…" maxlength="120"></div>
+          <div class="retiro-actions">
+            <button class="btn btn-ghost" id="btnVerHistorialRetiros">📋 Historial</button>
+            <button class="btn btn-primary" id="btnProcesarRetiro">Procesar retiro →</button>
+          </div>
+        </div>
+        <div class="retiro-hist-box" id="retiroHistBox" style="display:none;">
+          <div class="retiro-hist-head"><h3>📋 Historial de retiros</h3><button class="btn btn-ghost" id="btnCerrarHistorial">✕</button></div>
+          <div id="retiroHistList"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <nav class="vendor-bottom-nav">
+    <button class="vsnav-active" data-vpanel="inicio"><span class="vbn-icon">🏠</span> Inicio</button>
+    <button data-vpanel="catalogo"><span class="vbn-icon">🛍️</span> Catálogo</button>
+    <button data-vpanel="banco"><span class="vbn-icon">🏦</span> Banco</button>
+    <button data-vpanel="retiros"><span class="vbn-icon">💸</span> Retiros</button>
+    <button id="vendorLogoutBtnMobile"><span class="vbn-icon">🚪</span> Salir</button>
+  </nav>
+</div>
+
+<!-- MODAL BANCARIO -->
+<div id="bancoModal" class="modal-overlay" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-head"><h3 id="bancoModalTitle">Agregar cuenta bancaria</h3><button class="modal-close" id="bancoModalClose">×</button></div>
+    <div class="modal-body">
+      <div class="mfield"><label>País <span class="req">*</span></label><select id="bPais"><option value="">Seleccionar país</option><option value="COLOMBIA">🇨🇴 Colombia</option><option value="BRASIL">🇧🇷 Brasil</option></select><div class="mfield-err" id="errBPais">Selecciona un país</div></div>
+      <div class="mfield"><label>Banco <span class="req">*</span></label><select id="bBanco"><option value="">Seleccionar banco</option></select><div class="mfield-err" id="errBBanco">Selecciona un banco</div></div>
+      <div class="mfield mfield-extra" id="extraFields">
+        <div class="mfield"><label>Tipo de identificación <span class="req">*</span></label><select id="bTipoId"><option value="">Tipo de identificación</option><option value="CC">CC – Cédula de ciudadanía</option><option value="CE">CE – Cédula de extranjería</option><option value="NIT">NIT</option><option value="PP">PP – Pasaporte</option><option value="TI">TI – Tarjeta de identidad</option></select><div class="mfield-err" id="errBTipoId">Selecciona el tipo de identificación</div></div>
+        <div class="mfield"><label>Número de identificación <span class="req">*</span></label><input type="text" id="bNumId" placeholder="Ej: 1109184024"><div class="mfield-err" id="errBNumId">Ingresa tu número de identificación</div></div>
+        <div class="mfield"><label>Tipo de cuenta <span class="req">*</span></label><select id="bTipoCuenta"><option value="">Tipo de cuenta</option><option value="AHORROS">Ahorros</option><option value="CORRIENTE">Corriente</option><option value="DIGITAL">Digital / Billetera</option></select><div class="mfield-err" id="errBTipoCuenta">Selecciona el tipo de cuenta</div></div>
+        <div class="mfield"><label>Número de cuenta / Celular <span class="req">*</span></label><input type="text" id="bNumCuenta" placeholder="Ej: 3001234567"><div class="mfield-err" id="errBNumCuenta">Ingresa el número de cuenta</div></div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-primary" id="bancoModalSave">Aceptar</button><button class="btn btn-ghost" id="bancoModalCancel">Cancelar</button></div>
+  </div>
+</div>
+
+<!-- MODALES RETIRO -->
+<div id="retiroConfirmModal" class="r-modal-overlay" style="display:none;">
+  <div class="r-modal-box"><div class="r-modal-icon">💸</div><div class="r-modal-body"><h3>Confirmar retiro</h3><div class="rm-amount" id="retiroConfirmMonto"></div><div class="rm-banco" id="retiroConfirmBanco"></div><p>El administrador revisará tu solicitud y recibirás una notificación por <strong>WhatsApp y correo</strong> cuando sea procesada.</p></div><div class="r-modal-foot"><button class="btn btn-primary" id="retiroConfirmSi">Sí, solicitar</button><button class="btn btn-ghost" id="retiroConfirmNo">Cancelar</button></div></div>
+</div>
+<div id="retiroErrorModal" class="r-modal-overlay" style="display:none;">
+  <div class="r-err-box"><div class="r-err-icon">😔</div><h3>Saldo insuficiente</h3><p id="retiroErrorMsg">Tu saldo disponible no es suficiente para este retiro.</p><button class="btn btn-primary btn-full" id="retiroErrorClose">Entendido</button></div>
+</div>
+<div id="retiroSuccessModal" class="r-modal-overlay" style="display:none;">
+  <div class="r-ok-box"><div class="r-ok-icon">✓</div><h3>¡Retiro en proceso!</h3><p>Tu solicitud fue registrada. El administrador la aprobará y recibirás confirmación por <strong>WhatsApp y correo electrónico</strong>.</p><div class="r-ok-detail"><div class="rd-row"><span>Monto solicitado</span><b id="rsDetalleMonto"></b></div><div class="rd-row"><span>Cuenta destino</span><b id="rsDetalleBanco"></b></div><div class="rd-row"><span>Estado</span><b style="color:var(--amber);">⏳ Pendiente</b></div></div><button class="btn btn-primary btn-full" id="retiroSuccessClose">Entendido</button></div>
+</div>
+
+<!-- PRODUCT DETAIL MODAL -->
+<div id="productModal">
+  <div class="pmodal-inner">
+    <div id="modalImg" style="width:100%;background:var(--surface-2);max-height:420px;overflow:hidden;display:flex;align-items:center;justify-content:center;"></div>
+    <div style="padding:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+        <div id="modalBadges" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+        <button id="modalCloseBtn" style="background:rgba(0,0,0,.06);border:none;border-radius:50%;width:30px;height:30px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:8px;">×</button>
+      </div>
+      <div id="modalName" style="font-size:19px;font-weight:800;letter-spacing:-.4px;margin:10px 0 4px;"></div>
+      <div style="background:var(--accent-tint);border-radius:12px;padding:12px 14px;text-align:center;margin-bottom:12px;">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:2px;font-weight:600;">Precio al público</div>
+        <div id="modalPublicPrice" style="font-size:25px;font-weight:800;color:var(--accent-ink);letter-spacing:-.5px;font-variant-numeric:tabular-nums;"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <div style="flex:1;background:rgba(100,110,130,.08);border-radius:9px;padding:10px 12px;"><div style="font-size:10px;text-transform:uppercase;font-weight:700;color:#5A6270;margin-bottom:3px;">Tú pagas</div><div id="modalVendorPrice" style="font-size:15px;font-weight:700;color:#3A3A3C;font-variant-numeric:tabular-nums;"></div></div>
+        <div style="flex:1;background:var(--green-tint);border-radius:9px;padding:10px 12px;"><div style="font-size:10px;text-transform:uppercase;font-weight:700;color:#1a9e4a;margin-bottom:3px;">Tu ganancia</div><div id="modalEarn" style="font-size:15px;font-weight:700;color:#1a9e4a;font-variant-numeric:tabular-nums;"></div><div id="modalMargin" style="font-size:13px;font-weight:800;color:#1a9e4a;"></div></div>
+      </div>
+      <div id="modalOfertasBlock"></div>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;">Copy de venta</div>
+      <div id="modalCopy" style="background:var(--accent-tint);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:12px 14px;font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word;margin-bottom:16px;"></div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button id="modalShareBtn" class="btn btn-full" style="background:#25D366;color:#fff;box-shadow:0 4px 14px rgba(37,211,102,.32);font-size:15px;padding:14px;">📲 Compartir creativo + copy</button>
+        <button id="modalSendOrderBtn" class="btn btn-full" style="background:#25D366;color:#fff;font-size:14px;padding:12px;">🚀 Link Pedido Entrega Inmediata</button>
+        <button id="modalSendCampanaBtn" class="btn btn-primary btn-full" style="font-size:14px;padding:12px;">📅 Link Pedido Cierre de Campaña</button>
+        <button id="modalCopyBtn" class="btn btn-ghost btn-full">📋 Copiar solo el copy</button>
+      </div>
+      <div id="orderLinkBox" style="display:none;margin-top:12px;background:var(--green-tint);border:1px solid rgba(37,211,102,.25);border-radius:12px;padding:12px 14px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#1a9e4a;margin-bottom:6px;">🚀 Link · Entrega Inmediata</div>
+        <div id="orderLinkText" style="font-size:12px;color:var(--ink-2);word-break:break-all;font-family:ui-monospace,'SF Mono',monospace;margin-bottom:8px;"></div>
+        <div style="display:flex;gap:6px;"><button id="copyLinkBtn" class="btn btn-ghost" style="flex:1;font-size:12.5px;">📋 Copiar link</button><button id="sendViaWaBtn" class="btn" style="flex:1;background:#25D366;color:#fff;font-size:12.5px;">💬 Enviar por WhatsApp</button></div>
+      </div>
+      <div id="campanaLinkBox" style="display:none;margin-top:12px;background:var(--accent-tint);border:1px solid rgba(191,90,242,.25);border-radius:12px;padding:12px 14px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--accent-ink);margin-bottom:6px;">📅 Link · Cierre de Campaña</div>
+        <div id="campanaLinkText" style="font-size:12px;color:var(--ink-2);word-break:break-all;font-family:ui-monospace,'SF Mono',monospace;margin-bottom:8px;"></div>
+        <div style="display:flex;gap:6px;"><button id="copyCampanaLinkBtn" class="btn btn-ghost" style="flex:1;font-size:12.5px;">📋 Copiar link</button><button id="sendCampanaViaWaBtn" class="btn btn-primary" style="flex:1;font-size:12.5px;">💬 Enviar por WhatsApp</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  const SUPABASE_URL  = 'https://dwkuidvxqegdblablwst.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3a3VpZHZ4cWVnZGJsYWJsd3N0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NzQ5NzcsImV4cCI6MjA5ODA1MDk3N30.6onUCOak6BHdKlCglFJQhJx0VnnjHaB3vsooNR6l8dk';
+  const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  const currency = new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0});
+  const $=sel=>document.querySelector(sel);
+  function esc(str){const d=document.createElement('div');d.textContent=str==null?'':String(str);return d.innerHTML;}
+  function showToast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2800);}
+  function calcPrices(p){const vendorPrice=(p.price||0)*(1+(p.commission||0)/100);const publicPrice=vendorPrice*(1+(p.margin||0)/100)+(p.shipping||0);return{vendorPrice,publicPrice,gain:vendorPrice-(p.price||0),shipping:p.shipping||0};}
+  function setLoading(show){$('#appLoading').style.display=show?'flex':'none';}
+  function maskNum(n){const s=String(n||'');return s.length<=4?s:'*****'+s.slice(-4);}
+
+  const BANCOS_COLOMBIA = ['AV VILLAS','BANAGRARIO','BANCAMíA S.A.','BANCO CAJA SOCIAL','BANCO CORPBANCA','BANCO CREDIFINANCIERA','BANCO DE BOGOTá','BANCO DE LA REPúBLICA','BANCO DE OCCIDENTE','BANCO FALABELLA','BANCO GNB SUDAMERIS','BANCO ITAU','BANCOLDEX','BANCOLOMBIA','BANCO MULTIBANK','BANCO MUNDO MUJER','BANCOOMEVA','BANCO PICHINCHA','BANCO POPULAR','BANCO SANTANDER','BANCO SERFINANZAS','BANCO W S.A.','BBVA COLOMBIA','BOLD','Bre-B','CITIBANK','COBRE','COINK S.A.','COLPATRIA','COOPCENTRAL','CORFICOLOMBIANA','CREDIBANCO','CREDIFAMILIA','CREZCAMOS','DAVIPLATA','DAVIVIENDA','Dropipay','FINANCIERA DE DESARROLLO NACIONAL S.A','FINANCIERA JURISCOOP C.F.','FINANDINA','FONDO NACIONAL DE GARANTíAS','FONDO NACIONAL DEL AHORRO','Global 66','GRUPO BOLíVAR S.A.','GRUPO DE INVERSIONES SURAMERICANA S.A.','INTERNACIONAL','IRIS','Lulo Bank','MOVII S.A.','NEQUI','NUBANK','Payoneer','Paypal','RAPPIPAY','SCOTIABANK','TECNIPAGOS','TUYA','USDT(RED=TRC-20)'];
+  const BANCOS_BRASIL = ['Nubank','Itaú','Bradesco','Caixa Econômica Federal','Banco do Brasil','Santander Brasil','BTG Pactual','PicPay','Mercado Pago'];
+
+  let products=[], vendors=[], anuncios=[], cuentasBancarias=[], retiros=[];
+  let currentVendor=null, vendorCategory='Todas', vendorSearchTerm='';
+  let vendorRefreshTimer=null, hideOutOfStock=false, modalProduct=null;
+  let editingCuentaId=null, currentWalletBalance=0, pendingRetiroData=null;
+
+  async function init(){
+    try{const{data}=await db.from('vendors').select('*');vendors=data||[];}catch(e){console.error(e);}
+    setLoading(false);$('#gateScreen').style.display='flex';
+  }
+  init();
+
+  $('#vendorLoginBtn').addEventListener('click',()=>{
+    const name=$('#vendorNameInput').value.trim(),pin=$('#vendorPinInput').value.trim();
+    const match=vendors.find(v=>v.name.toLowerCase()===name.toLowerCase()&&v.pin===pin);
+    if(match&&name){currentVendor=match;enterVendor();}else{$('#vendorLoginError').style.display='block';}
+  });
+  $('#vendorPinInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('#vendorLoginBtn').click();});
+  $('#vendorPinInput').addEventListener('input',()=>{$('#vendorLoginError').style.display='none';});
+
+  async function enterVendor(){
+    $('#gateScreen').style.display='none';$('#vendorScreen').style.display='flex';
+    $('#sidebarVendorName').textContent=currentVendor.name;
+    $('#vendorGreeting').textContent='Hola, '+currentVendor.name+' 👋';
+    setLoading(true);
+    await Promise.all([loadProducts(),loadAnuncios(),loadVendorWallet(),loadCuentasBancarias()]);
+    setLoading(false);
+    renderVendorAnuncios();switchVendorPanel('inicio');
+    vendorCategory='Todas';vendorSearchTerm='';$('#vendorSearchInput').value='';
+    renderVendorCategories();renderVendorGrid();startVendorAutoRefresh();
+    populateRetiroBancoSel();
+  }
+  function showGate(){stopVendorAutoRefresh();currentVendor=null;$('#vendorScreen').style.display='none';$('#gateScreen').style.display='flex';$('#vendorNameInput').value='';$('#vendorPinInput').value='';$('#vendorLoginError').style.display='none';$('#walletAmount').innerHTML='<span class="wallet-loading">…</span>';}
+  $('#vendorLogoutBtn').addEventListener('click',showGate);
+  const mobileLogout=$('#vendorLogoutBtnMobile');if(mobileLogout)mobileLogout.addEventListener('click',showGate);
+  $('#navCierreCampana').addEventListener('click',()=>{window.open('cierre-campana.html','_blank');});
+
+  // ── DATA ──
+  async function loadProducts(){const{data,error}=await db.from('products').select('*').order('created_at',{ascending:false});if(error){console.error('products:',error);return;}products=data||[];}
+  async function loadAnuncios(){const{data,error}=await db.from('anuncios').select('*').order('created_at',{ascending:false});if(error){console.error('anuncios:',error);return;}anuncios=data||[];}
+  async function loadCuentasBancarias(){
+    if(!currentVendor)return;
+    $('#bancoLoading').style.display='block';$('#bancoTableContainer').style.display='none';$('#bancoEmpty').style.display='none';
+    try{const{data,error}=await db.from('cuentas_bancarias').select('*').eq('vendor_id',currentVendor.id).order('created_at',{ascending:true});if(error)throw error;cuentasBancarias=data||[];renderCuentasBancarias();}
+    catch(err){console.error('cuentas_bancarias:',err);showToast('Error al cargar cuentas: '+err.message);}
+    finally{$('#bancoLoading').style.display='none';}
+  }
+  async function saveCuentaBancaria(cuenta){
+    if(cuenta.id){const{error}=await db.from('cuentas_bancarias').update({pais:cuenta.pais,banco:cuenta.banco,tipo_id:cuenta.tipo_id,num_id:cuenta.num_id,tipo_cuenta:cuenta.tipo_cuenta,num_cuenta:cuenta.num_cuenta,updated_at:new Date().toISOString()}).eq('id',cuenta.id);if(error)throw error;}
+    else{const{error}=await db.from('cuentas_bancarias').insert({vendor_id:currentVendor.id,vendor_name:currentVendor.name,pais:cuenta.pais,banco:cuenta.banco,tipo_id:cuenta.tipo_id,num_id:cuenta.num_id,tipo_cuenta:cuenta.tipo_cuenta,num_cuenta:cuenta.num_cuenta});if(error)throw error;}
+    await loadCuentasBancarias();
+  }
+  async function deleteCuentaBancaria(id){const{error}=await db.from('cuentas_bancarias').delete().eq('id',id);if(error)throw error;await loadCuentasBancarias();}
+  function renderCuentasBancarias(){
+    const tbody=$('#bancoTbody');tbody.innerHTML='';
+    if(!cuentasBancarias.length){$('#bancoTableContainer').style.display='none';$('#bancoEmpty').style.display='block';return;}
+    $('#bancoEmpty').style.display='none';$('#bancoTableContainer').style.display='block';
+    cuentasBancarias.forEach(c=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${esc(c.pais||'')}</td><td><span class="banco-nombre">${esc(c.banco||'')}</span></td><td><span class="banco-num-chip">${esc(maskNum(c.num_cuenta))}</span></td><td>${esc(c.tipo_cuenta||'')}</td><td>${esc(c.tipo_id||'')+': '+esc(c.num_id||'')}</td><td><div class="banco-actions"><button class="banco-icon-btn edit" data-edit-id="${c.id}" title="Editar">✏️</button><button class="banco-icon-btn del" data-del-id="${c.id}" title="Eliminar">🗑️</button></div></td>`;tbody.appendChild(tr);});
+  }
+  $('#bancoTbody').addEventListener('click',async e=>{
+    const editBtn=e.target.closest('[data-edit-id]');const delBtn=e.target.closest('[data-del-id]');
+    if(editBtn){const id=editBtn.getAttribute('data-edit-id');const cuenta=cuentasBancarias.find(c=>String(c.id)===String(id));if(cuenta)openBancoModal(cuenta);}
+    if(delBtn){const id=delBtn.getAttribute('data-del-id');if(confirm('¿Eliminar esta cuenta bancaria?')){try{await deleteCuentaBancaria(id);showToast('✅ Cuenta eliminada.');}catch(err){showToast('Error: '+err.message);}}}
+  });
+
+  function updateBancoOptions(){const pais=$('#bPais').value;const bancoSel=$('#bBanco');bancoSel.innerHTML='<option value="">Seleccionar banco</option>';const lista=pais==='BRASIL'?BANCOS_BRASIL:pais?BANCOS_COLOMBIA:[];lista.forEach(b=>{const opt=document.createElement('option');opt.value=b;opt.textContent=b;bancoSel.appendChild(opt);});toggleExtraFields();}
+  function toggleExtraFields(){const banco=$('#bBanco').value;const extra=$('#extraFields');if(banco){extra.classList.add('vis');}else{extra.classList.remove('vis');}}
+  $('#bPais').addEventListener('change',updateBancoOptions);
+  $('#bBanco').addEventListener('change',toggleExtraFields);
+  function openBancoModal(cuenta=null){
+    editingCuentaId=cuenta?cuenta.id:null;
+    $('#bancoModalTitle').textContent=cuenta?'Editar cuenta bancaria':'Agregar cuenta bancaria';
+    $('#bPais').value=cuenta?cuenta.pais:'';updateBancoOptions();$('#bBanco').value=cuenta?cuenta.banco:'';toggleExtraFields();
+    $('#bTipoId').value=cuenta?cuenta.tipo_id:'';$('#bNumId').value=cuenta?cuenta.num_id:'';$('#bTipoCuenta').value=cuenta?cuenta.tipo_cuenta:'';$('#bNumCuenta').value=cuenta?cuenta.num_cuenta:'';
+    ['errBPais','errBBanco','errBTipoId','errBNumId','errBTipoCuenta','errBNumCuenta'].forEach(id=>{const el=$('#'+id);if(el)el.classList.remove('vis');});
+    ['bPais','bBanco','bTipoId','bNumId','bTipoCuenta','bNumCuenta'].forEach(id=>{const el=$('#'+id);if(el)el.classList.remove('err');});
+    $('#bancoModal').style.display='flex';document.body.style.overflow='hidden';
+  }
+  function closeBancoModal(){$('#bancoModal').style.display='none';document.body.style.overflow='';editingCuentaId=null;}
+  $('#btnAgregarCuenta').addEventListener('click',()=>openBancoModal());
+  $('#bancoModalClose').addEventListener('click',closeBancoModal);
+  $('#bancoModalCancel').addEventListener('click',closeBancoModal);
+  $('#bancoModal').addEventListener('click',e=>{if(e.target===$('#bancoModal'))closeBancoModal();});
+  $('#bancoModalSave').addEventListener('click',async()=>{
+    let ok=true;
+    function vf(id,errId,val){const el=$('#'+id),err=$('#'+errId);if(!val){el.classList.add('err');err.classList.add('vis');ok=false;}else{el.classList.remove('err');err.classList.remove('vis');}}
+    const pais=$('#bPais').value,banco=$('#bBanco').value,tipoId=$('#bTipoId').value,numId=$('#bNumId').value.trim(),tipoCuenta=$('#bTipoCuenta').value,numCuenta=$('#bNumCuenta').value.trim();
+    vf('bPais','errBPais',pais);vf('bBanco','errBBanco',banco);
+    if(banco){vf('bTipoId','errBTipoId',tipoId);vf('bNumId','errBNumId',numId);vf('bTipoCuenta','errBTipoCuenta',tipoCuenta);vf('bNumCuenta','errBNumCuenta',numCuenta);}
+    if(!ok)return;
+    const btn=$('#bancoModalSave');btn.disabled=true;btn.textContent='Guardando…';
+    try{await saveCuentaBancaria({id:editingCuentaId,pais,banco,tipo_id:tipoId,num_id:numId,tipo_cuenta:tipoCuenta,num_cuenta:numCuenta});showToast(editingCuentaId?'✅ Cuenta actualizada.':'✅ Cuenta guardada.');closeBancoModal();}
+    catch(err){showToast('❌ Error: '+err.message);}
+    finally{btn.disabled=false;btn.textContent='Aceptar';}
+  });
+
+  // ── WALLET ──
+  async function loadVendorWallet(){
+    if(!currentVendor)return;
+    const walletEl=$('#walletAmount');walletEl.innerHTML='<span class="wallet-loading">…</span>';
+    try{
+      const{data,error}=await db.from('pedidos').select('ganancia_vendedor,cantidad').eq('vendor_id',currentVendor.id).eq('estado','entregado');
+      if(error)throw error;
+      const total=(data||[]).reduce((sum,p)=>sum+(Number(p.ganancia_vendedor)||0),0);
+      const{data:rData}=await db.from('retiros_saldo').select('monto').eq('vendor_id',currentVendor.id).eq('estado','aprobado');
+      const totalRetiros=(rData||[]).reduce((sum,r)=>sum+(Number(r.monto)||0),0);
+      const saldo=total-totalRetiros;
+      currentWalletBalance=saldo;
+      walletEl.textContent=currency.format(saldo);
+      const retiroSaldoEl=$('#retiroSaldoVal');if(retiroSaldoEl)retiroSaldoEl.textContent=currency.format(saldo);
+    }catch(err){console.error('wallet error:',err);walletEl.textContent='—';currentWalletBalance=0;}
+  }
+
+  // ── RETIROS ──
+  function populateRetiroBancoSel(){
+    const sel=$('#retiroBancoSel');sel.innerHTML='<option value="">Seleccionar cuenta…</option>';
+    if(!cuentasBancarias.length){sel.innerHTML='<option value="">— Sin cuentas registradas —</option>';return;}
+    cuentasBancarias.forEach(c=>{const opt=document.createElement('option');opt.value=c.id;opt.textContent=`${c.banco} · ${c.tipo_cuenta} · ${maskNum(c.num_cuenta)}`;sel.appendChild(opt);});
+  }
+  async function loadRetiros(){
+    if(!currentVendor)return;
+    try{const{data,error}=await db.from('retiros_saldo').select('*').eq('vendor_id',currentVendor.id).order('created_at',{ascending:false});if(error)throw error;retiros=data||[];}
+    catch(err){console.error('retiros:',err);}
+  }
+  function renderRetiroHistorial(){
+    const list=$('#retiroHistList');
+    if(!retiros.length){list.innerHTML=`<div class="retiro-empty"><div class="re-icon">📭</div><p>Sin retiros registrados aún.</p></div>`;return;}
+    const estadoLabels={pendiente:{label:'Pendiente',cls:'re-estado-pendiente',icon:'⏳'},aprobado:{label:'Aprobado',cls:'re-estado-aprobado',icon:'✅'},rechazado:{label:'Rechazado',cls:'re-estado-rechazado',icon:'❌'}};
+    list.innerHTML=retiros.map(r=>{
+      const fecha=r.created_at?new Date(r.created_at).toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+      const est=estadoLabels[r.estado]||{label:r.estado,cls:'re-estado-pendiente',icon:'⏳'};
+      return `<div class="retiro-row"><div class="retiro-row-icon">💸</div><div class="retiro-row-info"><div class="retiro-row-banco">${esc(r.banco)}</div><div class="retiro-row-fecha">${fecha}</div>${r.concepto?`<div class="retiro-row-concepto">${esc(r.concepto)}</div>`:''}</div><div class="retiro-row-monto"><b>${currency.format(r.monto)}</b><span class="retiro-row-estado ${est.cls}">${est.icon} ${est.label}</span></div></div>`;
+    }).join('');
+  }
+  $('#btnVerHistorialRetiros').addEventListener('click',async()=>{await loadRetiros();renderRetiroHistorial();$('#retiroHistBox').style.display='block';setTimeout(()=>$('#retiroHistBox').scrollIntoView({behavior:'smooth',block:'nearest'}),100);});
+  $('#btnCerrarHistorial').addEventListener('click',()=>{$('#retiroHistBox').style.display='none';});
+  $('#btnRefreshRetiros').addEventListener('click',async()=>{await loadVendorWallet();await loadCuentasBancarias();populateRetiroBancoSel();showToast('✅ Saldo actualizado.');});
+  $('#btnProcesarRetiro').addEventListener('click',()=>{
+    const montoRaw=parseFloat($('#retiroMonto').value);const bancoSelId=$('#retiroBancoSel').value;let ok=true;
+    const errMonto=$('#errRetiroMonto');const inpMonto=$('#retiroMonto');
+    if(!montoRaw||montoRaw<1000){inpMonto.classList.add('input-err');errMonto.textContent='Ingresa un monto de al menos $1.000';errMonto.classList.add('vis');ok=false;}else{inpMonto.classList.remove('input-err');errMonto.classList.remove('vis');}
+    const errBanco=$('#errRetiroBanco');const selBanco=$('#retiroBancoSel');
+    if(!bancoSelId){selBanco.classList.add('input-err');errBanco.classList.add('vis');ok=false;}else{selBanco.classList.remove('input-err');errBanco.classList.remove('vis');}
+    if(!ok)return;
+    if(montoRaw>currentWalletBalance){$('#retiroErrorMsg').textContent=`Tu saldo disponible es ${currency.format(currentWalletBalance)} y el monto solicitado es ${currency.format(montoRaw)}. Por favor ajusta el monto.`;$('#retiroErrorModal').style.display='flex';document.body.style.overflow='hidden';return;}
+    const cuentaSeleccionada=cuentasBancarias.find(c=>String(c.id)===String(bancoSelId));
+    const bancoLabel=cuentaSeleccionada?`${cuentaSeleccionada.banco} · ${cuentaSeleccionada.tipo_cuenta} · ${cuentaSeleccionada.num_cuenta}`:'Cuenta seleccionada';
+    pendingRetiroData={monto:montoRaw,banco:cuentaSeleccionada?cuentaSeleccionada.banco:'',num_cuenta:cuentaSeleccionada?cuentaSeleccionada.num_cuenta:'',tipo_cuenta:cuentaSeleccionada?cuentaSeleccionada.tipo_cuenta:'',cuenta_id:bancoSelId,bancoLabel,concepto:$('#retiroConcepto').value.trim(),saldo_disponible:currentWalletBalance};
+    $('#retiroConfirmMonto').textContent=currency.format(montoRaw);$('#retiroConfirmBanco').textContent=bancoLabel;$('#retiroConfirmModal').style.display='flex';document.body.style.overflow='hidden';
+  });
+  $('#retiroConfirmNo').addEventListener('click',()=>{$('#retiroConfirmModal').style.display='none';document.body.style.overflow='';pendingRetiroData=null;});
+  $('#retiroConfirmModal').addEventListener('click',e=>{if(e.target===$('#retiroConfirmModal')){$('#retiroConfirmModal').style.display='none';document.body.style.overflow='';pendingRetiroData=null;}});
+  $('#retiroConfirmSi').addEventListener('click',async()=>{
+    if(!pendingRetiroData||!currentVendor)return;
+    const btn=$('#retiroConfirmSi');btn.disabled=true;btn.textContent='Guardando…';
+    try{
+      const{error}=await db.from('retiros_saldo').insert({vendor_id:currentVendor.id,vendor_name:currentVendor.name,monto:pendingRetiroData.monto,concepto:pendingRetiroData.concepto||null,banco:pendingRetiroData.banco,num_cuenta:pendingRetiroData.num_cuenta,tipo_cuenta:pendingRetiroData.tipo_cuenta,saldo_disponible:pendingRetiroData.saldo_disponible,estado:'pendiente'});
+      if(error)throw error;
+      $('#retiroConfirmModal').style.display='none';document.body.style.overflow='';
+      $('#rsDetalleMonto').textContent=currency.format(pendingRetiroData.monto);$('#rsDetalleBanco').textContent=pendingRetiroData.bancoLabel;
+      $('#retiroSuccessModal').style.display='flex';document.body.style.overflow='hidden';
+      $('#retiroMonto').value='';$('#retiroBancoSel').value='';$('#retiroConcepto').value='';pendingRetiroData=null;
+    }catch(err){showToast('❌ Error al guardar el retiro: '+err.message);}
+    finally{btn.disabled=false;btn.textContent='Sí, solicitar';}
+  });
+  $('#retiroErrorClose').addEventListener('click',()=>{$('#retiroErrorModal').style.display='none';document.body.style.overflow='';});
+  $('#retiroErrorModal').addEventListener('click',e=>{if(e.target===$('#retiroErrorModal')){$('#retiroErrorModal').style.display='none';document.body.style.overflow='';}});
+  $('#retiroSuccessClose').addEventListener('click',()=>{$('#retiroSuccessModal').style.display='none';document.body.style.overflow='';});
+
+  // ── CATALOGO ──
+  function renderVendorCategories(){const cats=['Todas',...new Set(products.map(p=>p.category).filter(Boolean))];$('#vendorCategories').innerHTML=cats.map(c=>`<button class="chip ${c===vendorCategory?'active':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('');}
+  $('#vendorCategories').addEventListener('click',e=>{const cat=e.target.getAttribute('data-cat');if(cat){vendorCategory=cat;renderVendorCategories();renderVendorGrid();}});
+  $('#vendorSearchInput').addEventListener('input',e=>{vendorSearchTerm=e.target.value;renderVendorGrid();});
+  $('#stockToggleBtn').addEventListener('click',()=>{hideOutOfStock=!hideOutOfStock;$('#stockToggleBtn').textContent=hideOutOfStock?'📦 Mostrar agotados':'📦 Ocultar agotados';$('#stockToggleBtn').style.color=hideOutOfStock?'var(--accent-ink)':'';renderVendorGrid();});
+  function renderVendorGrid(){
+    const term=vendorSearchTerm.trim().toLowerCase();
+    const filtered=products.filter(p=>{const inCat=vendorCategory==='Todas'||p.category===vendorCategory;const inSearch=!term||p.name.toLowerCase().includes(term)||(p.category||'').toLowerCase().includes(term);const inStock=!hideOutOfStock||(p.stock||0)>0;return inCat&&inSearch&&inStock;});
+    const vgrid=$('#vendorGrid');vgrid.innerHTML='';filtered.forEach(p=>vgrid.appendChild(buildVendorCard(p)));
+    $('#vendorEmptyState').style.display=filtered.length===0?'block':'none';
+  }
+  function buildVendorCard(p){
+    const card=document.createElement('div');card.className='vcard';card.setAttribute('data-product-id',p.id);
+    const prices=calcPrices(p);
+    let stockBadge=(p.stock||0)<=0?`<span class="badge badge-out">Agotado</span>`:(p.stock||0)<=5?`<span class="badge badge-low">Pocas ud.</span>`:`<span class="badge badge-ok">Disponible</span>`;
+    if((p.stock||0)<=0)card.style.opacity='.55';
+    const imgHtml=p.image?`<img src="${esc(p.image)}" alt="${esc(p.name)}">`:`<div class="noimg">🫙</div>`;
+    const hasCopy=p.copy&&p.copy.trim().length>0;
+    const shippingBadge=prices.shipping>0?`<span class="badge" style="background:var(--amber-tint);color:#B36B00;">📦 Envío inc.</span>`:'';
+    card.innerHTML=`<div class="vcard-img">${imgHtml}</div><div class="vcard-body"><div class="vcard-badges"><span class="badge badge-cat">${esc(p.category||'')}</span>${stockBadge}${shippingBadge}</div><div class="vcard-name">${esc(p.name)}</div><div class="vcard-id-chip" data-copy-id="${esc(p.id)}"># ${esc(p.id)}</div><div class="vcard-price"><div class="vp-label">Precio al público${prices.shipping>0?' (c/envío)':''}</div><div class="vp-amount">${currency.format(prices.publicPrice)}</div></div><div class="vcard-money"><div class="vm-row vm-pay"><span>Tú pagas</span><b>${currency.format(prices.vendorPrice+prices.shipping)}</b></div><div class="vm-row vm-earn"><span>Ganancia</span><b>${currency.format(prices.publicPrice-prices.vendorPrice-prices.shipping)}</b></div></div>${p.oferta2_activa?`<div class="oferta-mini"><span>📦 Oferta x2</span><b>${currency.format(p.oferta2_precio||0)}</b></div>`:''}${p.oferta3_activa?`<div class="oferta-mini"><span>📦 Oferta x3</span><b>${currency.format(p.oferta3_precio||0)}</b></div>`:''}<div class="vcard-tap-hint">${hasCopy?'👆 Toca para ver y compartir':'👆 Toca para ver detalle'}</div></div>`;
+    return card;
+  }
+  $('#vendorGrid').addEventListener('click',e=>{
+    const chip=e.target.closest('[data-copy-id]');
+    if(chip){e.stopPropagation();const id=chip.getAttribute('data-copy-id');navigator.clipboard.writeText(id).then(()=>{chip.classList.add('copied');chip.textContent='✅ Copiado';setTimeout(()=>{chip.classList.remove('copied');chip.textContent='# '+id;},1500);}).catch(()=>{});return;}
+    const card=e.target.closest('.vcard');
+    if(card){const id=card.getAttribute('data-product-id');if(id){const p=products.find(x=>x.id===id);if(p)openModal(p);}}
+  });
+
+  // ── AUTO REFRESH ──
+  async function refreshVendorData(){await Promise.all([loadProducts(),loadAnuncios(),loadVendorWallet()]);renderVendorCategories();renderVendorGrid();renderVendorAnuncios();}
+  $('#vendorRefreshBtn').addEventListener('click',async()=>{await refreshVendorData();showToast('✅ Catálogo actualizado.');});
+  function startVendorAutoRefresh(){stopVendorAutoRefresh();vendorRefreshTimer=setInterval(refreshVendorData,30000);}
+  function stopVendorAutoRefresh(){if(vendorRefreshTimer){clearInterval(vendorRefreshTimer);vendorRefreshTimer=null;}}
+
+  // ── MODAL PRODUCTO ──
+  function openModal(p){
+    modalProduct=p;const prices=calcPrices(p);const earn=prices.publicPrice-prices.vendorPrice-prices.shipping;
+    const mi=$('#modalImg');
+    mi.innerHTML=p.image?'<img src="'+p.image+'" style="width:100%;max-height:420px;object-fit:contain;display:block;">':'<div style="height:160px;display:flex;align-items:center;justify-content:center;font-size:60px;opacity:.2;">🫙</div>';
+    let stockBadge=(p.stock||0)<=0?'<span class="badge badge-out">Agotado</span>':(p.stock||0)<=5?'<span class="badge badge-low">Pocas ud.</span>':'<span class="badge badge-ok">Disponible</span>';
+    const shippingBadge=prices.shipping>0?'<span class="badge" style="background:var(--amber-tint);color:#B36B00;">📦 Envío incluido</span>':'';
+    $('#modalBadges').innerHTML='<span class="badge badge-cat">'+esc(p.category||'')+'</span>'+stockBadge+shippingBadge;
+    $('#modalName').textContent=p.name;
+    $('#modalPublicPrice').textContent=currency.format(prices.publicPrice)+(prices.shipping>0?' (c/envío)':'');
+    $('#modalVendorPrice').textContent=currency.format(prices.vendorPrice);
+    $('#modalEarn').textContent='+'+currency.format(earn);
+    $('#modalMargin').textContent=(p.margin||0)+'%';
+    $('#modalCopy').textContent=p.copy||'(Sin copy de venta)';
+    const canShare=!!(p.image&&p.copy&&p.copy.trim());
+    $('#modalShareBtn').disabled=!canShare;$('#modalShareBtn').style.opacity=canShare?'1':'.4';
+    let ofertasHtml='';
+    if(p.oferta2_activa)ofertasHtml+='<div style="background:var(--blue-tint);border:1px solid rgba(10,132,255,.2);border-radius:10px;padding:8px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;font-weight:700;color:var(--blue);">📦 Oferta x2</span><b style="color:var(--blue);font-size:14px;font-variant-numeric:tabular-nums;">'+currency.format(p.oferta2_precio||0)+'</b></div>';
+    if(p.oferta3_activa)ofertasHtml+='<div style="background:var(--blue-tint);border:1px solid rgba(10,132,255,.2);border-radius:10px;padding:8px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;font-weight:700;color:var(--blue);">📦 Oferta x3</span><b style="color:var(--blue);font-size:14px;font-variant-numeric:tabular-nums;">'+currency.format(p.oferta3_precio||0)+'</b></div>';
+    $('#modalOfertasBlock').innerHTML=ofertasHtml;
+    $('#orderLinkBox').style.display='none';$('#campanaLinkBox').style.display='none';
+    $('#productModal').style.display='block';document.body.style.overflow='hidden';
+  }
+  function closeModal(){$('#productModal').style.display='none';document.body.style.overflow='';modalProduct=null;}
+  $('#modalCloseBtn').addEventListener('click',closeModal);
+  $('#productModal').addEventListener('click',e=>{if(e.target===$('#productModal'))closeModal();});
+  $('#modalCopyBtn').addEventListener('click',()=>{if(!modalProduct||!modalProduct.copy)return;navigator.clipboard.writeText(modalProduct.copy.trim()).then(()=>showToast('✅ Copy copiado.')).catch(()=>showToast('No se pudo copiar.'));});
+  $('#modalShareBtn').addEventListener('click',()=>{if(modalProduct)shareToWhatsapp(modalProduct,$('#modalShareBtn'));});
+
+  // Links apuntan a los archivos separados: pedido-inmediata.html y pedido-campana.html
+  $('#modalSendOrderBtn').addEventListener('click',()=>{
+    if(!modalProduct)return;
+    const base=window.location.href.replace(/[^\/]*$/,'');
+    const vendorParam=currentVendor?'&v='+encodeURIComponent(currentVendor.id):'';
+    const link=base+'pedido-inmediata.html?order='+encodeURIComponent(modalProduct.id)+vendorParam;
+    $('#orderLinkText').textContent=link;$('#orderLinkBox').style.display='block';$('#campanaLinkBox').style.display='none';
+    setTimeout(()=>$('#orderLinkBox').scrollIntoView({behavior:'smooth',block:'nearest'}),100);
+  });
+  $('#copyLinkBtn').addEventListener('click',()=>{const link=$('#orderLinkText').textContent;navigator.clipboard.writeText(link).then(()=>{showToast('✅ Link copiado.');$('#copyLinkBtn').textContent='✅ Copiado';setTimeout(()=>$('#copyLinkBtn').textContent='📋 Copiar link',1500);}).catch(()=>showToast('No se pudo copiar.'));});
+  $('#sendViaWaBtn').addEventListener('click',()=>{if(!modalProduct)return;const link=$('#orderLinkText').textContent;const prices=calcPrices(modalProduct);const msg='Hola! 👋 Te comparto este producto que creo que te va a encantar:\n\n*'+modalProduct.name+'*\nPrecio: '+currency.format(prices.publicPrice)+'\n\n🚀 Haz tu pedido de *Entrega Inmediata* aquí:\n'+link;window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');});
+
+  $('#modalSendCampanaBtn').addEventListener('click',()=>{
+    if(!modalProduct)return;
+    const base=window.location.href.replace(/[^\/]*$/,'');
+    const vendorParam=currentVendor?'&v='+encodeURIComponent(currentVendor.id):'';
+    const link=base+'pedido-campana.html?order='+encodeURIComponent(modalProduct.id)+vendorParam;
+    $('#campanaLinkText').textContent=link;$('#campanaLinkBox').style.display='block';$('#orderLinkBox').style.display='none';
+    setTimeout(()=>$('#campanaLinkBox').scrollIntoView({behavior:'smooth',block:'nearest'}),100);
+  });
+  $('#copyCampanaLinkBtn').addEventListener('click',()=>{const link=$('#campanaLinkText').textContent;navigator.clipboard.writeText(link).then(()=>{showToast('✅ Link copiado.');$('#copyCampanaLinkBtn').textContent='✅ Copiado';setTimeout(()=>$('#copyCampanaLinkBtn').textContent='📋 Copiar link',1500);}).catch(()=>showToast('No se pudo copiar.'));});
+  $('#sendCampanaViaWaBtn').addEventListener('click',()=>{if(!modalProduct)return;const link=$('#campanaLinkText').textContent;const prices=calcPrices(modalProduct);const msg='Hola! 👋 Te comparto esta oferta especial de nuestra *campaña*:\n\n*'+modalProduct.name+'*\nPrecio: '+currency.format(prices.publicPrice)+'\n\n📅 Reserva tu pedido (pagas el día del cierre):\n'+link;window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');});
+
+  function buildShareImage(p){return new Promise(resolve=>{const img=new Image();img.onload=()=>{const canvas=document.createElement('canvas');canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0);canvas.toBlob(blob=>resolve(blob),'image/jpeg',.95);};img.onerror=()=>resolve(null);img.src=p.image;});}
+  function downloadBlob(blob,filename){const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);}
+  async function shareToWhatsapp(p,btn){const original=btn.textContent;btn.disabled=true;btn.textContent='Preparando imagen…';try{const blob=await buildShareImage(p);if(!blob){showToast('No se pudo preparar la imagen.');return;}const text=(p.copy&&p.copy.trim())?p.copy.trim():p.name;const file=new File([blob],(p.id||'producto')+'.jpg',{type:'image/jpeg'});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],text,title:p.name});}else if(navigator.share){await navigator.share({text,title:p.name});downloadBlob(blob,file.name);showToast('Imagen descargada — adjúntala en WhatsApp.');}else{downloadBlob(blob,file.name);window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');showToast('Imagen descargada. Ábrela en WhatsApp.');}}catch(err){if(err&&err.name!=='AbortError')showToast('No se pudo compartir.');}finally{btn.disabled=false;btn.textContent=original;}}
+
+  // ── ANUNCIOS ──
+  function renderVendorAnuncios(){const container=$('#anunciosContainer');if(!container)return;if(!anuncios.length){container.innerHTML='<div class="no-anuncios"><div class="na-icon">📢</div><b>Sin anuncios por ahora</b><p style="margin-top:6px;font-size:13px;">Aquí aparecerán los mensajes de tu administrador.</p></div>';return;}const iconos={general:'📢',alerta:'🔴',info:'💬',logro:'🏆'};container.innerHTML=anuncios.map(a=>'<div class="anuncio-card tipo-'+a.tipo+'"><div class="anuncio-header"><span class="anuncio-emoji">'+(iconos[a.tipo]||'📢')+'</span><span class="anuncio-titulo">'+esc(a.titulo)+'</span><span class="anuncio-fecha">'+(a.fecha||'')+'</span></div><div class="anuncio-texto">'+esc(a.texto)+'</div></div>').join('');}
+
+  // ── NAV ──
+  function switchVendorPanel(name){
+    document.querySelectorAll('.vpanel').forEach(p=>p.classList.remove('vpanel-active'));
+    const target=$('#vpanel-'+name);if(target)target.classList.add('vpanel-active');
+    document.querySelectorAll('[data-vpanel]').forEach(btn=>btn.classList.toggle('vsnav-active',btn.getAttribute('data-vpanel')===name));
+    if(name==='banco')loadCuentasBancarias();
+    if(name==='retiros'){loadVendorWallet().then(()=>{const el=$('#retiroSaldoVal');if(el)el.textContent=currency.format(currentWalletBalance);});populateRetiroBancoSel();}
+    window.scrollTo({top:0,behavior:'instant'});
+  }
+  document.querySelectorAll('[data-vpanel]').forEach(btn=>{btn.addEventListener('click',()=>switchVendorPanel(btn.getAttribute('data-vpanel')));});
+
+})();
+</script>
+</body>
+</html>
