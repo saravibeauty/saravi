@@ -200,6 +200,14 @@ button{font:inherit;}
 @media(min-width:860px){.vgrid{grid-template-columns:repeat(4,1fr);}}
 @media(min-width:1200px){.vgrid{grid-template-columns:repeat(5,1fr);}}
 
+/* Segmented control — reemplaza el antiguo botón "Ocultar agotados" */
+.stock-segment{display:inline-flex;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:50px;padding:3px;box-shadow:var(--shadow-sm);gap:2px;flex-shrink:0;}
+.stock-segment .seg-btn{position:relative;border:none;background:none;cursor:pointer;padding:8px 16px;border-radius:50px;font-size:12.5px;font-weight:600;color:var(--muted);white-space:nowrap;transition:color .24s var(--ease),background-color .24s var(--ease);}
+.stock-segment .seg-btn.active{background:var(--accent);color:#fff;box-shadow:0 3px 10px rgba(191,90,242,.28);}
+.stock-segment .seg-btn:not(.active):hover{color:var(--ink-2);}
+.stock-segment .seg-btn:active{transform:scale(.96);}
+@media(max-width:420px){.stock-segment .seg-btn{padding:7px 12px;font-size:11.5px;}}
+
 /* ── TARJETA DE PRODUCTO — rediseño ── */
 .vcard{
   background:var(--surface);
@@ -458,7 +466,13 @@ button{font:inherit;}
       </div>
       <!-- CATÁLOGO -->
       <div class="vpanel" id="vpanel-catalogo">
-        <div class="vpanel-topbar"><div class="vpanel-title">Catálogo</div><button class="btn btn-ghost" id="stockToggleBtn">📦 Ocultar agotados</button></div>
+        <div class="vpanel-topbar">
+          <div class="vpanel-title">Catálogo</div>
+          <div class="stock-segment" id="stockSegment">
+            <button type="button" class="seg-btn active" data-stock="all">Todos</button>
+            <button type="button" class="seg-btn" data-stock="available">Disponibles</button>
+          </div>
+        </div>
         <div class="search-wrap"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="search" id="vendorSearchInput" placeholder="Buscar producto…"></div>
         <div class="v-categories" id="vendorCategories"></div>
         <div class="vgrid" id="vendorGrid"></div>
@@ -696,9 +710,12 @@ button{font:inherit;}
   });
 
   // ── WALLET ──
-  async function loadVendorWallet(){
+  // Nota: recibe "silent" para no mostrar el estado de carga durante refrescos
+  // en segundo plano (evita el parpadeo del chip cada 30s).
+  async function loadVendorWallet(silent){
     if(!currentVendor)return;
-    const walletEl=$('#walletAmount');walletEl.innerHTML='<span class="wallet-loading">…</span>';
+    const walletEl=$('#walletAmount');
+    if(!silent)walletEl.innerHTML='<span class="wallet-loading">…</span>';
     try{
       const{data,error}=await db.from('pedidos').select('ganancia_vendedor,cantidad').eq('vendor_id',currentVendor.id).eq('estado','entregado');
       if(error)throw error;
@@ -709,7 +726,7 @@ button{font:inherit;}
       currentWalletBalance=saldo;
       walletEl.textContent=currency.format(saldo);
       const retiroSaldoEl=$('#retiroSaldoVal');if(retiroSaldoEl)retiroSaldoEl.textContent=currency.format(saldo);
-    }catch(err){console.error('wallet error:',err);walletEl.textContent='—';currentWalletBalance=0;}
+    }catch(err){console.error('wallet error:',err);if(!silent){walletEl.textContent='—';currentWalletBalance=0;}}
   }
 
   // ── RETIROS ──
@@ -772,7 +789,13 @@ button{font:inherit;}
   function renderVendorCategories(){const cats=['Todas',...new Set(products.map(p=>p.category).filter(Boolean))];$('#vendorCategories').innerHTML=cats.map(c=>`<button class="chip ${c===vendorCategory?'active':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('');}
   $('#vendorCategories').addEventListener('click',e=>{const cat=e.target.getAttribute('data-cat');if(cat){vendorCategory=cat;renderVendorCategories();renderVendorGrid();}});
   $('#vendorSearchInput').addEventListener('input',e=>{vendorSearchTerm=e.target.value;renderVendorGrid();});
-  $('#stockToggleBtn').addEventListener('click',()=>{hideOutOfStock=!hideOutOfStock;$('#stockToggleBtn').textContent=hideOutOfStock?'📦 Mostrar agotados':'📦 Ocultar agotados';$('#stockToggleBtn').style.color=hideOutOfStock?'var(--accent-ink)':'';renderVendorGrid();});
+  // Segmented control "Todos / Disponibles" — reemplaza el antiguo botón ghost con emoji.
+  $('#stockSegment').addEventListener('click',e=>{
+    const btn=e.target.closest('.seg-btn');if(!btn)return;
+    hideOutOfStock=btn.getAttribute('data-stock')==='available';
+    $('#stockSegment').querySelectorAll('.seg-btn').forEach(b=>b.classList.toggle('active',b===btn));
+    renderVendorGrid();
+  });
   function renderVendorGrid(){
     const term=vendorSearchTerm.trim().toLowerCase();
     const filtered=products.filter(p=>{const inCat=vendorCategory==='Todas'||p.category===vendorCategory;const inSearch=!term||p.name.toLowerCase().includes(term)||(p.category||'').toLowerCase().includes(term);const inStock=!hideOutOfStock||(p.stock||0)>0;return inCat&&inSearch&&inStock;});
@@ -798,7 +821,24 @@ button{font:inherit;}
   });
 
   // ── AUTO REFRESH ──
-  async function refreshVendorData(){await Promise.all([loadProducts(),loadAnuncios(),loadVendorWallet()]);renderVendorCategories();renderVendorGrid();renderVendorAnuncios();}
+  // Antes: cada 30s se recargaban productos/anuncios/wallet y SIEMPRE se
+  // volvía a pintar toda la grilla y el chip de saldo, aunque no hubiera
+  // cambios → esto producía el parpadeo/"flash" que se veía cada 30s.
+  // Ahora: comparamos los datos nuevos contra los anteriores y solo
+  // volvemos a renderizar lo que realmente cambió. El wallet se recarga
+  // en modo "silent" (sin mostrar el estado de carga "…").
+  async function refreshVendorData(){
+    const prevProductsJSON=JSON.stringify(products);
+    const prevAnunciosJSON=JSON.stringify(anuncios);
+    await Promise.all([loadProducts(),loadAnuncios(),loadVendorWallet(true)]);
+    if(JSON.stringify(products)!==prevProductsJSON){
+      renderVendorCategories();
+      renderVendorGrid();
+    }
+    if(JSON.stringify(anuncios)!==prevAnunciosJSON){
+      renderVendorAnuncios();
+    }
+  }
   $('#vendorRefreshBtn').addEventListener('click',async()=>{await refreshVendorData();showToast('✅ Catálogo actualizado.');});
   function startVendorAutoRefresh(){stopVendorAutoRefresh();vendorRefreshTimer=setInterval(refreshVendorData,30000);}
   function stopVendorAutoRefresh(){if(vendorRefreshTimer){clearInterval(vendorRefreshTimer);vendorRefreshTimer=null;}}
