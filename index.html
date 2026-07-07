@@ -80,6 +80,8 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 .btn-ghost:hover{background:rgba(60,60,67,.09);}
 .btn-danger{background:var(--red-tint);color:var(--red);}
 .btn-danger:hover{background:rgba(255,69,58,.18);}
+.btn-ai{background:var(--accent-tint);color:var(--accent-ink);box-shadow:inset 0 0 0 1px rgba(191,90,242,.14);}
+.btn-ai:hover{background:rgba(191,90,242,.16);}
 .btn-sm{font-size:12.5px;padding:9px 14px;border-radius:9px;}
 .btn-full{width:100%;}
 
@@ -454,6 +456,11 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
             <div class="inline-row" style="margin-bottom:8px;"><input type="text" id="newVendorName" placeholder="Nombre del vendedor"><input type="text" id="newVendorPin" placeholder="PIN" style="max-width:90px;font-family:ui-monospace,'SF Mono',monospace;"><button class="btn btn-ghost btn-sm" id="genVendorPinBtn">Generar</button></div>
             <button class="btn btn-primary btn-sm" id="addVendorBtn">+ Agregar</button>
           </div>
+          <div>
+            <div class="v-section-title">✨ API Key de Groq (Mejora de textos con IA)</div>
+            <div class="inline-row"><input type="password" id="groqApiKeySetting" placeholder="gsk_..."><button class="btn btn-ghost btn-sm" id="saveGroqKeyBtn">Guardar</button></div>
+            <p style="font-size:12px;color:var(--muted);margin-top:8px;">Se usa en el catálogo para mejorar el copy de venta con IA (botón "✨ Mejorar con IA"). Consíguela gratis en <span style="font-family:ui-monospace,'SF Mono',monospace;">console.groq.com</span>.</p>
+          </div>
         </div>
         <div class="vendors-list" id="vendorsList"></div>
       </section>
@@ -519,6 +526,10 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
             <div class="field">
               <label>Copy de venta</label>
               <textarea id="copyInput" rows="4" placeholder="Ej: ✨ ¿Quieres una piel radiante? ¡Últimas unidades! Escríbeme 👇" style="width:100%;padding:12px 14px;background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:14px;resize:vertical;line-height:1.55;transition:border-color var(--ease),box-shadow var(--ease);"></textarea>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:8px;flex-wrap:wrap;">
+                <button type="button" class="btn btn-ai btn-sm" id="mejorarCopyBtn">✨ Mejorar con IA</button>
+                <span style="font-size:11px;color:var(--muted);">Escribe una idea, características o beneficios y la IA la transforma en un copy de venta</span>
+              </div>
               <div style="font-size:11px;color:var(--muted);margin-top:5px;display:flex;justify-content:space-between;"><span>Se envía junto con la imagen en WhatsApp</span><span id="copyCount">0 / 500</span></div>
             </div>
 
@@ -615,6 +626,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 
   let products=[], vendors=[], anuncios=[], pedidos=[];
   let adminPin='1234';
+  let groqApiKey='';
   let editingId=null, pendingImageData=null, deleteConfirmId=null;
 
   const $=sel=>document.querySelector(sel);
@@ -644,13 +656,99 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   async function loadVendors(){const{data,error}=await db.from('vendors').select('*').order('created_at',{ascending:true});if(error){console.error('vendors:',error);return;}vendors=data||[];}
   async function addVendor(name,pin){const{error}=await db.from('vendors').insert({name,pin});if(error)throw error;await loadVendors();}
   async function removeVendor(id){const{error}=await db.from('vendors').delete().eq('id',id);if(error)throw error;await loadVendors();}
-  async function loadConfig(){const{data,error}=await db.from('config').select('*');if(error){console.error('config:',error);return;}const pinRow=(data||[]).find(r=>r.key==='admin_pin');adminPin=pinRow?pinRow.value:'1234';}
+  async function loadConfig(){const{data,error}=await db.from('config').select('*');if(error){console.error('config:',error);return;}const pinRow=(data||[]).find(r=>r.key==='admin_pin');adminPin=pinRow?pinRow.value:'1234';const groqRow=(data||[]).find(r=>r.key==='groq_api_key');groqApiKey=groqRow?groqRow.value:'';}
   async function saveAdminPinDB(pin){const{error}=await db.from('config').upsert({key:'admin_pin',value:pin},{onConflict:'key'});if(error)throw error;adminPin=pin;}
+  async function saveGroqKeyDB(key){const{error}=await db.from('config').upsert({key:'groq_api_key',value:key},{onConflict:'key'});if(error)throw error;groqApiKey=key;}
   async function loadAnuncios(){const{data,error}=await db.from('anuncios').select('*').order('created_at',{ascending:false});if(error){console.error('anuncios:',error);return;}anuncios=data||[];}
   async function saveAnuncio(titulo,texto,tipo){const fecha=new Date().toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'});const{error}=await db.from('anuncios').insert({titulo,texto,tipo,fecha});if(error)throw error;await loadAnuncios();}
   async function removeAnuncio(id){const{error}=await db.from('anuncios').delete().eq('id',id);if(error)throw error;await loadAnuncios();}
   async function loadPedidos(){const{data,error}=await db.from('pedidos').select('*').order('created_at',{ascending:false}).limit(200);if(error){console.error('pedidos:',error);return;}pedidos=data||[];}
   async function updatePedidoEstado(id,nuevoEstado){const{error}=await db.from('pedidos').update({estado:nuevoEstado,updated_at:new Date().toISOString()}).eq('id',id);if(error)throw error;}
+
+  // ── MEJORAR COPY CON IA (Groq) ──
+  function buildGroqPrompts({categoria,nombre,notas,precio}){
+    const systemPrompt=[
+      'Eres un experto en marketing, copywriting y comercio electrónico para redes sociales (WhatsApp, Instagram, Facebook).',
+      'Tu objetivo es crear contenido que aumente las ventas de cualquier tipo de producto cuando se comparte como estado/historia.',
+      'INSTRUCCIONES:',
+      '- Analiza la categoría del producto para adaptar el estilo de escritura.',
+      '- Usa únicamente la información proporcionada por el usuario.',
+      '- No inventes ingredientes, características, beneficios, certificaciones ni especificaciones que no estén en los datos.',
+      '- Si falta información, simplemente no la menciones.',
+      '- Escribe de forma natural, persuasiva y profesional, en español neutro/colombiano.',
+      '- Destaca los beneficios reales del producto.',
+      '- Usa un lenguaje que genere confianza y motive la compra.',
+      '- Evita exageraciones y promesas falsas.',
+      '- Si el producto es un alimento, resalta sabor, textura y ocasión de consumo.',
+      '- Si es ropa o accesorio, destaca estilo, comodidad y uso.',
+      '- Si es tecnología, enfatiza funciones y utilidad.',
+      '- Si es belleza o salud, enfócate en la aplicación y los beneficios indicados.',
+      '- Adapta el tono automáticamente según la categoría.',
+      '- El campo "copy_estado" es el más importante: debe ser corto (máx. 3-4 líneas), con emojis moderados, ideal para publicar como estado de WhatsApp junto a una foto del producto, y debe cerrar invitando a escribir/pedir.',
+      '',
+      'INSTRUCCIÓN FINAL: Devuelve ÚNICAMENTE un JSON válido, sin texto adicional ni backticks, con esta estructura exacta:',
+      '{"titulo":"","descripcion":"","copy_estado":"","llamado_accion":"","hashtags":[]}'
+    ].join('\n');
+    const userPrompt=[
+      'DATOS DEL PRODUCTO',
+      'Categoría: '+(categoria||'General'),
+      'Nombre: '+(nombre||''),
+      'Descripción / características / notas del vendedor: '+(notas||'(sin notas adicionales)'),
+      'Precio al público: '+(precio?currency.format(precio):'(no especificado)')
+    ].join('\n');
+    return{systemPrompt,userPrompt};
+  }
+  async function mejorarCopyConIA(){
+    const btn=$('#mejorarCopyBtn');
+    const nombre=$('#nameInput').value.trim();
+    const categoria=$('#categoryInput').value.trim();
+    const notas=$('#copyInput').value.trim();
+    const bodega=parseFloat($('#priceInput').value)||0;
+    const commission=parseFloat($('#commissionInput').value)||0;
+    const margin=parseFloat($('#marginInput').value)||0;
+    const envio=$('#envioToggle').checked?(parseFloat($('#envioInput').value)||0):0;
+    if(!nombre){showToast('⚠️ Escribe primero el nombre del producto.');return;}
+    if(!groqApiKey){showToast('⚠️ Falta la API Key de Groq. Guárdala en "Vendedores → API Key de Groq".');return;}
+    const prices=calcPrices({price:bodega,commission,margin,shipping:envio});
+    const{systemPrompt,userPrompt}=buildGroqPrompts({categoria,nombre,notas,precio:prices.publicPrice});
+    const original=btn.textContent;btn.disabled=true;btn.textContent='✨ Generando…';
+    try{
+      const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+groqApiKey},
+        body:JSON.stringify({
+          model:'llama-3.3-70b-versatile',
+          temperature:0.7,
+          max_tokens:700,
+          response_format:{type:'json_object'},
+          messages:[{role:'system',content:systemPrompt},{role:'user',content:userPrompt}]
+        })
+      });
+      if(!res.ok){const errText=await res.text().catch(()=>'');throw new Error('HTTP '+res.status+(errText?(' — '+errText.slice(0,180)):''));}
+      const data=await res.json();
+      const raw=data.choices&&data.choices[0]&&data.choices[0].message?data.choices[0].message.content:'';
+      if(!raw)throw new Error('Respuesta vacía de Groq.');
+      const clean=raw.replace(/```json|```/g,'').trim();
+      const parsed=JSON.parse(clean);
+      const partes=[];
+      if(parsed.copy_estado)partes.push(String(parsed.copy_estado).trim());
+      if(parsed.llamado_accion&&!String(parsed.copy_estado||'').includes(parsed.llamado_accion))partes.push(String(parsed.llamado_accion).trim());
+      if(Array.isArray(parsed.hashtags)&&parsed.hashtags.length){const tags=parsed.hashtags.map(h=>{h=String(h).trim();return h.startsWith('#')?h:'#'+h.replace(/\s+/g,'');}).join(' ');partes.push(tags);}
+      let resultado=partes.join('\n\n').trim();
+      if(!resultado)resultado=String(parsed.descripcion||raw).trim();
+      resultado=resultado.slice(0,500);
+      $('#copyInput').value=resultado;
+      $('#copyInput').dispatchEvent(new Event('input'));
+      showToast('✅ Copy mejorado con IA.');
+    }catch(err){
+      console.error('Groq error:',err);
+      showToast('❌ No se pudo generar el copy: '+err.message);
+    }finally{
+      btn.disabled=false;btn.textContent=original;
+    }
+  }
+  $('#mejorarCopyBtn').addEventListener('click',mejorarCopyConIA);
+  $('#saveGroqKeyBtn').addEventListener('click',async()=>{const key=$('#groqApiKeySetting').value.trim();if(!key){showToast('La API Key no puede estar vacía.');return;}try{await saveGroqKeyDB(key);showToast('✅ API Key de Groq guardada.');}catch(err){showToast('Error: '+err.message);}});
 
   // ── RETIROS ADMIN ──
   async function loadRetirosAdmin(){
@@ -725,7 +823,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   async function enterAdmin(){
     $('#gateScreen').style.display='none';$('#adminScreen').style.display='block';
     setLoading(true);await Promise.all([loadProducts(),loadPedidos()]);setLoading(false);
-    render();updateCalcPreview();$('#adminPinSetting').value=adminPin;renderVendorsList();$('#statPedidos').textContent=pedidos.length;
+    render();updateCalcPreview();$('#adminPinSetting').value=adminPin;$('#groqApiKeySetting').value=groqApiKey;renderVendorsList();$('#statPedidos').textContent=pedidos.length;
     switchAdminPanel('catalogo');
   }
 
@@ -734,7 +832,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     document.querySelectorAll('.apanel').forEach(p=>p.classList.remove('apanel-active'));
     const target=$('#apanel-'+name);if(target)target.classList.add('apanel-active');
     document.querySelectorAll('[data-apanel]').forEach(btn=>btn.classList.toggle('asnav-active',btn.getAttribute('data-apanel')===name));
-    if(name==='vendedores'){$('#adminPinSetting').value=adminPin;renderVendorsList();}
+    if(name==='vendedores'){$('#adminPinSetting').value=adminPin;$('#groqApiKeySetting').value=groqApiKey;renderVendorsList();}
     if(name==='anuncios'){renderAdminAnuncios();}
     if(name==='pedidos'){loadPedidos().then(renderPedidos);}
     if(name==='retiros'){loadRetirosAdmin();}
