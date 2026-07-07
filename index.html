@@ -117,6 +117,11 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 .ai-custom-wrap textarea{width:100%;padding:10px 12px;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:13px;resize:vertical;color:var(--ink);line-height:1.5;transition:border-color var(--ease),box-shadow var(--ease);}
 .ai-custom-wrap textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-tint);}
 .ai-custom-wrap .btn{margin-top:8px;}
+.ai-strength-row{margin-top:10px;}
+.ai-strength-row label{display:block;font-size:11.5px;font-weight:600;color:var(--ink-2);margin-bottom:6px;}
+.ai-strength-row label b{color:var(--accent-ink);font-variant-numeric:tabular-nums;}
+.ai-strength-row input[type=range]{width:100%;accent-color:var(--accent);height:4px;cursor:pointer;}
+.ai-strength-hint{font-size:10.5px;color:var(--muted);margin-top:5px;line-height:1.4;}
 .ai-image-status{display:none;align-items:center;gap:8px;margin-top:10px;font-size:11.5px;color:var(--accent-ink);font-weight:600;}
 .ai-image-status.show{display:flex;}
 .ai-spinner{width:13px;height:13px;border:2px solid rgba(191,90,242,.25);border-top-color:var(--accent-ink);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
@@ -555,9 +560,14 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
                 <button type="button" class="btn btn-ai btn-sm" id="aiWhiteBgBtn"><span>🤍</span> Fondo blanco</button>
                 <button type="button" class="btn btn-ai btn-sm" id="aiCustomToggleBtn"><span>🛍️</span> Estilo e-commerce</button>
               </div>
-              <div id="aiCustomPromptWrap" class="ai-custom-wrap">
+              <div class="ai-custom-wrap" id="aiCustomPromptWrap">
                 <textarea id="aiCustomPrompt" rows="2" placeholder="Ej: fondo de mármol blanco con luz suave, sombra sutil, estilo e-commerce premium"></textarea>
                 <button type="button" class="btn btn-primary btn-sm" id="aiCustomGenBtn">✨ Generar</button>
+              </div>
+              <div class="ai-strength-row">
+                <label for="aiStrengthRange">Intensidad del cambio: <b id="aiStrengthVal">30%</b></label>
+                <input type="range" id="aiStrengthRange" min="15" max="70" step="5" value="30">
+                <p class="ai-strength-hint">Baja = conserva mejor el producto tal cual. Alta = cambia más el entorno, pero puede distorsionar.</p>
               </div>
               <div id="aiImageStatus" class="ai-image-status"><span class="ai-spinner"></span><span class="ai-image-status-text"></span></div>
               <p class="ai-image-tools-hint">Sube primero una foto. La IA la transforma conservando el producto y cambiando el entorno.</p>
@@ -832,7 +842,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
       const res=await fetch(cfWorkerUrl,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({prompt,image:Array.from(bytes),strength:strength,num_steps:20,guidance:7.5})
+        body:JSON.stringify({prompt,image:Array.from(bytes),strength:strength,num_steps:25,guidance:7.5})
       });
       if(!res.ok){
         let msg='HTTP '+res.status;
@@ -855,9 +865,11 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     }
   }
   const PROMPT_FONDO_BLANCO='professional e-commerce product photography, the exact same product centered, clean pure white seamless background, soft studio softbox lighting, subtle natural shadow beneath product, sharp focus, high resolution catalog photo, no text, no watermark';
-  $('#aiWhiteBgBtn').addEventListener('click',()=>{generarImagenIA(PROMPT_FONDO_BLANCO,0.45);});
+  function getAiStrength(){return (parseFloat($('#aiStrengthRange').value)||30)/100;}
+  $('#aiStrengthRange').addEventListener('input',()=>{$('#aiStrengthVal').textContent=$('#aiStrengthRange').value+'%';});
+  $('#aiWhiteBgBtn').addEventListener('click',()=>{generarImagenIA(PROMPT_FONDO_BLANCO,getAiStrength());});
   $('#aiCustomToggleBtn').addEventListener('click',()=>{const wrap=$('#aiCustomPromptWrap');const willShow=!wrap.classList.contains('show');wrap.classList.toggle('show',willShow);if(willShow)$('#aiCustomPrompt').focus();});
-  $('#aiCustomGenBtn').addEventListener('click',()=>{const prompt=$('#aiCustomPrompt').value.trim();if(!prompt){showToast('⚠️ Escribe un prompt para el estilo que quieres.');return;}generarImagenIA(prompt,0.55);});
+  $('#aiCustomGenBtn').addEventListener('click',()=>{const prompt=$('#aiCustomPrompt').value.trim();if(!prompt){showToast('⚠️ Escribe un prompt para el estilo que quieres.');return;}generarImagenIA(prompt,getAiStrength());});
   $('#saveCfWorkerBtn').addEventListener('click',async()=>{const url=$('#cfWorkerUrlSetting').value.trim();if(!url){showToast('La URL no puede estar vacía.');return;}try{await saveCfWorkerUrlDB(url);showToast('✅ URL del Worker guardada.');}catch(err){showToast('Error: '+err.message);}});
 
   // ── RETIROS ADMIN ──
@@ -1076,6 +1088,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     $('#oferta2Toggle').checked=false;$('#oferta2Preview').style.display='none';$('#calcOferta2Row').style.display='none';
     $('#oferta3Toggle').checked=false;$('#oferta3Preview').style.display='none';$('#calcOferta3Row').style.display='none';
     $('#aiCustomPromptWrap').classList.remove('show');$('#aiCustomPrompt').value='';setAiImageStatus('');
+    $('#aiStrengthRange').value=30;$('#aiStrengthVal').textContent='30%';
     updateCalcPreview();
   }
   $('#cancelEditBtn').addEventListener('click',()=>{resetForm();closeProductModal();});
