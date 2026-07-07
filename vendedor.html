@@ -555,7 +555,7 @@ button{font:inherit;}
         <div id="modalPublicPrice" style="font-size:25px;font-weight:800;color:var(--accent-ink);letter-spacing:-.5px;font-variant-numeric:tabular-nums;"></div>
       </div>
       <div style="display:flex;gap:8px;margin-bottom:14px;">
-        <div style="flex:1;background:rgba(100,110,130,.08);border-radius:9px;padding:10px 12px;"><div style="font-size:10px;text-transform:uppercase;font-weight:700;color:#5A6270;margin-bottom:3px;">Tú pagas</div><div id="modalVendorPrice" style="font-size:15px;font-weight:700;color:#3A3A3C;font-variant-numeric:tabular-nums;"></div></div>
+        <div style="flex:1;background:rgba(100,110,130,.08);border-radius:9px;padding:10px 12px;"><div style="font-size:10px;text-transform:uppercase;font-weight:700;color:#5A6270;margin-bottom:3px;">Tú pagas</div><div id="modalVendorPrice" style="font-size:15px;font-weight:700;color:#3A3A3C;font-variant-numeric:tabular-nums;"></div><div id="modalVendorBreakdown" style="font-size:9.5px;color:#8A8A8E;margin-top:3px;line-height:1.4;display:none;"></div></div>
         <div style="flex:1;background:var(--green-tint);border-radius:9px;padding:10px 12px;"><div style="font-size:10px;text-transform:uppercase;font-weight:700;color:#1a9e4a;margin-bottom:3px;">Tu ganancia</div><div id="modalEarn" style="font-size:15px;font-weight:700;color:#1a9e4a;font-variant-numeric:tabular-nums;"></div><div id="modalMargin" style="font-size:13px;font-weight:800;color:#1a9e4a;"></div></div>
       </div>
       <div id="modalOfertasBlock"></div>
@@ -814,7 +814,11 @@ button{font:inherit;}
     $('#modalBadges').innerHTML='<span class="badge badge-cat">'+esc(p.category||'')+'</span>'+stockBadge+shippingBadge;
     $('#modalName').textContent=p.name;
     $('#modalPublicPrice').textContent=currency.format(prices.publicPrice)+(prices.shipping>0?' (c/envío)':'');
-    $('#modalVendorPrice').textContent=currency.format(prices.vendorPrice);
+    const totalVendorPaga=prices.vendorPrice+prices.shipping;
+    $('#modalVendorPrice').textContent=currency.format(totalVendorPaga);
+    const vb=$('#modalVendorBreakdown');
+    if(prices.shipping>0){vb.style.display='block';vb.textContent='Producto '+currency.format(prices.vendorPrice)+' + Envío '+currency.format(prices.shipping);}
+    else{vb.style.display='none';vb.textContent='';}
     $('#modalEarn').textContent='+'+currency.format(earn);
     $('#modalMargin').textContent=(p.margin||0)+'%';
     $('#modalCopy').textContent=p.copy||'(Sin copy de venta)';
