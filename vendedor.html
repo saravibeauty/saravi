@@ -195,36 +195,72 @@ button{font:inherit;}
 .chip:hover{border-color:rgba(191,90,242,.4);color:var(--accent-ink);}
 .chip:active{transform:scale(.95);}
 .chip.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 3px 10px rgba(191,90,242,.28);}
-.vgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-3);margin-top:var(--sp-4);}
-@media(min-width:520px){.vgrid{grid-template-columns:repeat(3,1fr);}}
+.vgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-4) var(--sp-3);margin-top:var(--sp-4);}
+@media(min-width:520px){.vgrid{grid-template-columns:repeat(3,1fr);gap:var(--sp-4);}}
 @media(min-width:860px){.vgrid{grid-template-columns:repeat(4,1fr);}}
-.vcard{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;transition:transform .3s var(--spring),box-shadow .24s var(--ease);animation:fadeUp .3s ease both;cursor:pointer;}
-.vcard:hover{box-shadow:var(--shadow);transform:translateY(-2px);}
-.vcard:active{transform:scale(.98);}
-.vcard-img{width:100%;aspect-ratio:1/1.02;background:var(--surface-2);overflow:hidden;display:flex;align-items:center;justify-content:center;position:relative;}
-.vcard-img img{width:100%;height:100%;object-fit:cover;}
-.vcard-img .noimg{font-size:28px;opacity:.18;}
-.vcard-badges-float{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;gap:5px;flex-wrap:wrap;}
-.vcard-badges-float .badge{backdrop-filter:blur(8px);background:rgba(255,255,255,.82);box-shadow:0 1px 3px rgba(0,0,0,.08);}
+@media(min-width:1200px){.vgrid{grid-template-columns:repeat(5,1fr);}}
+
+/* ── TARJETA DE PRODUCTO — rediseño ── */
+.vcard{
+  background:var(--surface);
+  border-radius:20px;
+  border:1px solid var(--line);
+  box-shadow:var(--shadow-sm);
+  overflow:hidden;
+  display:flex;flex-direction:column;
+  transition:transform .32s var(--spring),box-shadow .28s var(--ease),border-color .28s var(--ease);
+  animation:fadeUp .3s ease both;
+  cursor:pointer;
+}
+.vcard:hover{box-shadow:0 14px 32px rgba(0,0,0,.09),0 2px 6px rgba(0,0,0,.05);transform:translateY(-3px);border-color:rgba(60,60,67,.18);}
+.vcard:active{transform:translateY(-1px) scale(.985);transition-duration:.12s;}
+
+/* Foto del producto: sin recortes, centrada, con aire y un leve realce */
+.vcard-img{
+  width:100%;
+  aspect-ratio:1/1;
+  background:radial-gradient(120% 120% at 50% 20%,#FCFCFD 0%,#F2F2F4 100%);
+  overflow:hidden;display:flex;align-items:center;justify-content:center;
+  position:relative;padding:16px;
+}
+.vcard-img img{
+  width:100%;height:100%;object-fit:contain;
+  filter:drop-shadow(0 10px 18px rgba(20,20,25,.10));
+  transition:transform .4s var(--spring);
+}
+.vcard:hover .vcard-img img{transform:scale(1.045);}
+.vcard-img .noimg{font-size:32px;opacity:.16;}
+.vcard-badges-float{position:absolute;top:9px;left:9px;right:9px;display:flex;justify-content:space-between;gap:5px;flex-wrap:wrap;pointer-events:none;}
+.vcard-badges-float .badge{backdrop-filter:blur(10px);background:rgba(255,255,255,.88);box-shadow:0 1px 4px rgba(0,0,0,.09);}
 .vcard-badges-float .badge-ok{color:#1a9e4a;}
 .vcard-badges-float .badge-low{color:#B36B00;}
 .vcard-badges-float .badge-out{color:var(--red);}
-.vcard-body{padding:var(--sp-3) var(--sp-3) var(--sp-3);}
-.vcard-cat{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;}
-.vcard-name{font-size:var(--fs-sm);font-weight:700;line-height:1.32;margin-bottom:9px;min-height:34px;letter-spacing:-.1px;color:var(--ink);}
-.vcard-earn-row{display:flex;align-items:baseline;justify-content:space-between;background:var(--green-tint);border-radius:9px;padding:8px 10px;margin-bottom:7px;}
+
+.vcard-body{padding:13px 13px 14px;display:flex;flex-direction:column;flex:1;}
+.vcard-cat{font-size:9.5px;font-weight:700;color:var(--accent-ink);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;opacity:.8;}
+.vcard-name{
+  font-size:13.5px;font-weight:700;line-height:1.32;letter-spacing:-.1px;color:var(--ink);
+  margin-bottom:10px;
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;
+  min-height:35px;
+}
+.vcard-earn-row{display:flex;align-items:center;justify-content:space-between;background:var(--green-tint);border-radius:11px;padding:9px 11px;margin-bottom:8px;}
 .vcard-earn-row .ve-label{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#1a9e4a;opacity:.85;}
-.vcard-earn-row .ve-amount{font-size:15px;font-weight:800;color:#1a9e4a;font-variant-numeric:tabular-nums;letter-spacing:-.2px;}
-.vcard-sub-prices{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--muted);margin-bottom:8px;padding:0 1px;}
-.vcard-sub-prices b{color:var(--ink-2);font-weight:600;font-variant-numeric:tabular-nums;}
+.vcard-earn-row .ve-amount{font-size:15.5px;font-weight:800;color:#1a9e4a;font-variant-numeric:tabular-nums;letter-spacing:-.2px;}
+.vcard-price-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;}
+.vcard-price-chip{background:var(--surface-2);border-radius:8px;padding:6px 8px;text-align:center;}
+.vcard-price-chip span{display:block;font-size:8.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:700;margin-bottom:2px;}
+.vcard-price-chip b{font-size:12px;font-weight:800;color:var(--ink-2);font-variant-numeric:tabular-nums;}
 .oferta-mini{margin-bottom:6px;background:rgba(60,60,67,.05);border-radius:8px;padding:6px 10px;display:flex;justify-content:space-between;font-size:10.5px;}
 .oferta-mini span{color:var(--ink-2);font-weight:600;}
 .oferta-mini b{color:var(--accent-ink);font-variant-numeric:tabular-nums;}
-.vcard-foot{display:flex;align-items:center;justify-content:space-between;margin-top:2px;}
+.vcard-foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:6px;border-top:1px dashed var(--line);}
 .vcard-id-chip{display:inline-flex;align-items:center;font-size:10px;font-weight:600;color:var(--muted);background:none;border:none;padding:2px 0;cursor:pointer;font-family:ui-monospace,'SF Mono',monospace;user-select:none;transition:color .2s var(--ease);}
 .vcard-id-chip:hover{color:var(--accent-ink);}
 .vcard-id-chip.copied{color:#1a9e4a;}
-.vcard-tap-hint{font-size:10px;color:var(--muted);opacity:.65;}
+.vcard-tap-hint{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--accent-ink);opacity:.75;font-weight:600;}
+.vcard-tap-hint svg{width:11px;height:11px;transition:transform .25s var(--spring);}
+.vcard:hover .vcard-tap-hint svg{transform:translateX(2px);}
 
 /* BANCO */
 .banco-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-5);flex-wrap:wrap;gap:var(--sp-3);}
@@ -524,12 +560,14 @@ button{font:inherit;}
       </div>
       <div id="modalOfertasBlock"></div>
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;">Copy de venta</div>
-      <div id="modalCopy" style="background:var(--accent-tint);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:12px 14px;font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word;margin-bottom:16px;"></div>
+      <div style="position:relative;margin-bottom:16px;">
+        <div id="modalCopy" style="background:var(--accent-tint);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:12px 46px 12px 14px;font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word;"></div>
+        <button id="modalCopyBtn" title="Copiar copy" style="position:absolute;top:8px;right:8px;display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.85);backdrop-filter:blur(6px);border:1px solid rgba(191,90,242,.18);color:var(--accent-ink);font-size:10.5px;font-weight:700;padding:5px 8px;border-radius:8px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.07);transition:background .2s var(--ease),transform .25s var(--spring);">📋</button>
+      </div>
       <div style="display:flex;flex-direction:column;gap:8px;">
         <button id="modalShareBtn" class="btn btn-whatsapp btn-full" style="font-size:15px;">📲 Compartir creativo + copy</button>
         <button id="modalSendOrderBtn" class="btn btn-whatsapp btn-full btn-sm" style="font-size:14px;">🚀 Link Pedido Entrega Inmediata</button>
         <button id="modalSendCampanaBtn" class="btn btn-primary btn-full btn-sm" style="font-size:14px;">📅 Link Pedido Cierre de Campaña</button>
-        <button id="modalCopyBtn" class="btn btn-ghost btn-full">📋 Copiar solo el copy</button>
       </div>
       <div id="orderLinkBox" style="display:none;margin-top:12px;background:var(--green-tint);border:1px solid rgba(37,211,102,.25);border-radius:12px;padding:12px 14px;">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#1a9e4a;margin-bottom:6px;">🚀 Link · Entrega Inmediata</div>
@@ -750,7 +788,7 @@ button{font:inherit;}
     const imgHtml=p.image?`<img src="${esc(p.image)}" alt="${esc(p.name)}">`:`<div class="noimg">🫙</div>`;
     const hasCopy=p.copy&&p.copy.trim().length>0;
     const shippingBadge=prices.shipping>0?`<span class="badge" style="background:var(--amber-tint);color:#B36B00;">Envío inc.</span>`:'';
-    card.innerHTML=`<div class="vcard-img">${imgHtml}<div class="vcard-badges-float">${stockBadge}${shippingBadge}</div></div><div class="vcard-body"><div class="vcard-cat">${esc(p.category||'')}</div><div class="vcard-name">${esc(p.name)}</div><div class="vcard-earn-row"><span class="ve-label">Tu ganancia</span><span class="ve-amount">${currency.format(prices.publicPrice-prices.vendorPrice-prices.shipping)}</span></div><div class="vcard-sub-prices"><span>Público <b>${currency.format(prices.publicPrice)}</b></span><span>Pagas <b>${currency.format(prices.vendorPrice+prices.shipping)}</b></span></div>${p.oferta2_activa?`<div class="oferta-mini"><span>Oferta x2</span><b>${currency.format(p.oferta2_precio||0)}</b></div>`:''}${p.oferta3_activa?`<div class="oferta-mini"><span>Oferta x3</span><b>${currency.format(p.oferta3_precio||0)}</b></div>`:''}<div class="vcard-foot"><span class="vcard-id-chip" data-copy-id="${esc(p.id)}">#${esc(p.id)}</span><span class="vcard-tap-hint">${hasCopy?'Toca para compartir':'Toca para ver'}</span></div></div>`;
+    card.innerHTML=`<div class="vcard-img">${imgHtml}<div class="vcard-badges-float">${stockBadge}${shippingBadge}</div></div><div class="vcard-body"><div class="vcard-cat">${esc(p.category||'Producto')}</div><div class="vcard-name">${esc(p.name)}</div><div class="vcard-earn-row"><span class="ve-label">Tu ganancia</span><span class="ve-amount">${currency.format(prices.publicPrice-prices.vendorPrice-prices.shipping)}</span></div><div class="vcard-price-grid"><div class="vcard-price-chip"><span>Público</span><b>${currency.format(prices.publicPrice)}</b></div><div class="vcard-price-chip"><span>Pagas</span><b>${currency.format(prices.vendorPrice+prices.shipping)}</b></div></div>${p.oferta2_activa?`<div class="oferta-mini"><span>Oferta x2</span><b>${currency.format(p.oferta2_precio||0)}</b></div>`:''}${p.oferta3_activa?`<div class="oferta-mini"><span>Oferta x3</span><b>${currency.format(p.oferta3_precio||0)}</b></div>`:''}<div class="vcard-foot"><span class="vcard-id-chip" data-copy-id="${esc(p.id)}">#${esc(p.id)}</span><span class="vcard-tap-hint">${hasCopy?'Compartir':'Ver'}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></div></div>`;
     return card;
   }
   $('#vendorGrid').addEventListener('click',e=>{
@@ -792,7 +830,15 @@ button{font:inherit;}
   function closeModal(){$('#productModal').style.display='none';document.body.style.overflow='';modalProduct=null;}
   $('#modalCloseBtn').addEventListener('click',closeModal);
   $('#productModal').addEventListener('click',e=>{if(e.target===$('#productModal'))closeModal();});
-  $('#modalCopyBtn').addEventListener('click',()=>{if(!modalProduct||!modalProduct.copy)return;navigator.clipboard.writeText(modalProduct.copy.trim()).then(()=>showToast('✅ Copy copiado.')).catch(()=>showToast('No se pudo copiar.'));});
+  $('#modalCopyBtn').addEventListener('click',()=>{
+    if(!modalProduct||!modalProduct.copy)return;
+    const btn=$('#modalCopyBtn');
+    navigator.clipboard.writeText(modalProduct.copy.trim()).then(()=>{
+      showToast('✅ Copy copiado.');
+      const original=btn.textContent;btn.textContent='✅';btn.style.color='#1a9e4a';
+      setTimeout(()=>{btn.textContent=original;btn.style.color='var(--accent-ink)';},1300);
+    }).catch(()=>showToast('No se pudo copiar.'));
+  });
   $('#modalShareBtn').addEventListener('click',()=>{if(modalProduct)shareToWhatsapp(modalProduct,$('#modalShareBtn'));});
 
   // Links apuntan a los archivos separados: pedido-inmediata.html y pedido-campana.html
