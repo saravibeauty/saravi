@@ -203,7 +203,7 @@ button{font:inherit;}
 /* ── TARJETA DE PRODUCTO — rediseño ── */
 .vcard{
   background:var(--surface);
-  border-radius:20px;
+  border-radius:var(--radius-lg);
   border:1px solid var(--line);
   box-shadow:var(--shadow-sm);
   overflow:hidden;
@@ -215,13 +215,13 @@ button{font:inherit;}
 .vcard:hover{box-shadow:0 14px 32px rgba(0,0,0,.09),0 2px 6px rgba(0,0,0,.05);transform:translateY(-3px);border-color:rgba(60,60,67,.18);}
 .vcard:active{transform:translateY(-1px) scale(.985);transition-duration:.12s;}
 
-/* Foto del producto: sin recortes, centrada, con aire y un leve realce */
+/* Foto del producto: protagonista, grande, sin recortes, con leve realce */
 .vcard-img{
   width:100%;
   aspect-ratio:1/1;
   background:radial-gradient(120% 120% at 50% 20%,#FCFCFD 0%,#F2F2F4 100%);
   overflow:hidden;display:flex;align-items:center;justify-content:center;
-  position:relative;padding:16px;
+  position:relative;padding:10px;
 }
 .vcard-img img{
   width:100%;height:100%;object-fit:contain;
@@ -230,37 +230,37 @@ button{font:inherit;}
 }
 .vcard:hover .vcard-img img{transform:scale(1.045);}
 .vcard-img .noimg{font-size:32px;opacity:.16;}
-.vcard-badges-float{position:absolute;top:9px;left:9px;right:9px;display:flex;justify-content:space-between;gap:5px;flex-wrap:wrap;pointer-events:none;}
-.vcard-badges-float .badge{backdrop-filter:blur(10px);background:rgba(255,255,255,.88);box-shadow:0 1px 4px rgba(0,0,0,.09);}
+.vcard-badges-float{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;align-items:flex-start;gap:5px;flex-wrap:nowrap;pointer-events:none;}
+.vcard-badges-float .badge{backdrop-filter:blur(10px);background:rgba(255,255,255,.92);box-shadow:0 1px 4px rgba(0,0,0,.09);white-space:nowrap;flex-shrink:0;font-size:9.5px;padding:3.5px 8px 3.5px 9px;}
 .vcard-badges-float .badge-ok{color:#1a9e4a;}
 .vcard-badges-float .badge-low{color:#B36B00;}
 .vcard-badges-float .badge-out{color:var(--red);}
+.vcard-badges-float .badge-ship{background:rgba(255,255,255,.92);color:#B36B00;}
+.vcard-badges-float .badge-ship::before{display:none;}
 
-.vcard-body{padding:13px 13px 14px;display:flex;flex-direction:column;flex:1;}
-.vcard-cat{font-size:9.5px;font-weight:700;color:var(--accent-ink);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;opacity:.8;}
+.vcard-body{padding:12px 13px 13px;display:flex;flex-direction:column;flex:1;}
 .vcard-name{
-  font-size:13.5px;font-weight:700;line-height:1.32;letter-spacing:-.1px;color:var(--ink);
-  margin-bottom:10px;
+  font-size:14px;font-weight:700;line-height:1.3;letter-spacing:-.1px;color:var(--ink);
+  margin-bottom:9px;
   display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;
-  min-height:35px;
+  min-height:36px;
 }
-.vcard-earn-row{display:flex;align-items:center;justify-content:space-between;background:var(--green-tint);border-radius:11px;padding:9px 11px;margin-bottom:8px;}
-.vcard-earn-row .ve-label{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#1a9e4a;opacity:.85;}
-.vcard-earn-row .ve-amount{font-size:15.5px;font-weight:800;color:#1a9e4a;font-variant-numeric:tabular-nums;letter-spacing:-.2px;}
-.vcard-price-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;}
-.vcard-price-chip{background:var(--surface-2);border-radius:8px;padding:6px 8px;text-align:center;}
-.vcard-price-chip span{display:block;font-size:8.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:700;margin-bottom:2px;}
-.vcard-price-chip b{font-size:12px;font-weight:800;color:var(--ink-2);font-variant-numeric:tabular-nums;}
-.oferta-mini{margin-bottom:6px;background:rgba(60,60,67,.05);border-radius:8px;padding:6px 10px;display:flex;justify-content:space-between;font-size:10.5px;}
-.oferta-mini span{color:var(--ink-2);font-weight:600;}
-.oferta-mini b{color:var(--accent-ink);font-variant-numeric:tabular-nums;}
-.vcard-foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:6px;border-top:1px dashed var(--line);}
+.vcard-earn-row{display:flex;align-items:center;justify-content:space-between;background:var(--green-tint);border-radius:12px;padding:10px 12px;margin-top:auto;}
+.vcard-earn-row .ve-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#1a9e4a;opacity:.85;}
+.vcard-earn-row .ve-amount{font-size:16.5px;font-weight:800;color:#1a9e4a;font-variant-numeric:tabular-nums;letter-spacing:-.3px;}
+.vcard-foot{display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
 .vcard-id-chip{display:inline-flex;align-items:center;font-size:10px;font-weight:600;color:var(--muted);background:none;border:none;padding:2px 0;cursor:pointer;font-family:ui-monospace,'SF Mono',monospace;user-select:none;transition:color .2s var(--ease);}
 .vcard-id-chip:hover{color:var(--accent-ink);}
 .vcard-id-chip.copied{color:#1a9e4a;}
 .vcard-tap-hint{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--accent-ink);opacity:.75;font-weight:600;}
 .vcard-tap-hint svg{width:11px;height:11px;transition:transform .25s var(--spring);}
 .vcard:hover .vcard-tap-hint svg{transform:translateX(2px);}
+
+@media(max-width:600px){
+  .vcard-img{aspect-ratio:4/5;padding:12px;}
+  .vcard-badges-float .badge{font-size:8.5px;padding:3px 7px 3px 7px;}
+  .vcard-name{font-size:13.5px;}
+}
 
 /* BANCO */
 .banco-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-5);flex-wrap:wrap;gap:var(--sp-3);}
@@ -283,7 +283,6 @@ button{font:inherit;}
 .banco-icon-btn.del:hover{background:rgba(255,69,58,.16);}
 .banco-empty{text-align:center;padding:56px 20px;color:var(--muted);}
 .banco-empty .be-icon{font-size:40px;margin-bottom:14px;opacity:.5;}
-.banco-empty strong{display:block;font-size:15px;font-weight:700;color:var(--ink-2);margin-bottom:6px;}
 
 /* MODAL BANCARIO */
 .modal-overlay{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center;padding:0;}
@@ -785,10 +784,10 @@ button{font:inherit;}
     const prices=calcPrices(p);
     let stockBadge=(p.stock||0)<=0?`<span class="badge badge-out">Agotado</span>`:(p.stock||0)<=5?`<span class="badge badge-low">Pocas ud.</span>`:`<span class="badge badge-ok">Disponible</span>`;
     if((p.stock||0)<=0)card.style.opacity='.55';
-    const imgHtml=p.image?`<img src="${esc(p.image)}" alt="${esc(p.name)}">`:`<div class="noimg">🫙</div>`;
+    const imgHtml=p.image?`<img src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy">`:`<div class="noimg">🫙</div>`;
     const hasCopy=p.copy&&p.copy.trim().length>0;
-    const shippingBadge=prices.shipping>0?`<span class="badge" style="background:var(--amber-tint);color:#B36B00;">Envío inc.</span>`:'';
-    card.innerHTML=`<div class="vcard-img">${imgHtml}<div class="vcard-badges-float">${stockBadge}${shippingBadge}</div></div><div class="vcard-body"><div class="vcard-cat">${esc(p.category||'Producto')}</div><div class="vcard-name">${esc(p.name)}</div><div class="vcard-earn-row"><span class="ve-label">Tu ganancia</span><span class="ve-amount">${currency.format(prices.publicPrice-prices.vendorPrice-prices.shipping)}</span></div><div class="vcard-price-grid"><div class="vcard-price-chip"><span>Público</span><b>${currency.format(prices.publicPrice)}</b></div><div class="vcard-price-chip"><span>Pagas</span><b>${currency.format(prices.vendorPrice+prices.shipping)}</b></div></div>${p.oferta2_activa?`<div class="oferta-mini"><span>Oferta x2</span><b>${currency.format(p.oferta2_precio||0)}</b></div>`:''}${p.oferta3_activa?`<div class="oferta-mini"><span>Oferta x3</span><b>${currency.format(p.oferta3_precio||0)}</b></div>`:''}<div class="vcard-foot"><span class="vcard-id-chip" data-copy-id="${esc(p.id)}">#${esc(p.id)}</span><span class="vcard-tap-hint">${hasCopy?'Compartir':'Ver'}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></div></div>`;
+    const shippingBadge=prices.shipping>0?`<span class="badge badge-ship" title="Envío incluido">🚚 Envío</span>`:'';
+    card.innerHTML=`<div class="vcard-img">${imgHtml}<div class="vcard-badges-float">${stockBadge}${shippingBadge}</div></div><div class="vcard-body"><div class="vcard-name">${esc(p.name)}</div><div class="vcard-earn-row"><span class="ve-label">Ganas</span><span class="ve-amount">${currency.format(prices.publicPrice-prices.vendorPrice-prices.shipping)}</span></div><div class="vcard-foot"><span class="vcard-id-chip" data-copy-id="${esc(p.id)}">#${esc(p.id)}</span><span class="vcard-tap-hint">${hasCopy?'Compartir':'Ver'}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></span></div></div>`;
     return card;
   }
   $('#vendorGrid').addEventListener('click',e=>{
@@ -868,9 +867,47 @@ button{font:inherit;}
   $('#copyCampanaLinkBtn').addEventListener('click',()=>{const link=$('#campanaLinkText').textContent;navigator.clipboard.writeText(link).then(()=>{showToast('✅ Link copiado.');$('#copyCampanaLinkBtn').textContent='✅ Copiado';setTimeout(()=>$('#copyCampanaLinkBtn').textContent='📋 Copiar link',1500);}).catch(()=>showToast('No se pudo copiar.'));});
   $('#sendCampanaViaWaBtn').addEventListener('click',()=>{if(!modalProduct)return;const link=$('#campanaLinkText').textContent;const prices=calcPrices(modalProduct);const msg='Hola! 👋 Te comparto esta oferta especial de nuestra *campaña*:\n\n*'+modalProduct.name+'*\nPrecio: '+currency.format(prices.publicPrice)+'\n\n📅 Reserva tu pedido (pagas el día del cierre):\n'+link;window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');});
 
-  function buildShareImage(p){return new Promise(resolve=>{const img=new Image();img.onload=()=>{const canvas=document.createElement('canvas');canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0);canvas.toBlob(blob=>resolve(blob),'image/jpeg',.95);};img.onerror=()=>resolve(null);img.src=p.image;});}
+  // Antes esto dibujaba la imagen en un <canvas> y usaba canvas.toBlob().
+  // Si la imagen viene de otro origen sin CORS habilitado para lectura de píxeles,
+  // el canvas queda "contaminado" y toBlob() lanza un error dentro de img.onload
+  // que nunca se captura → la promesa nunca resuelve → botón colgado en "Preparando imagen…".
+  // Fix: pedimos los bytes originales directo con fetch (sin canvas), y con timeout
+  // de seguridad para que jamás quede colgado, pase lo que pase con la red.
+  function buildShareImage(p){
+    if(!p.image)return Promise.resolve(null);
+    const controller=new AbortController();
+    const timeoutId=setTimeout(()=>controller.abort(),12000);
+    return fetch(p.image,{signal:controller.signal})
+      .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.blob();})
+      .catch(err=>{console.error('buildShareImage error:',err);return null;})
+      .finally(()=>clearTimeout(timeoutId));
+  }
   function downloadBlob(blob,filename){const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);}
-  async function shareToWhatsapp(p,btn){const original=btn.textContent;btn.disabled=true;btn.textContent='Preparando imagen…';try{const blob=await buildShareImage(p);if(!blob){showToast('No se pudo preparar la imagen.');return;}const text=(p.copy&&p.copy.trim())?p.copy.trim():p.name;const file=new File([blob],(p.id||'producto')+'.jpg',{type:'image/jpeg'});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],text,title:p.name});}else if(navigator.share){await navigator.share({text,title:p.name});downloadBlob(blob,file.name);showToast('Imagen descargada — adjúntala en WhatsApp.');}else{downloadBlob(blob,file.name);window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');showToast('Imagen descargada. Ábrela en WhatsApp.');}}catch(err){if(err&&err.name!=='AbortError')showToast('No se pudo compartir.');}finally{btn.disabled=false;btn.textContent=original;}}
+  async function shareToWhatsapp(p,btn){
+    const original=btn.textContent;btn.disabled=true;btn.textContent='Preparando imagen…';
+    try{
+      const blob=await buildShareImage(p);
+      if(!blob){showToast('No se pudo preparar la imagen. Verifica la URL de la foto del producto.');return;}
+      const text=(p.copy&&p.copy.trim())?p.copy.trim():p.name;
+      const ext=blob.type&&blob.type.includes('/')?blob.type.split('/')[1].replace('jpeg','jpg'):'jpg';
+      const file=new File([blob],(p.id||'producto')+'.'+ext,{type:blob.type||'image/jpeg'});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){
+        await navigator.share({files:[file],text,title:p.name});
+      }else if(navigator.share){
+        await navigator.share({text,title:p.name});
+        downloadBlob(blob,file.name);
+        showToast('Imagen descargada — adjúntala en WhatsApp.');
+      }else{
+        downloadBlob(blob,file.name);
+        window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
+        showToast('Imagen descargada. Ábrela en WhatsApp.');
+      }
+    }catch(err){
+      if(err&&err.name!=='AbortError')showToast('No se pudo compartir.');
+    }finally{
+      btn.disabled=false;btn.textContent=original;
+    }
+  }
 
   // ── ANUNCIOS ──
   function renderVendorAnuncios(){const container=$('#anunciosContainer');if(!container)return;if(!anuncios.length){container.innerHTML='<div class="no-anuncios"><div class="na-icon">📢</div><b>Sin anuncios por ahora</b><p style="margin-top:6px;font-size:13px;">Aquí aparecerán los mensajes de tu administrador.</p></div>';return;}const iconos={general:'📢',alerta:'🔴',info:'💬',logro:'🏆'};container.innerHTML=anuncios.map(a=>'<div class="anuncio-card tipo-'+a.tipo+'"><div class="anuncio-header"><span class="anuncio-emoji">'+(iconos[a.tipo]||'📢')+'</span><span class="anuncio-titulo">'+esc(a.titulo)+'</span><span class="anuncio-fecha">'+(a.fecha||'')+'</span></div><div class="anuncio-texto">'+esc(a.texto)+'</div></div>').join('');}
