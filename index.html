@@ -842,7 +842,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
       const res=await fetch(cfWorkerUrl,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({prompt,image:Array.from(bytes),strength:strength,num_steps:25,guidance:7.5})
+        body:JSON.stringify({prompt,image:Array.from(bytes),strength:strength,num_steps:20,guidance:7.5})
       });
       if(!res.ok){
         let msg='HTTP '+res.status;
