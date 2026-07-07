@@ -600,7 +600,7 @@ button{font:inherit;}
   $('#navCierreCampana').addEventListener('click',()=>{window.open('cierre-campana.html','_blank');});
 
   // ── DATA ──
-  async function loadProducts(){const{data,error}=await db.from('products').select('*').order('created_at',{ascending:false});if(error){console.error('products:',error);return;}products=data||[];}
+  async function loadProducts(){const{data,error}=await db.from('products').select('*').eq('activo',true).order('created_at',{ascending:false});if(error){console.error('products:',error);return;}products=data||[];}
   async function loadAnuncios(){const{data,error}=await db.from('anuncios').select('*').order('created_at',{ascending:false});if(error){console.error('anuncios:',error);return;}anuncios=data||[];}
   async function loadCuentasBancarias(){
     if(!currentVendor)return;
