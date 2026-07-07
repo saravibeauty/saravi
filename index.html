@@ -480,9 +480,8 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
           </div>
           <div>
             <div class="v-section-title">🖼️ Cloudflare Workers AI (Mejora de imágenes)</div>
-            <div class="inline-row" style="margin-bottom:8px;"><input type="text" id="cfAccountIdSetting" placeholder="Account ID"><button class="btn btn-ghost btn-sm" id="saveCfAccountBtn">Guardar</button></div>
-            <div class="inline-row"><input type="password" id="cfApiTokenSetting" placeholder="API Token"><button class="btn btn-ghost btn-sm" id="saveCfTokenBtn">Guardar</button></div>
-            <p style="font-size:12px;color:var(--muted);margin-top:8px;">Se usa en el catálogo para poner fondo blanco o estilo e-commerce a las fotos (sección "✨ Mejorar imagen con IA"). Crea un token en <span style="font-family:ui-monospace,'SF Mono',monospace;">dash.cloudflare.com → Perfil → API Tokens</span> con permiso <b>Workers AI · Edit</b>, y copia el <b>Account ID</b> desde el panel principal.</p>
+            <div class="inline-row"><input type="text" id="cfWorkerUrlSetting" placeholder="https://saravi-ai-imagen.tuusuario.workers.dev"><button class="btn btn-ghost btn-sm" id="saveCfWorkerBtn">Guardar</button></div>
+            <p style="font-size:12px;color:var(--muted);margin-top:8px;">URL de tu Cloudflare Worker (puente hacia Workers AI). Se usa en el catálogo para poner fondo blanco o estilo e-commerce a las fotos (sección "✨ Mejorar imagen con IA").</p>
           </div>
         </div>
         <div class="vendors-list" id="vendorsList"></div>
@@ -668,7 +667,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   let products=[], vendors=[], anuncios=[], pedidos=[];
   let adminPin='1234';
   let groqApiKey='';
-  let cfAccountId='', cfApiToken='';
+  let cfWorkerUrl='';
   let editingId=null, pendingImageData=null, deleteConfirmId=null;
 
   const $=sel=>document.querySelector(sel);
@@ -698,11 +697,10 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   async function loadVendors(){const{data,error}=await db.from('vendors').select('*').order('created_at',{ascending:true});if(error){console.error('vendors:',error);return;}vendors=data||[];}
   async function addVendor(name,pin){const{error}=await db.from('vendors').insert({name,pin});if(error)throw error;await loadVendors();}
   async function removeVendor(id){const{error}=await db.from('vendors').delete().eq('id',id);if(error)throw error;await loadVendors();}
-  async function loadConfig(){const{data,error}=await db.from('config').select('*');if(error){console.error('config:',error);return;}const pinRow=(data||[]).find(r=>r.key==='admin_pin');adminPin=pinRow?pinRow.value:'1234';const groqRow=(data||[]).find(r=>r.key==='groq_api_key');groqApiKey=groqRow?groqRow.value:'';const cfAccRow=(data||[]).find(r=>r.key==='cf_account_id');cfAccountId=cfAccRow?cfAccRow.value:'';const cfTokRow=(data||[]).find(r=>r.key==='cf_api_token');cfApiToken=cfTokRow?cfTokRow.value:'';}
+  async function loadConfig(){const{data,error}=await db.from('config').select('*');if(error){console.error('config:',error);return;}const pinRow=(data||[]).find(r=>r.key==='admin_pin');adminPin=pinRow?pinRow.value:'1234';const groqRow=(data||[]).find(r=>r.key==='groq_api_key');groqApiKey=groqRow?groqRow.value:'';const cfRow=(data||[]).find(r=>r.key==='cf_worker_url');cfWorkerUrl=cfRow?cfRow.value:'';}
   async function saveAdminPinDB(pin){const{error}=await db.from('config').upsert({key:'admin_pin',value:pin},{onConflict:'key'});if(error)throw error;adminPin=pin;}
   async function saveGroqKeyDB(key){const{error}=await db.from('config').upsert({key:'groq_api_key',value:key},{onConflict:'key'});if(error)throw error;groqApiKey=key;}
-  async function saveCfAccountDB(id){const{error}=await db.from('config').upsert({key:'cf_account_id',value:id},{onConflict:'key'});if(error)throw error;cfAccountId=id;}
-  async function saveCfTokenDB(token){const{error}=await db.from('config').upsert({key:'cf_api_token',value:token},{onConflict:'key'});if(error)throw error;cfApiToken=token;}
+  async function saveCfWorkerUrlDB(url){const{error}=await db.from('config').upsert({key:'cf_worker_url',value:url},{onConflict:'key'});if(error)throw error;cfWorkerUrl=url;}
   async function loadAnuncios(){const{data,error}=await db.from('anuncios').select('*').order('created_at',{ascending:false});if(error){console.error('anuncios:',error);return;}anuncios=data||[];}
   async function saveAnuncio(titulo,texto,tipo){const fecha=new Date().toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'});const{error}=await db.from('anuncios').insert({titulo,texto,tipo,fecha});if(error)throw error;await loadAnuncios();}
   async function removeAnuncio(id){const{error}=await db.from('anuncios').delete().eq('id',id);if(error)throw error;await loadAnuncios();}
@@ -826,21 +824,19 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   async function generarImagenIA(prompt,strength){
     const currentSource=pendingImageData||(editingId&&(products.find(p=>p.id===editingId)||{}).image)||null;
     if(!currentSource){showToast('⚠️ Sube primero una foto del producto.');return;}
-    if(!cfAccountId||!cfApiToken){showToast('⚠️ Falta configurar Cloudflare (Account ID / Token) en "Vendedores".');return;}
+    if(!cfWorkerUrl){showToast('⚠️ Falta configurar la URL del Worker de Cloudflare en "Vendedores".');return;}
     setAiImageStatus('Generando imagen con IA, un momento…');
     setAiButtonsDisabled(true);
     try{
       const bytes=await dataUrlToUint8Array(currentSource,768);
-      const model='@cf/runwayml/stable-diffusion-v1-5-img2img';
-      const url=`https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/ai/run/${model}`;
-      const res=await fetch(url,{
+      const res=await fetch(cfWorkerUrl,{
         method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+cfApiToken},
+        headers:{'Content-Type':'application/json'},
         body:JSON.stringify({prompt,image:Array.from(bytes),strength:strength,num_steps:20,guidance:7.5})
       });
       if(!res.ok){
         let msg='HTTP '+res.status;
-        try{const j=await res.json();if(j&&j.errors&&j.errors[0]&&j.errors[0].message)msg=j.errors[0].message;}catch(_){}
+        try{const j=await res.json();if(j&&j.error)msg=j.error;}catch(_){}
         throw new Error(msg);
       }
       const blob=await res.blob();
@@ -851,7 +847,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
       $('#dzPlaceholder').style.display='none';
       showToast('✅ Imagen generada con IA.');
     }catch(err){
-      console.error('Cloudflare AI error:',err);
+      console.error('Cloudflare Worker AI error:',err);
       showToast('❌ No se pudo generar la imagen: '+err.message);
     }finally{
       setAiImageStatus('');
@@ -862,8 +858,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   $('#aiWhiteBgBtn').addEventListener('click',()=>{generarImagenIA(PROMPT_FONDO_BLANCO,0.45);});
   $('#aiCustomToggleBtn').addEventListener('click',()=>{const wrap=$('#aiCustomPromptWrap');const willShow=!wrap.classList.contains('show');wrap.classList.toggle('show',willShow);if(willShow)$('#aiCustomPrompt').focus();});
   $('#aiCustomGenBtn').addEventListener('click',()=>{const prompt=$('#aiCustomPrompt').value.trim();if(!prompt){showToast('⚠️ Escribe un prompt para el estilo que quieres.');return;}generarImagenIA(prompt,0.55);});
-  $('#saveCfAccountBtn').addEventListener('click',async()=>{const id=$('#cfAccountIdSetting').value.trim();if(!id){showToast('El Account ID no puede estar vacío.');return;}try{await saveCfAccountDB(id);showToast('✅ Account ID de Cloudflare guardado.');}catch(err){showToast('Error: '+err.message);}});
-  $('#saveCfTokenBtn').addEventListener('click',async()=>{const token=$('#cfApiTokenSetting').value.trim();if(!token){showToast('El API Token no puede estar vacío.');return;}try{await saveCfTokenDB(token);showToast('✅ API Token de Cloudflare guardado.');}catch(err){showToast('Error: '+err.message);}});
+  $('#saveCfWorkerBtn').addEventListener('click',async()=>{const url=$('#cfWorkerUrlSetting').value.trim();if(!url){showToast('La URL no puede estar vacía.');return;}try{await saveCfWorkerUrlDB(url);showToast('✅ URL del Worker guardada.');}catch(err){showToast('Error: '+err.message);}});
 
   // ── RETIROS ADMIN ──
   async function loadRetirosAdmin(){
@@ -938,7 +933,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   async function enterAdmin(){
     $('#gateScreen').style.display='none';$('#adminScreen').style.display='block';
     setLoading(true);await Promise.all([loadProducts(),loadPedidos()]);setLoading(false);
-    render();updateCalcPreview();$('#adminPinSetting').value=adminPin;$('#groqApiKeySetting').value=groqApiKey;$('#cfAccountIdSetting').value=cfAccountId;$('#cfApiTokenSetting').value=cfApiToken;renderVendorsList();$('#statPedidos').textContent=pedidos.length;
+    render();updateCalcPreview();$('#adminPinSetting').value=adminPin;$('#groqApiKeySetting').value=groqApiKey;$('#cfWorkerUrlSetting').value=cfWorkerUrl;renderVendorsList();$('#statPedidos').textContent=pedidos.length;
     switchAdminPanel('catalogo');
   }
 
@@ -947,7 +942,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     document.querySelectorAll('.apanel').forEach(p=>p.classList.remove('apanel-active'));
     const target=$('#apanel-'+name);if(target)target.classList.add('apanel-active');
     document.querySelectorAll('[data-apanel]').forEach(btn=>btn.classList.toggle('asnav-active',btn.getAttribute('data-apanel')===name));
-    if(name==='vendedores'){$('#adminPinSetting').value=adminPin;$('#groqApiKeySetting').value=groqApiKey;$('#cfAccountIdSetting').value=cfAccountId;$('#cfApiTokenSetting').value=cfApiToken;renderVendorsList();}
+    if(name==='vendedores'){$('#adminPinSetting').value=adminPin;$('#groqApiKeySetting').value=groqApiKey;$('#cfWorkerUrlSetting').value=cfWorkerUrl;renderVendorsList();}
     if(name==='anuncios'){renderAdminAnuncios();}
     if(name==='pedidos'){loadPedidos().then(renderPedidos);}
     if(name==='retiros'){loadRetirosAdmin();}
