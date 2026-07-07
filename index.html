@@ -684,7 +684,10 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
       '- Si es tecnología, enfatiza funciones y utilidad.',
       '- Si es belleza o salud, enfócate en la aplicación y los beneficios indicados.',
       '- Adapta el tono automáticamente según la categoría.',
-      '- El campo "copy_estado" es el más importante: debe ser corto (máx. 3-4 líneas), con emojis moderados, ideal para publicar como estado de WhatsApp junto a una foto del producto, y debe cerrar invitando a escribir/pedir.',
+      '- El campo "copy_estado" es el más importante: es el texto que se publicará TAL CUAL como estado de WhatsApp junto a una foto del producto.',
+      '- REGLA CLAVE: si el usuario ya escribió características técnicas, medidas, cantidades, accesorios incluidos o cualquier dato concreto en sus notas, DEBES conservarlos TODOS en el "copy_estado". No los resumas, no los omitas ni los generalices. Tu trabajo es mejorar la redacción, el orden y el gancho — no acortar ni quitar información de venta real.',
+      '- Estructura recomendada para "copy_estado": 1) una línea de apertura llamativa (gancho), 2) una lista de viñetas con emoji cubriendo TODAS las características/beneficios/accesorios que el usuario mencionó, 3) el precio, 4) frase de urgencia/escasez SOLO si el usuario ya la mencionó en sus notas (no la inventes si no estaba), 5) un cierre corto invitando a escribir/pedir.',
+      '- No hay límite estricto de líneas: prioriza incluir toda la información real por encima de que sea corto. Puedes usar hasta 500 caracteres si es necesario.',
       '',
       'INSTRUCCIÓN FINAL: Devuelve ÚNICAMENTE un JSON válido, sin texto adicional ni backticks, con esta estructura exacta:',
       '{"titulo":"","descripcion":"","copy_estado":"","llamado_accion":"","hashtags":[]}'
