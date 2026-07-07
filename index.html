@@ -106,6 +106,23 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 .dropzone .dz-ph span{display:block;font-size:12px;opacity:.7;margin-top:2px;}
 .dropzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
 
+.ai-image-tools{margin-top:10px;background:var(--accent-tint);border:1px solid rgba(191,90,242,.18);border-radius:var(--radius-sm);padding:13px 14px;transition:border-color var(--ease);}
+.ai-image-tools-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:11px;}
+.ai-image-tools-title{font-size:11.5px;font-weight:700;color:var(--accent-ink);text-transform:uppercase;letter-spacing:.04em;}
+.ai-image-tools-tag{font-size:9.5px;font-weight:700;color:var(--accent-ink);background:rgba(191,90,242,.14);padding:2px 8px;border-radius:20px;letter-spacing:.02em;}
+.ai-image-tools-row{display:flex;gap:8px;flex-wrap:wrap;}
+.ai-image-tools-row .btn span{font-size:14px;line-height:1;}
+.ai-custom-wrap{display:none;margin-top:10px;animation:fadeUp .22s ease both;}
+.ai-custom-wrap.show{display:block;}
+.ai-custom-wrap textarea{width:100%;padding:10px 12px;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:13px;resize:vertical;color:var(--ink);line-height:1.5;transition:border-color var(--ease),box-shadow var(--ease);}
+.ai-custom-wrap textarea:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-tint);}
+.ai-custom-wrap .btn{margin-top:8px;}
+.ai-image-status{display:none;align-items:center;gap:8px;margin-top:10px;font-size:11.5px;color:var(--accent-ink);font-weight:600;}
+.ai-image-status.show{display:flex;}
+.ai-spinner{width:13px;height:13px;border:2px solid rgba(191,90,242,.25);border-top-color:var(--accent-ink);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
+.ai-image-tools-hint{font-size:11px;color:var(--muted);margin-top:9px;line-height:1.45;}
+@media(min-width:520px){.ai-image-tools-row .btn{flex:1;}}
+
 .calc-box{background:var(--green-tint);border:1.5px solid rgba(48,209,88,.22);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:16px;}
 .calc-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#1a9e4a;margin-bottom:10px;}
 .calc-row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;}
@@ -461,6 +478,12 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
             <div class="inline-row"><input type="password" id="groqApiKeySetting" placeholder="gsk_..."><button class="btn btn-ghost btn-sm" id="saveGroqKeyBtn">Guardar</button></div>
             <p style="font-size:12px;color:var(--muted);margin-top:8px;">Se usa en el catálogo para mejorar el copy de venta con IA (botón "✨ Mejorar con IA"). Consíguela gratis en <span style="font-family:ui-monospace,'SF Mono',monospace;">console.groq.com</span>.</p>
           </div>
+          <div>
+            <div class="v-section-title">🖼️ Cloudflare Workers AI (Mejora de imágenes)</div>
+            <div class="inline-row" style="margin-bottom:8px;"><input type="text" id="cfAccountIdSetting" placeholder="Account ID"><button class="btn btn-ghost btn-sm" id="saveCfAccountBtn">Guardar</button></div>
+            <div class="inline-row"><input type="password" id="cfApiTokenSetting" placeholder="API Token"><button class="btn btn-ghost btn-sm" id="saveCfTokenBtn">Guardar</button></div>
+            <p style="font-size:12px;color:var(--muted);margin-top:8px;">Se usa en el catálogo para poner fondo blanco o estilo e-commerce a las fotos (sección "✨ Mejorar imagen con IA"). Crea un token en <span style="font-family:ui-monospace,'SF Mono',monospace;">dash.cloudflare.com → Perfil → API Tokens</span> con permiso <b>Workers AI · Edit</b>, y copia el <b>Account ID</b> desde el panel principal.</p>
+          </div>
         </div>
         <div class="vendors-list" id="vendorsList"></div>
       </section>
@@ -523,6 +546,24 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
                 <input type="file" id="imgInput" accept="image/*">
               </div>
             </div>
+
+            <div class="ai-image-tools" id="aiImageTools">
+              <div class="ai-image-tools-head">
+                <span class="ai-image-tools-title">✨ Mejorar imagen con IA</span>
+                <span class="ai-image-tools-tag">Cloudflare AI</span>
+              </div>
+              <div class="ai-image-tools-row">
+                <button type="button" class="btn btn-ai btn-sm" id="aiWhiteBgBtn"><span>🤍</span> Fondo blanco</button>
+                <button type="button" class="btn btn-ai btn-sm" id="aiCustomToggleBtn"><span>🛍️</span> Estilo e-commerce</button>
+              </div>
+              <div id="aiCustomPromptWrap" class="ai-custom-wrap">
+                <textarea id="aiCustomPrompt" rows="2" placeholder="Ej: fondo de mármol blanco con luz suave, sombra sutil, estilo e-commerce premium"></textarea>
+                <button type="button" class="btn btn-primary btn-sm" id="aiCustomGenBtn">✨ Generar</button>
+              </div>
+              <div id="aiImageStatus" class="ai-image-status"><span class="ai-spinner"></span><span class="ai-image-status-text"></span></div>
+              <p class="ai-image-tools-hint">Sube primero una foto. La IA la transforma conservando el producto y cambiando el entorno.</p>
+            </div>
+
             <div class="field">
               <label>Copy de venta</label>
               <textarea id="copyInput" rows="4" placeholder="Ej: ✨ ¿Quieres una piel radiante? ¡Últimas unidades! Escríbeme 👇" style="width:100%;padding:12px 14px;background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:14px;resize:vertical;line-height:1.55;transition:border-color var(--ease),box-shadow var(--ease);"></textarea>
@@ -627,6 +668,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   let products=[], vendors=[], anuncios=[], pedidos=[];
   let adminPin='1234';
   let groqApiKey='';
+  let cfAccountId='', cfApiToken='';
   let editingId=null, pendingImageData=null, deleteConfirmId=null;
 
   const $=sel=>document.querySelector(sel);
@@ -656,9 +698,11 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   async function loadVendors(){const{data,error}=await db.from('vendors').select('*').order('created_at',{ascending:true});if(error){console.error('vendors:',error);return;}vendors=data||[];}
   async function addVendor(name,pin){const{error}=await db.from('vendors').insert({name,pin});if(error)throw error;await loadVendors();}
   async function removeVendor(id){const{error}=await db.from('vendors').delete().eq('id',id);if(error)throw error;await loadVendors();}
-  async function loadConfig(){const{data,error}=await db.from('config').select('*');if(error){console.error('config:',error);return;}const pinRow=(data||[]).find(r=>r.key==='admin_pin');adminPin=pinRow?pinRow.value:'1234';const groqRow=(data||[]).find(r=>r.key==='groq_api_key');groqApiKey=groqRow?groqRow.value:'';}
+  async function loadConfig(){const{data,error}=await db.from('config').select('*');if(error){console.error('config:',error);return;}const pinRow=(data||[]).find(r=>r.key==='admin_pin');adminPin=pinRow?pinRow.value:'1234';const groqRow=(data||[]).find(r=>r.key==='groq_api_key');groqApiKey=groqRow?groqRow.value:'';const cfAccRow=(data||[]).find(r=>r.key==='cf_account_id');cfAccountId=cfAccRow?cfAccRow.value:'';const cfTokRow=(data||[]).find(r=>r.key==='cf_api_token');cfApiToken=cfTokRow?cfTokRow.value:'';}
   async function saveAdminPinDB(pin){const{error}=await db.from('config').upsert({key:'admin_pin',value:pin},{onConflict:'key'});if(error)throw error;adminPin=pin;}
   async function saveGroqKeyDB(key){const{error}=await db.from('config').upsert({key:'groq_api_key',value:key},{onConflict:'key'});if(error)throw error;groqApiKey=key;}
+  async function saveCfAccountDB(id){const{error}=await db.from('config').upsert({key:'cf_account_id',value:id},{onConflict:'key'});if(error)throw error;cfAccountId=id;}
+  async function saveCfTokenDB(token){const{error}=await db.from('config').upsert({key:'cf_api_token',value:token},{onConflict:'key'});if(error)throw error;cfApiToken=token;}
   async function loadAnuncios(){const{data,error}=await db.from('anuncios').select('*').order('created_at',{ascending:false});if(error){console.error('anuncios:',error);return;}anuncios=data||[];}
   async function saveAnuncio(titulo,texto,tipo){const fecha=new Date().toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'});const{error}=await db.from('anuncios').insert({titulo,texto,tipo,fecha});if(error)throw error;await loadAnuncios();}
   async function removeAnuncio(id){const{error}=await db.from('anuncios').delete().eq('id',id);if(error)throw error;await loadAnuncios();}
@@ -753,6 +797,74 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   $('#mejorarCopyBtn').addEventListener('click',mejorarCopyConIA);
   $('#saveGroqKeyBtn').addEventListener('click',async()=>{const key=$('#groqApiKeySetting').value.trim();if(!key){showToast('La API Key no puede estar vacía.');return;}try{await saveGroqKeyDB(key);showToast('✅ API Key de Groq guardada.');}catch(err){showToast('Error: '+err.message);}});
 
+  // ── MEJORAR IMAGEN CON IA (Cloudflare Workers AI) ──
+  function dataUrlToUint8Array(dataUrl,maxSize){
+    return new Promise((resolve,reject)=>{
+      const img=new Image();
+      img.onload=()=>{
+        let w=img.naturalWidth,h=img.naturalHeight;
+        if(w>h&&w>maxSize){h=Math.round(h*maxSize/w);w=maxSize;}
+        else if(h>=w&&h>maxSize){w=Math.round(w*maxSize/h);h=maxSize;}
+        const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+        const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,w,h);
+        canvas.toBlob(blob=>{
+          if(!blob){reject(new Error('No se pudo procesar la imagen.'));return;}
+          const reader=new FileReader();
+          reader.onload=()=>resolve(new Uint8Array(reader.result));
+          reader.onerror=()=>reject(new Error('No se pudo leer la imagen.'));
+          reader.readAsArrayBuffer(blob);
+        },'image/jpeg',0.92);
+      };
+      img.onerror=()=>reject(new Error('No se pudo cargar la imagen.'));
+      img.src=dataUrl;
+    });
+  }
+  function blobToDataUrl(blob){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(new Error('No se pudo leer el resultado.'));r.readAsDataURL(blob);});}
+  function setAiImageStatus(text){const el=$('#aiImageStatus');const txt=el.querySelector('.ai-image-status-text');if(!text){el.classList.remove('show');if(txt)txt.textContent='';}else{el.classList.add('show');if(txt)txt.textContent=text;}}
+  function setAiButtonsDisabled(disabled){['aiWhiteBgBtn','aiCustomToggleBtn','aiCustomGenBtn'].forEach(id=>{const b=$('#'+id);if(b)b.disabled=disabled;});}
+
+  async function generarImagenIA(prompt,strength){
+    const currentSource=pendingImageData||(editingId&&(products.find(p=>p.id===editingId)||{}).image)||null;
+    if(!currentSource){showToast('⚠️ Sube primero una foto del producto.');return;}
+    if(!cfAccountId||!cfApiToken){showToast('⚠️ Falta configurar Cloudflare (Account ID / Token) en "Vendedores".');return;}
+    setAiImageStatus('Generando imagen con IA, un momento…');
+    setAiButtonsDisabled(true);
+    try{
+      const bytes=await dataUrlToUint8Array(currentSource,768);
+      const model='@cf/runwayml/stable-diffusion-v1-5-img2img';
+      const url=`https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/ai/run/${model}`;
+      const res=await fetch(url,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+cfApiToken},
+        body:JSON.stringify({prompt,image:Array.from(bytes),strength:strength,num_steps:20,guidance:7.5})
+      });
+      if(!res.ok){
+        let msg='HTTP '+res.status;
+        try{const j=await res.json();if(j&&j.errors&&j.errors[0]&&j.errors[0].message)msg=j.errors[0].message;}catch(_){}
+        throw new Error(msg);
+      }
+      const blob=await res.blob();
+      const dataUrl=await blobToDataUrl(blob);
+      pendingImageData=dataUrl;
+      $('#imgPreview').src=dataUrl;
+      $('#dzPreviewWrap').style.display='block';
+      $('#dzPlaceholder').style.display='none';
+      showToast('✅ Imagen generada con IA.');
+    }catch(err){
+      console.error('Cloudflare AI error:',err);
+      showToast('❌ No se pudo generar la imagen: '+err.message);
+    }finally{
+      setAiImageStatus('');
+      setAiButtonsDisabled(false);
+    }
+  }
+  const PROMPT_FONDO_BLANCO='professional e-commerce product photography, the exact same product centered, clean pure white seamless background, soft studio softbox lighting, subtle natural shadow beneath product, sharp focus, high resolution catalog photo, no text, no watermark';
+  $('#aiWhiteBgBtn').addEventListener('click',()=>{generarImagenIA(PROMPT_FONDO_BLANCO,0.45);});
+  $('#aiCustomToggleBtn').addEventListener('click',()=>{const wrap=$('#aiCustomPromptWrap');const willShow=!wrap.classList.contains('show');wrap.classList.toggle('show',willShow);if(willShow)$('#aiCustomPrompt').focus();});
+  $('#aiCustomGenBtn').addEventListener('click',()=>{const prompt=$('#aiCustomPrompt').value.trim();if(!prompt){showToast('⚠️ Escribe un prompt para el estilo que quieres.');return;}generarImagenIA(prompt,0.55);});
+  $('#saveCfAccountBtn').addEventListener('click',async()=>{const id=$('#cfAccountIdSetting').value.trim();if(!id){showToast('El Account ID no puede estar vacío.');return;}try{await saveCfAccountDB(id);showToast('✅ Account ID de Cloudflare guardado.');}catch(err){showToast('Error: '+err.message);}});
+  $('#saveCfTokenBtn').addEventListener('click',async()=>{const token=$('#cfApiTokenSetting').value.trim();if(!token){showToast('El API Token no puede estar vacío.');return;}try{await saveCfTokenDB(token);showToast('✅ API Token de Cloudflare guardado.');}catch(err){showToast('Error: '+err.message);}});
+
   // ── RETIROS ADMIN ──
   async function loadRetirosAdmin(){
     const filtro=$('#filtroEstadoRetiro').value;
@@ -826,7 +938,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   async function enterAdmin(){
     $('#gateScreen').style.display='none';$('#adminScreen').style.display='block';
     setLoading(true);await Promise.all([loadProducts(),loadPedidos()]);setLoading(false);
-    render();updateCalcPreview();$('#adminPinSetting').value=adminPin;$('#groqApiKeySetting').value=groqApiKey;renderVendorsList();$('#statPedidos').textContent=pedidos.length;
+    render();updateCalcPreview();$('#adminPinSetting').value=adminPin;$('#groqApiKeySetting').value=groqApiKey;$('#cfAccountIdSetting').value=cfAccountId;$('#cfApiTokenSetting').value=cfApiToken;renderVendorsList();$('#statPedidos').textContent=pedidos.length;
     switchAdminPanel('catalogo');
   }
 
@@ -835,7 +947,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     document.querySelectorAll('.apanel').forEach(p=>p.classList.remove('apanel-active'));
     const target=$('#apanel-'+name);if(target)target.classList.add('apanel-active');
     document.querySelectorAll('[data-apanel]').forEach(btn=>btn.classList.toggle('asnav-active',btn.getAttribute('data-apanel')===name));
-    if(name==='vendedores'){$('#adminPinSetting').value=adminPin;$('#groqApiKeySetting').value=groqApiKey;renderVendorsList();}
+    if(name==='vendedores'){$('#adminPinSetting').value=adminPin;$('#groqApiKeySetting').value=groqApiKey;$('#cfAccountIdSetting').value=cfAccountId;$('#cfApiTokenSetting').value=cfApiToken;renderVendorsList();}
     if(name==='anuncios'){renderAdminAnuncios();}
     if(name==='pedidos'){loadPedidos().then(renderPedidos);}
     if(name==='retiros'){loadRetirosAdmin();}
@@ -968,6 +1080,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   function resetForm(){$('#productForm').reset();pendingImageData=null;$('#imgPreview').src='';$('#dzPreviewWrap').style.display='none';$('#dzPlaceholder').style.display='block';$('#imgInput').value='';$('#copyInput').value='';$('#copyCount').textContent='0 / 500';editingId=null;$('#formTitle').textContent='Agregar producto';$('#saveBtn').textContent='Guardar producto';$('#cancelEditBtn').style.display='none';$('#idError').style.display='none';$('#idInput').disabled=false;$('#commissionInput').value=15;$('#marginInput').value=20;$('#envioToggle').checked=false;$('#envioValueWrap').style.display='none';$('#envioInput').value='';$('#calcEnvioRow').style.display='none';
     $('#oferta2Toggle').checked=false;$('#oferta2Preview').style.display='none';$('#calcOferta2Row').style.display='none';
     $('#oferta3Toggle').checked=false;$('#oferta3Preview').style.display='none';$('#calcOferta3Row').style.display='none';
+    $('#aiCustomPromptWrap').classList.remove('show');$('#aiCustomPrompt').value='';setAiImageStatus('');
     updateCalcPreview();
   }
   $('#cancelEditBtn').addEventListener('click',()=>{resetForm();closeProductModal();});
