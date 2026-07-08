@@ -301,7 +301,6 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 .pedido-row.estado-cancelado{border-left-color:var(--red);opacity:.65;}
 .pedido-row.expanded{box-shadow:var(--shadow-sm);}
 
-/* Fila resumen (siempre visible, tap para expandir) */
 .pedido-summary{display:flex;align-items:center;gap:10px;padding:11px 12px;cursor:pointer;-webkit-user-select:none;user-select:none;}
 .pedido-summary:hover{background:rgba(0,0,0,.015);}
 .pedido-summary-icon{font-size:19px;flex-shrink:0;line-height:1;}
@@ -313,7 +312,6 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 .pedido-chevron{width:16px;height:16px;color:var(--muted);flex-shrink:0;transition:transform .25s var(--ease);}
 .pedido-row.expanded .pedido-chevron{transform:rotate(180deg);}
 
-/* Detalle (oculto por defecto) */
 .pedido-details{display:none;padding:2px 12px 12px;border-top:1px dashed var(--line);margin:0 12px;}
 .pedido-row.expanded .pedido-details{display:block;}
 .pedido-detail-grid{display:grid;grid-template-columns:1fr;gap:8px 14px;padding-top:10px;}
@@ -336,7 +334,6 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   .pedido-actions .btn-update-status{width:100%;}
 }
 
-/* Botón cargar más */
 .pedidos-load-more{display:flex;justify-content:center;margin-top:6px;}
 .pedidos-load-more .btn{width:100%;max-width:280px;}
 
@@ -671,6 +668,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   const SUPABASE_URL  = 'https://dwkuidvxqegdblablwst.supabase.co';
   const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3a3VpZHZ4cWVnZGJsYWJsd3N0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NzQ5NzcsImV4cCI6MjA5ODA1MDk3N30.6onUCOak6BHdKlCglFJQhJx0VnnjHaB3vsooNR6l8dk';
   const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  const STORAGE_BUCKET = 'product-images';
 
   const currency = new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0});
 
@@ -692,6 +690,47 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   const ESTADO_LABELS={reservado:{label:'Reservado',icon:'🟣'},nuevo:{label:'Nuevo',icon:'🔵'},confirmado:{label:'Confirmado',icon:'🟢'},despachado:{label:'Despachado',icon:'🟡'},entregado:{label:'Entregado',icon:'✅'},cancelado:{label:'Cancelado',icon:'🔴'}};
   function estadoBadge(estado){const e=ESTADO_LABELS[estado]||{label:estado,icon:'⚪'};return `<span class="badge badge-estado-${estado}">${e.icon} ${e.label}</span>`;}
 
+  // ── SUBIDA DE IMÁGENES A SUPABASE STORAGE ──
+  // Antes: las fotos se convertían a base64 y se guardaban como texto dentro de la
+  // fila de la tabla `products`. Eso hacía que products pesara ~43MB en total y que
+  // vendedor.html (que recarga el catálogo cada 30s) fallara en conexiones móviles.
+  // Ahora: cada foto se comprime en el navegador y se sube como archivo real a un
+  // bucket de Storage; en la fila solo se guarda la URL pública (unos 80 caracteres).
+  function resizeImageFile(file, maxDim, quality){
+    return new Promise((resolve,reject)=>{
+      const img=new Image();
+      const objectUrl=URL.createObjectURL(file);
+      img.onload=()=>{
+        URL.revokeObjectURL(objectUrl);
+        let w=img.naturalWidth,h=img.naturalHeight;
+        if(w>h&&w>maxDim){h=Math.round(h*maxDim/w);w=maxDim;}
+        else if(h>=w&&h>maxDim){w=Math.round(w*maxDim/h);h=maxDim;}
+        const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+        const ctx=canvas.getContext('2d');
+        ctx.fillStyle='#ffffff';ctx.fillRect(0,0,w,h); // fondo blanco por si el PNG original tenía transparencia
+        ctx.drawImage(img,0,0,w,h);
+        canvas.toBlob(blob=>{
+          if(!blob){reject(new Error('No se pudo procesar la imagen.'));return;}
+          resolve(blob);
+        },'image/jpeg',quality);
+      };
+      img.onerror=()=>{URL.revokeObjectURL(objectUrl);reject(new Error('No se pudo leer la imagen.'));};
+      img.src=objectUrl;
+    });
+  }
+  function randomFileName(ext){return Date.now()+'-'+Math.random().toString(36).slice(2,9)+'.'+ext;}
+  async function uploadBlobToStorage(blob,ext){
+    const path=randomFileName(ext||'jpg');
+    const{error}=await db.storage.from(STORAGE_BUCKET).upload(path,blob,{contentType:blob.type||'image/jpeg',upsert:true});
+    if(error)throw error;
+    const{data}=db.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+    return data.publicUrl;
+  }
+  async function uploadImageFile(file){
+    const compressed=await resizeImageFile(file,1600,0.85);
+    return uploadBlobToStorage(compressed,'jpg');
+  }
+
   // ── INIT ──
   async function init(){
     try{await Promise.all([loadConfig(),loadVendors(),loadAnuncios()]);}
@@ -701,7 +740,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   init();
 
   // ── SUPABASE DATA ──
-  async function loadProducts(){const{data,error}=await db.from('products').select('*').eq('activo',true).order('created_at',{ascending:false});if(error){console.error('products:',error);return;}products=data||[];}
+  async function loadProducts(){const{data,error}=await db.from('products').select('*').eq('activo',true).order('created_at',{ascending:false});if(error){console.error('products:',error);showToast('⚠️ Error al cargar productos: '+error.message);return;}products=data||[];}
   async function saveProduct(p){const row={id:p.id,name:p.name,category:p.category||'',city:p.city||'',price:p.price||0,stock:p.stock||0,commission:p.commission||0,margin:p.margin||0,copy:p.copy||'',image:p.image||'',shipping:p.shipping||0,in_stock:(p.stock||0)>0,oferta2_activa:!!p.oferta2_activa,oferta2_precio:p.oferta2_precio||0,oferta3_activa:!!p.oferta3_activa,oferta3_precio:p.oferta3_precio||0,activo:true,updated_at:new Date().toISOString()};const{error}=await db.from('products').upsert(row,{onConflict:'id'});if(error)throw error;}
   async function deleteProduct(id){const{error}=await db.from('products').update({activo:false,updated_at:new Date().toISOString()}).eq('id',id);if(error)throw error;}
   async function loadVendors(){const{data,error}=await db.from('vendors').select('*').order('created_at',{ascending:true});if(error){console.error('vendors:',error);return;}vendors=data||[];}
@@ -806,9 +845,10 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   $('#saveGroqKeyBtn').addEventListener('click',async()=>{const key=$('#groqApiKeySetting').value.trim();if(!key){showToast('La API Key no puede estar vacía.');return;}try{await saveGroqKeyDB(key);showToast('✅ API Key de Groq guardada.');}catch(err){showToast('Error: '+err.message);}});
 
   // ── MEJORAR IMAGEN CON IA (Cloudflare Workers AI) ──
-  function dataUrlToUint8Array(dataUrl,maxSize){
+  function dataUrlToUint8Array(source,maxSize){
     return new Promise((resolve,reject)=>{
       const img=new Image();
+      if(!String(source).startsWith('data:'))img.crossOrigin='anonymous'; // necesario para leer píxeles de una URL de Storage
       img.onload=()=>{
         let w=img.naturalWidth,h=img.naturalHeight;
         if(w>h&&w>maxSize){h=Math.round(h*maxSize/w);w=maxSize;}
@@ -824,10 +864,9 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
         },'image/jpeg',0.92);
       };
       img.onerror=()=>reject(new Error('No se pudo cargar la imagen.'));
-      img.src=dataUrl;
+      img.src=source;
     });
   }
-  function blobToDataUrl(blob){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(new Error('No se pudo leer el resultado.'));r.readAsDataURL(blob);});}
   function setAiImageStatus(text){const el=$('#aiImageStatus');const txt=el.querySelector('.ai-image-status-text');if(!text){el.classList.remove('show');if(txt)txt.textContent='';}else{el.classList.add('show');if(txt)txt.textContent=text;}}
   function setAiButtonsDisabled(disabled){['aiWhiteBgBtn','aiCustomToggleBtn','aiCustomGenBtn'].forEach(id=>{const b=$('#'+id);if(b)b.disabled=disabled;});}
 
@@ -850,9 +889,12 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
         throw new Error(msg);
       }
       const blob=await res.blob();
-      const dataUrl=await blobToDataUrl(blob);
-      pendingImageData=dataUrl;
-      $('#imgPreview').src=dataUrl;
+      // Antes: se convertía el resultado a base64 y se guardaba tal cual (el problema de siempre).
+      // Ahora: se sube como archivo real a Storage y solo guardamos la URL pública.
+      setAiImageStatus('Guardando imagen generada…');
+      const publicUrl=await uploadBlobToStorage(blob,(blob.type&&blob.type.includes('/')?blob.type.split('/')[1]:'jpg').replace('jpeg','jpg'));
+      pendingImageData=publicUrl;
+      $('#imgPreview').src=publicUrl;
       $('#dzPreviewWrap').style.display='block';
       $('#dzPlaceholder').style.display='none';
       showToast('✅ Imagen generada con IA.');
@@ -1077,7 +1119,27 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 
   // ── IMAGE ──
   $('#dropzone').addEventListener('click',e=>{if(e.target.id==='removeImgBtn')return;if(!e.target.closest('#removeImgBtn'))$('#imgInput').click();});
-  $('#imgInput').addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=ev=>{pendingImageData=ev.target.result;$('#imgPreview').src=ev.target.result;$('#dzPreviewWrap').style.display='block';$('#dzPlaceholder').style.display='none';};reader.readAsDataURL(file);});
+  $('#imgInput').addEventListener('change',async e=>{
+    const file=e.target.files[0];if(!file)return;
+    // Vista previa instantánea local mientras se sube (para que no se sienta lento)
+    const localPreview=URL.createObjectURL(file);
+    $('#imgPreview').src=localPreview;
+    $('#dzPreviewWrap').style.display='block';$('#dzPlaceholder').style.display='none';
+    showToast('Subiendo imagen…');
+    try{
+      const publicUrl=await uploadImageFile(file);
+      pendingImageData=publicUrl;
+      $('#imgPreview').src=publicUrl; // swap a la URL final ya hosteada en Storage
+      URL.revokeObjectURL(localPreview);
+      showToast('✅ Imagen subida.');
+    }catch(err){
+      console.error('upload image error:',err);
+      showToast('❌ No se pudo subir la imagen: '+err.message);
+      pendingImageData=null;
+      $('#dzPreviewWrap').style.display='none';$('#dzPlaceholder').style.display='block';
+      URL.revokeObjectURL(localPreview);
+    }
+  });
   $('#removeImgBtn').addEventListener('click',e=>{e.stopPropagation();pendingImageData=null;$('#imgPreview').src='';$('#dzPreviewWrap').style.display='none';$('#dzPlaceholder').style.display='block';$('#imgInput').value='';});
   $('#copyInput').addEventListener('input',()=>{const len=$('#copyInput').value.length;$('#copyCount').textContent=len+' / 500';$('#copyCount').style.color=len>450?'var(--red)':'var(--muted)';});
 
@@ -1125,7 +1187,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     const prices=calcPrices(p);
     const vendorGain = prices.publicPrice - prices.vendorPrice - prices.shipping;
     const stockBadge=(p.stock||0)<=0?`<span class="badge badge-out">Agotado</span>`:(p.stock||0)<=5?`<span class="badge badge-low">Quedan ${p.stock}</span>`:`<span class="badge badge-ok">Stock: ${p.stock}</span>`;
-    const imgHtml=p.image?`<img src="${esc(p.image)}" alt="${esc(p.name)}">`:`<div class="noimg">🫙</div>`;
+    const imgHtml=p.image?`<img src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy">`:`<div class="noimg">🫙</div>`;
     card.innerHTML=`
       <div class="card-media">${imgHtml}</div>
       <div class="card-body">
