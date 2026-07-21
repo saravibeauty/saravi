@@ -106,6 +106,26 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 .dropzone .dz-ph span{display:block;font-size:12px;opacity:.7;margin-top:2px;}
 .dropzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
 
+/* ============ GALERÍA DE CREATIVOS (imágenes + video) ============ */
+.media-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px;}
+.media-item{position:relative;background:var(--surface-2);border:1.5px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;}
+.media-item .mi-thumb{width:100%;aspect-ratio:1/1;background:#111;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;}
+.media-item .mi-thumb img,.media-item .mi-thumb video{width:100%;height:100%;object-fit:cover;}
+.media-item .mi-thumb .mi-video-badge{position:absolute;bottom:5px;left:5px;background:rgba(0,0,0,.6);color:#fff;font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:20px;display:flex;align-items:center;gap:3px;}
+.media-item .mi-thumb .mi-uploading{position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;}
+.media-item .mi-thumb .mi-uploading .spinner{border-color:rgba(255,255,255,.3);border-top-color:#fff;}
+.media-item .mi-label{width:100%;border:none;background:var(--surface);font-family:inherit;font-size:10.5px;padding:5px 7px;color:var(--ink-2);border-top:1px solid var(--line);}
+.media-item .mi-label:focus{outline:none;background:var(--accent-tint);}
+.media-item .mi-label::placeholder{color:var(--muted);}
+.media-item .mi-controls{position:absolute;top:5px;right:5px;display:flex;flex-direction:column;gap:4px;}
+.media-item .mi-btn{width:22px;height:22px;border-radius:50%;border:none;background:rgba(0,0,0,.55);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;line-height:1;transition:background .2s var(--ease);}
+.media-item .mi-btn:hover{background:rgba(0,0,0,.75);}
+.media-item .mi-btn.mi-del:hover{background:var(--red);}
+.media-item .mi-order{position:absolute;bottom:5px;right:5px;display:flex;gap:3px;}
+.media-item .mi-order .mi-btn{width:20px;height:20px;font-size:11px;}
+.media-item .mi-cover-tag{position:absolute;top:5px;left:5px;background:var(--accent);color:#fff;font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 6px;border-radius:20px;}
+.media-add-btns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+
 .calc-box{background:var(--green-tint);border:1.5px solid rgba(48,209,88,.22);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:16px;}
 .calc-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#1a9e4a;margin-bottom:10px;}
 .calc-row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;}
@@ -238,10 +258,11 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 
 .card{display:flex;flex-direction:row;background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;transition:transform .3s var(--spring),box-shadow .24s var(--ease);animation:fadeUp .3s ease both;}
 .card:hover{transform:translateY(-3px);box-shadow:var(--shadow);}
-.card-media{width:104px;flex-shrink:0;background:var(--surface-2);overflow:hidden;}
+.card-media{width:104px;flex-shrink:0;background:var(--surface-2);overflow:hidden;position:relative;}
 .card-media img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease;}
 .card:hover .card-media img{transform:scale(1.04);}
 .card-media .noimg{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:28px;opacity:.22;}
+.card-media .card-video-badge{position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,.6);color:#fff;font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:20px;}
 .card-body{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column;gap:7px;}
 .card-badges{display:flex;gap:6px;flex-wrap:wrap;}
 .card-name{font-size:14px;font-weight:700;letter-spacing:-.2px;line-height:1.32;}
@@ -511,14 +532,17 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
           <button type="button" class="modal-close" id="closeProductModalBtn">×</button>
           <div class="form-panel-head"><h2 id="formTitle">Agregar producto</h2><p>Completa la ficha antes de publicarlo.</p></div>
           <form id="productForm">
-            <div class="form-section-label">🖼️ Creativo y copy</div>
+            <div class="form-section-label">🖼️ Galería de creativos</div>
             <div class="field">
-              <label>Creativo <span style="font-weight:400;text-transform:none;font-size:11px;color:var(--accent-ink);">formato 9:16 recomendado</span></label>
-              <div class="dropzone" id="dropzone" style="padding:0;overflow:hidden;border-radius:12px;">
-                <div id="dzPreviewWrap" style="display:none;position:relative;"><img id="imgPreview" style="width:100%;display:block;border-radius:12px;max-height:340px;object-fit:cover;"><button type="button" id="removeImgBtn" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:28px;height:28px;font-size:16px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;">×</button></div>
-                <div class="dz-ph" id="dzPlaceholder" style="padding:28px 16px;"><div style="font-size:32px;margin-bottom:8px;">🖼️</div><div style="font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:4px;">Subir creativo</div><span>JPG · PNG · formato 9:16 recomendado</span></div>
-                <input type="file" id="imgInput" accept="image/*">
+              <label>Fotos y video <span style="font-weight:400;text-transform:none;font-size:11px;color:var(--accent-ink);">el primero se usa como portada</span></label>
+              <div class="media-gallery" id="mediaGallery"></div>
+              <div class="media-add-btns">
+                <button type="button" class="btn btn-ghost btn-sm" id="addImageBtn">+ Imagen</button>
+                <button type="button" class="btn btn-ghost btn-sm" id="addVideoBtn">+ Video</button>
+                <input type="file" id="mediaImageInput" accept="image/*" multiple style="display:none">
+                <input type="file" id="mediaVideoInput" accept="video/*" style="display:none">
               </div>
+              <p style="font-size:11px;color:var(--muted);margin-top:8px;">Máximo <span id="mediaMaxLabel"></span> creativos por producto · Video: hasta <span id="videoMaxSecLabel"></span>s y <span id="videoMaxMbLabel"></span>MB.</p>
             </div>
 
             <div class="field">
@@ -620,13 +644,18 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3a3VpZHZ4cWVnZGJsYWJsd3N0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0NzQ5NzcsImV4cCI6MjA5ODA1MDk3N30.6onUCOak6BHdKlCglFJQhJx0VnnjHaB3vsooNR6l8dk';
   const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
   const STORAGE_BUCKET = 'product-images';
+  const VIDEO_BUCKET = 'product-videos';
+  const MEDIA_MAX_ITEMS = 6;
+  const VIDEO_MAX_SECONDS = 45;
+  const VIDEO_MAX_MB = 30;
 
   const currency = new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0});
 
   let products=[], vendors=[], anuncios=[], pedidos=[];
   let adminPin='1234';
   let groqApiKey='';
-  let editingId=null, pendingImageData=null, deleteConfirmId=null;
+  let editingId=null, deleteConfirmId=null;
+  let mediaItems=[]; // {tipo:'imagen'|'video', url, etiqueta, _uploading}
 
   const $=sel=>document.querySelector(sel);
   function esc(str){const d=document.createElement('div');d.textContent=str==null?'':String(str);return d.innerHTML;}
@@ -637,6 +666,10 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   function openProductModal(){$('#productModalOverlay').classList.add('show');document.body.style.overflow='hidden';}
   function closeProductModal(){$('#productModalOverlay').classList.remove('show');document.body.style.overflow='';}
 
+  $('#mediaMaxLabel').textContent=MEDIA_MAX_ITEMS;
+  $('#videoMaxSecLabel').textContent=VIDEO_MAX_SECONDS;
+  $('#videoMaxMbLabel').textContent=VIDEO_MAX_MB;
+
   const ESTADO_LABELS={reservado:{label:'Reservado',icon:'🟣'},nuevo:{label:'Nuevo',icon:'🔵'},confirmado:{label:'Confirmado',icon:'🟢'},despachado:{label:'Despachado',icon:'🟡'},entregado:{label:'Entregado',icon:'✅'},cancelado:{label:'Cancelado',icon:'🔴'}};
   function estadoBadge(estado){const e=ESTADO_LABELS[estado]||{label:estado,icon:'⚪'};return `<span class="badge badge-estado-${estado}">${e.icon} ${e.label}</span>`;}
 
@@ -646,6 +679,12 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   // vendedor.html (que recarga el catálogo cada 30s) fallara en conexiones móviles.
   // Ahora: cada foto se comprime en el navegador y se sube como archivo real a un
   // bucket de Storage; en la fila solo se guarda la URL pública (unos 80 caracteres).
+  //
+  // Ajuste de compresión (julio 2026): se bajó de 1600px/calidad 0.85 a 1000px/0.72.
+  // Para un catálogo visto en celular, 1000px es más que suficiente (nadie hace zoom
+  // a un producto en pantalla completa 4K). Esto reduce el peso promedio por foto de
+  // ~700KB a ~150-220KB. Solo aplica a fotos nuevas subidas después de este cambio;
+  // las fotos ya existentes conservan su peso actual hasta que se vuelvan a subir.
   function resizeImageFile(file, maxDim, quality){
     return new Promise((resolve,reject)=>{
       const img=new Image();
@@ -669,16 +708,146 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     });
   }
   function randomFileName(ext){return Date.now()+'-'+Math.random().toString(36).slice(2,9)+'.'+ext;}
-  async function uploadBlobToStorage(blob,ext){
+  async function uploadBlobToStorage(bucket,blob,ext){
     const path=randomFileName(ext||'jpg');
-    const{error}=await db.storage.from(STORAGE_BUCKET).upload(path,blob,{contentType:blob.type||'image/jpeg',upsert:true});
+    const{error}=await db.storage.from(bucket).upload(path,blob,{contentType:blob.type||'application/octet-stream',upsert:true});
     if(error)throw error;
-    const{data}=db.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+    const{data}=db.storage.from(bucket).getPublicUrl(path);
     return data.publicUrl;
   }
   async function uploadImageFile(file){
-    const compressed=await resizeImageFile(file,1600,0.85);
-    return uploadBlobToStorage(compressed,'jpg');
+    const compressed=await resizeImageFile(file,1000,0.72);
+    return uploadBlobToStorage(STORAGE_BUCKET,compressed,'jpg');
+  }
+
+  // ── VALIDACIÓN Y SUBIDA DE VIDEO ──
+  // No se comprime en el navegador (sería muy pesado con ffmpeg.wasm y arruinaría
+  // la experiencia de subida). En vez de eso, se valida duración y peso ANTES de
+  // subir, para no llenar Storage con archivos gigantes. Los videos grabados para
+  // WhatsApp Status ya vienen razonablemente livianos de fábrica.
+  function getVideoDuration(file){
+    return new Promise((resolve,reject)=>{
+      const video=document.createElement('video');
+      video.preload='metadata';
+      const objectUrl=URL.createObjectURL(file);
+      video.onloadedmetadata=()=>{URL.revokeObjectURL(objectUrl);resolve(video.duration);};
+      video.onerror=()=>{URL.revokeObjectURL(objectUrl);reject(new Error('No se pudo leer el video. Intenta con otro archivo.'));};
+      video.src=objectUrl;
+    });
+  }
+  async function validateVideoFile(file){
+    if(file.size>VIDEO_MAX_MB*1024*1024)throw new Error(`El video pesa demasiado (máx ${VIDEO_MAX_MB}MB). El tuyo pesa ${(file.size/1024/1024).toFixed(1)}MB.`);
+    const duration=await getVideoDuration(file);
+    if(duration>VIDEO_MAX_SECONDS)throw new Error(`El video dura demasiado (máx ${VIDEO_MAX_SECONDS}s). El tuyo dura ${Math.round(duration)}s.`);
+  }
+  async function uploadVideoFile(file){
+    await validateVideoFile(file);
+    const ext=(file.name.split('.').pop()||'mp4').toLowerCase();
+    return uploadBlobToStorage(VIDEO_BUCKET,file,ext);
+  }
+
+  // ── GALERÍA DE CREATIVOS (imágenes + video por producto) ──
+  function renderMediaGallery(){
+    const wrap=$('#mediaGallery');
+    wrap.innerHTML='';
+    mediaItems.forEach((item,idx)=>{
+      const el=document.createElement('div');el.className='media-item';
+      const thumbInner=item.tipo==='video'
+        ? `<video src="${esc(item.url)}" muted playsinline></video><span class="mi-video-badge">🎥 Video</span>`
+        : `<img src="${esc(item.url)}" alt="creativo">`;
+      el.innerHTML=`
+        <div class="mi-thumb">
+          ${item._uploading?'<div class="mi-uploading"><div class="spinner"></div></div>':''}
+          ${thumbInner}
+          ${idx===0?'<span class="mi-cover-tag">Portada</span>':''}
+          <div class="mi-controls">
+            <button type="button" class="mi-btn mi-del" data-media-del="${idx}" title="Eliminar">×</button>
+          </div>
+          <div class="mi-order">
+            <button type="button" class="mi-btn" data-media-up="${idx}" title="Subir" ${idx===0?'disabled style="opacity:.3;cursor:default;"':''}>↑</button>
+            <button type="button" class="mi-btn" data-media-down="${idx}" title="Bajar" ${idx===mediaItems.length-1?'disabled style="opacity:.3;cursor:default;"':''}>↓</button>
+          </div>
+        </div>
+        <input type="text" class="mi-label" data-media-label="${idx}" placeholder="Etiqueta (ej: Beneficios)" value="${esc(item.etiqueta||'')}" maxlength="30">`;
+      wrap.appendChild(el);
+    });
+  }
+  $('#mediaGallery').addEventListener('click',e=>{
+    const delBtn=e.target.closest('[data-media-del]');
+    const upBtn=e.target.closest('[data-media-up]');
+    const downBtn=e.target.closest('[data-media-down]');
+    if(delBtn){mediaItems.splice(parseInt(delBtn.getAttribute('data-media-del'),10),1);renderMediaGallery();return;}
+    if(upBtn){const i=parseInt(upBtn.getAttribute('data-media-up'),10);if(i>0){[mediaItems[i-1],mediaItems[i]]=[mediaItems[i],mediaItems[i-1]];renderMediaGallery();}return;}
+    if(downBtn){const i=parseInt(downBtn.getAttribute('data-media-down'),10);if(i<mediaItems.length-1){[mediaItems[i+1],mediaItems[i]]=[mediaItems[i],mediaItems[i+1]];renderMediaGallery();}return;}
+  });
+  $('#mediaGallery').addEventListener('input',e=>{
+    const labelInput=e.target.closest('[data-media-label]');
+    if(labelInput){const i=parseInt(labelInput.getAttribute('data-media-label'),10);if(mediaItems[i])mediaItems[i].etiqueta=labelInput.value;}
+  });
+  $('#addImageBtn').addEventListener('click',()=>{
+    if(mediaItems.length>=MEDIA_MAX_ITEMS){showToast(`Máximo ${MEDIA_MAX_ITEMS} creativos por producto.`);return;}
+    $('#mediaImageInput').click();
+  });
+  $('#addVideoBtn').addEventListener('click',()=>{
+    if(mediaItems.length>=MEDIA_MAX_ITEMS){showToast(`Máximo ${MEDIA_MAX_ITEMS} creativos por producto.`);return;}
+    $('#mediaVideoInput').click();
+  });
+  $('#mediaImageInput').addEventListener('change',async e=>{
+    const files=Array.from(e.target.files||[]);e.target.value='';
+    if(!files.length)return;
+    const espacio=MEDIA_MAX_ITEMS-mediaItems.length;
+    const toUpload=files.slice(0,espacio);
+    if(files.length>espacio)showToast(`Solo se agregaron ${espacio} — llegaste al máximo de ${MEDIA_MAX_ITEMS}.`);
+    for(const file of toUpload){
+      const localUrl=URL.createObjectURL(file);
+      const item={tipo:'imagen',url:localUrl,etiqueta:'',_uploading:true};
+      mediaItems.push(item);renderMediaGallery();
+      try{
+        const publicUrl=await uploadImageFile(file);
+        item.url=publicUrl;item._uploading=false;
+        URL.revokeObjectURL(localUrl);
+        renderMediaGallery();
+      }catch(err){
+        showToast('❌ No se pudo subir la imagen: '+err.message);
+        mediaItems=mediaItems.filter(m=>m!==item);
+        URL.revokeObjectURL(localUrl);
+        renderMediaGallery();
+      }
+    }
+  });
+  $('#mediaVideoInput').addEventListener('change',async e=>{
+    const file=e.target.files&&e.target.files[0];e.target.value='';
+    if(!file)return;
+    const localUrl=URL.createObjectURL(file);
+    const item={tipo:'video',url:localUrl,etiqueta:'',_uploading:true};
+    mediaItems.push(item);renderMediaGallery();
+    showToast('Validando y subiendo video…');
+    try{
+      const publicUrl=await uploadVideoFile(file);
+      item.url=publicUrl;item._uploading=false;
+      URL.revokeObjectURL(localUrl);
+      renderMediaGallery();
+      showToast('✅ Video subido.');
+    }catch(err){
+      showToast('❌ '+err.message);
+      mediaItems=mediaItems.filter(m=>m!==item);
+      URL.revokeObjectURL(localUrl);
+      renderMediaGallery();
+    }
+  });
+
+  async function loadProductMedia(productId){
+    const{data,error}=await db.from('product_media').select('*').eq('product_id',productId).order('orden',{ascending:true});
+    if(error){console.error('product_media:',error);return[];}
+    return(data||[]).map(r=>({tipo:r.tipo,url:r.url,etiqueta:r.etiqueta||''}));
+  }
+  async function saveProductMedia(productId,items){
+    const{error:delErr}=await db.from('product_media').delete().eq('product_id',productId);
+    if(delErr)throw delErr;
+    if(!items.length)return;
+    const rows=items.map((m,idx)=>({product_id:productId,tipo:m.tipo,url:m.url,etiqueta:m.etiqueta||null,orden:idx}));
+    const{error}=await db.from('product_media').insert(rows);
+    if(error)throw error;
   }
 
   // ── INIT ──
@@ -996,36 +1165,12 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   });
   ['priceInput','commissionInput','marginInput','envioInput'].forEach(id=>$(`#${id}`).addEventListener('input',updateCalcPreview));
 
-  // ── IMAGE ──
-  $('#dropzone').addEventListener('click',e=>{if(e.target.id==='removeImgBtn')return;if(!e.target.closest('#removeImgBtn'))$('#imgInput').click();});
-  $('#imgInput').addEventListener('change',async e=>{
-    const file=e.target.files[0];if(!file)return;
-    // Vista previa instantánea local mientras se sube (para que no se sienta lento)
-    const localPreview=URL.createObjectURL(file);
-    $('#imgPreview').src=localPreview;
-    $('#dzPreviewWrap').style.display='block';$('#dzPlaceholder').style.display='none';
-    showToast('Subiendo imagen…');
-    try{
-      const publicUrl=await uploadImageFile(file);
-      pendingImageData=publicUrl;
-      $('#imgPreview').src=publicUrl; // swap a la URL final ya hosteada en Storage
-      URL.revokeObjectURL(localPreview);
-      showToast('✅ Imagen subida.');
-    }catch(err){
-      console.error('upload image error:',err);
-      showToast('❌ No se pudo subir la imagen: '+err.message);
-      pendingImageData=null;
-      $('#dzPreviewWrap').style.display='none';$('#dzPlaceholder').style.display='block';
-      URL.revokeObjectURL(localPreview);
-    }
-  });
-  $('#removeImgBtn').addEventListener('click',e=>{e.stopPropagation();pendingImageData=null;$('#imgPreview').src='';$('#dzPreviewWrap').style.display='none';$('#dzPlaceholder').style.display='block';$('#imgInput').value='';});
   $('#copyInput').addEventListener('input',()=>{const len=$('#copyInput').value.length;$('#copyCount').textContent=len+' / 500';$('#copyCount').style.color=len>450?'var(--red)':'var(--muted)';});
 
   // ── FORM ──
   $('#genIdBtn').addEventListener('click',()=>{let id;do{id='SKU-'+Math.floor(1000+Math.random()*9000);}while(products.some(p=>p.id===id));$('#idInput').value=id;$('#idError').style.display='none';});
   $('#idInput').addEventListener('input',()=>{$('#idError').style.display='none';});
-  function resetForm(){$('#productForm').reset();pendingImageData=null;$('#imgPreview').src='';$('#dzPreviewWrap').style.display='none';$('#dzPlaceholder').style.display='block';$('#imgInput').value='';$('#copyInput').value='';$('#copyCount').textContent='0 / 500';editingId=null;$('#formTitle').textContent='Agregar producto';$('#saveBtn').textContent='Guardar producto';$('#cancelEditBtn').style.display='none';$('#idError').style.display='none';$('#idInput').disabled=false;$('#commissionInput').value=15;$('#marginInput').value=20;$('#envioToggle').checked=false;$('#envioValueWrap').style.display='none';$('#envioInput').value='';$('#calcEnvioRow').style.display='none';
+  function resetForm(){$('#productForm').reset();mediaItems=[];renderMediaGallery();$('#copyInput').value='';$('#copyCount').textContent='0 / 500';editingId=null;$('#formTitle').textContent='Agregar producto';$('#saveBtn').textContent='Guardar producto';$('#cancelEditBtn').style.display='none';$('#idError').style.display='none';$('#idInput').disabled=false;$('#commissionInput').value=15;$('#marginInput').value=20;$('#envioToggle').checked=false;$('#envioValueWrap').style.display='none';$('#envioInput').value='';$('#calcEnvioRow').style.display='none';
     $('#oferta2Toggle').checked=false;$('#oferta2Preview').style.display='none';$('#calcOferta2Row').style.display='none';
     $('#oferta3Toggle').checked=false;$('#oferta3Preview').style.display='none';$('#calcOferta3Row').style.display='none';
     updateCalcPreview();
@@ -1040,7 +1185,9 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     const shipping=$('#envioToggle').checked?(parseFloat($('#envioInput').value)||0):0;
     if(!name||!id||!category||!city||isNaN(price)||isNaN(stock)){showToast('Completa todos los campos.');return;}
     if(products.some(p=>p.id===id&&p.id!==editingId)){$('#idError').style.display='block';return;}
-    let imageData=pendingImageData;if(editingId!==null&&pendingImageData===null){const ex=products.find(p=>p.id===editingId);imageData=ex?ex.image:'';}
+    if(mediaItems.some(m=>m._uploading)){showToast('Espera a que terminen de subirse los creativos.');return;}
+    const primeraImagen=mediaItems.find(m=>m.tipo==='imagen');
+    const imageData=primeraImagen?primeraImagen.url:'';
     const prices2=calcPrices({price,commission,margin,shipping});
     const o2activa=$('#oferta2Toggle').checked;
     const o3activa=$('#oferta3Toggle').checked;
@@ -1050,7 +1197,8 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     const productObj={id,name,category,city,price,stock,commission,margin,copy,image:imageData||'',shipping,oferta2_activa:o2activa,oferta2_precio:oferta2precio,oferta3_activa:o3activa,oferta3_precio:oferta3precio};setSaving(true);
     try{
       await saveProduct(productObj);
-      if(editingId!==null&&id!==editingId){await deleteProduct(editingId);}
+      if(editingId!==null&&id!==editingId){await deleteProduct(editingId);await saveProductMedia(editingId,[]);}
+      await saveProductMedia(id,mediaItems.map(m=>({tipo:m.tipo,url:m.url,etiqueta:m.etiqueta})));
       await loadProducts();
       showToast(editingId?'✅ Producto actualizado.':'✅ Producto guardado.');
       resetForm();closeProductModal();render();
@@ -1093,7 +1241,14 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     $('#oferta3Toggle').checked=!!(p.oferta3_activa);
     $('#oferta3Preview').style.display=p.oferta3_activa?'block':'none';
     $('#calcOferta3Row').style.display=p.oferta3_activa?'flex':'none';
-    const copy=p.copy||'';$('#copyInput').value=copy;$('#copyCount').textContent=copy.length+' / 500';updateCalcPreview();pendingImageData=null;if(p.image){$('#imgPreview').src=p.image;$('#dzPreviewWrap').style.display='block';$('#dzPlaceholder').style.display='none';}else{$('#dzPreviewWrap').style.display='none';$('#dzPlaceholder').style.display='block';}$('#formTitle').textContent='Editar producto';$('#saveBtn').textContent='Actualizar';$('#cancelEditBtn').style.display='block';openProductModal();}if(delId!==null){deleteConfirmId=delId;render();}if(confirmDelId!==null){try{await deleteProduct(confirmDelId);products=products.filter(p=>p.id!==confirmDelId);deleteConfirmId=null;render();showToast('Producto eliminado.');}catch(err){showToast('Error al eliminar: '+err.message);}}if(cancelDelId!==null){deleteConfirmId=null;render();}});
+    const copy=p.copy||'';$('#copyInput').value=copy;$('#copyCount').textContent=copy.length+' / 500';updateCalcPreview();
+    $('#formTitle').textContent='Editar producto';$('#saveBtn').textContent='Actualizar';$('#cancelEditBtn').style.display='block';
+    mediaItems=[];renderMediaGallery();
+    openProductModal();
+    const loadedMedia=await loadProductMedia(p.id);
+    mediaItems=loadedMedia.length?loadedMedia:(p.image?[{tipo:'imagen',url:p.image,etiqueta:''}]:[]);
+    renderMediaGallery();
+  }if(delId!==null){deleteConfirmId=delId;render();}if(confirmDelId!==null){try{await deleteProduct(confirmDelId);await saveProductMedia(confirmDelId,[]);products=products.filter(p=>p.id!==confirmDelId);deleteConfirmId=null;render();showToast('Producto eliminado.');}catch(err){showToast('Error al eliminar: '+err.message);}}if(cancelDelId!==null){deleteConfirmId=null;render();}});
   $('#searchInput').addEventListener('input',render);
 
   // ── EXPORT ──
