@@ -840,7 +840,9 @@ button{font:inherit;}
     }
   }
   $('#vendorRefreshBtn').addEventListener('click',async()=>{await refreshVendorData();showToast('✅ Catálogo actualizado.');});
-  function startVendorAutoRefresh(){stopVendorAutoRefresh();vendorRefreshTimer=setInterval(refreshVendorData,30000);}
+  // Antes: 30000 (30s). Optimización de egress autorizada: 150000 (2.5min).
+  // El vendedor puede refrescar manual en cualquier momento con el botón ⟳.
+  function startVendorAutoRefresh(){stopVendorAutoRefresh();vendorRefreshTimer=setInterval(refreshVendorData,150000);}
   function stopVendorAutoRefresh(){if(vendorRefreshTimer){clearInterval(vendorRefreshTimer);vendorRefreshTimer=null;}}
 
   // ── MODAL PRODUCTO ──
@@ -913,12 +915,23 @@ button{font:inherit;}
   // que nunca se captura → la promesa nunca resuelve → botón colgado en "Preparando imagen…".
   // Fix: pedimos los bytes originales directo con fetch (sin canvas), y con timeout
   // de seguridad para que jamás quede colgado, pase lo que pase con la red.
+  //
+  // OPTIMIZACIÓN DE EGRESS (autorizada): antes cada clic en "Compartir" volvía a
+  // descargar la imagen completa del producto desde Supabase Storage, sin importar
+  // si ya se había descargado hace 10 segundos. Ahora se guarda el blob ya
+  // descargado en memoria (imageShareCache) por URL de imagen, así que si el
+  // vendedor comparte el mismo producto varias veces en la misma sesión, solo se
+  // descarga una vez. La caché se pierde al recargar la pestaña (es solo en
+  // memoria, no persiste), lo cual es intencional y seguro.
+  const imageShareCache = new Map();
   function buildShareImage(p){
     if(!p.image)return Promise.resolve(null);
+    if(imageShareCache.has(p.image))return Promise.resolve(imageShareCache.get(p.image));
     const controller=new AbortController();
     const timeoutId=setTimeout(()=>controller.abort(),12000);
     return fetch(p.image,{signal:controller.signal})
       .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.blob();})
+      .then(blob=>{imageShareCache.set(p.image,blob);return blob;})
       .catch(err=>{console.error('buildShareImage error:',err);return null;})
       .finally(()=>clearTimeout(timeoutId));
   }
