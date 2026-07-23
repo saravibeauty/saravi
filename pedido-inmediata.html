@@ -370,10 +370,8 @@ img{max-width:100%;display:block;}
     };
   }
 
-  // Precio "antes" automático: +25% sobre el precio público actual, aplicado
-  // parejo a todo el catálogo (no requiere tocarlo producto por producto en el
-  // admin). El % del badge se calcula a partir de esos dos números para que
-  // nunca queden desincronizados entre sí.
+  // Precio "antes" automático: exactamente +25% sobre el precio público real
+  // del producto (el mismo que configuraste en el admin — ese nunca se toca).
   const PRECIO_ANTES_FACTOR=1.25;
   function renderProduct(){
     const prices=calcPrices(product);
@@ -382,9 +380,8 @@ img{max-width:100%;display:block;}
     $('#ppLabel').textContent='Precio'+(prices.shipping>0?' (envío incluido)':'');
 
     const antes=Math.round((prices.publicPrice*PRECIO_ANTES_FACTOR)/100)*100;
-    const pctOff=Math.round((1-prices.publicPrice/antes)*100);
     $('#ppBefore').textContent=currency.format(antes);$('#ppBefore').style.display='inline';
-    $('#ppDiscountBadge').textContent='-'+pctOff+'%';$('#ppDiscountBadge').style.display='inline-block';
+    $('#ppDiscountBadge').textContent='-25%';$('#ppDiscountBadge').style.display='inline-block';
 
     // Urgencia de stock — solo si es real, tomada directo del inventario (nunca inventada).
     const stock=product.stock||0;
