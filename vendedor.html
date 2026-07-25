@@ -497,6 +497,11 @@ button{font:inherit;}
           <div><div class="vpanel-eyebrow">Mi perfil financiero</div><div class="vpanel-title">Datos bancarios</div></div>
           <button class="btn btn-primary" id="btnAgregarCuenta"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Agregar cuenta</button>
         </div>
+        <div class="retiro-form-box" style="margin-bottom:var(--sp-5);">
+          <h3>📲 Mi WhatsApp de ventas</h3>
+          <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;">Cuando un cliente confirme un pedido tuyo, va a poder avisarte directo por este número. Formato: indicativo de país + número, sin espacios ni "+" (ej: 573001234567).</p>
+          <div class="inline-row"><input type="text" id="vendorWhatsappInput" placeholder="Ej: 573001234567" style="flex:1;min-width:180px;padding:13px 14px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:15px;color:var(--ink);"><button class="btn btn-primary btn-sm" id="saveVendorWhatsappBtn">Guardar</button></div>
+        </div>
         <div class="banco-table-wrap">
           <div id="bancoLoading" style="text-align:center;padding:40px;color:var(--muted);font-size:13px;"><div class="spinner" style="margin:0 auto 10px;"></div>Cargando cuentas…</div>
           <div id="bancoTableContainer" style="display:none;">
@@ -667,6 +672,7 @@ button{font:inherit;}
     vendorCategory='Todas';vendorSearchTerm='';$('#vendorSearchInput').value='';
     renderVendorCategories();renderVendorGrid();startVendorAutoRefresh();
     populateRetiroBancoSel();
+    $('#vendorWhatsappInput').value=currentVendor.whatsapp||'';
   }
   function showGate(){stopVendorAutoRefresh();currentVendor=null;$('#vendorScreen').style.display='none';$('#gateScreen').style.display='flex';$('#vendorNameInput').value='';$('#vendorPinInput').value='';$('#vendorLoginError').style.display='none';$('#walletAmount').innerHTML='<span class="wallet-loading">…</span>';}
   $('#vendorLogoutBtn').addEventListener('click',showGate);
@@ -704,6 +710,21 @@ button{font:inherit;}
     const editBtn=e.target.closest('[data-edit-id]');const delBtn=e.target.closest('[data-del-id]');
     if(editBtn){const id=editBtn.getAttribute('data-edit-id');const cuenta=cuentasBancarias.find(c=>String(c.id)===String(id));if(cuenta)openBancoModal(cuenta);}
     if(delBtn){const id=delBtn.getAttribute('data-del-id');if(confirm('¿Eliminar esta cuenta bancaria?')){try{await deleteCuentaBancaria(id);showToast('✅ Cuenta eliminada.');}catch(err){showToast('Error: '+err.message);}}}
+  });
+
+  async function saveVendorWhatsapp(numero){
+    if(!currentVendor)return;
+    const{error}=await db.from('vendors').update({whatsapp:numero}).eq('id',currentVendor.id);
+    if(error)throw error;
+    currentVendor.whatsapp=numero;
+  }
+  $('#saveVendorWhatsappBtn').addEventListener('click',async()=>{
+    const numero=$('#vendorWhatsappInput').value.trim().replace(/[^0-9]/g,'');
+    if(!numero||numero.length<10){showToast('⚠️ Ingresa un número válido con indicativo de país.');return;}
+    const btn=$('#saveVendorWhatsappBtn');btn.disabled=true;btn.textContent='Guardando…';
+    try{await saveVendorWhatsapp(numero);showToast('✅ WhatsApp guardado.');}
+    catch(err){showToast('❌ Error: '+err.message);}
+    finally{btn.disabled=false;btn.textContent='Guardar';}
   });
 
   function updateBancoOptions(){const pais=$('#bPais').value;const bancoSel=$('#bBanco');bancoSel.innerHTML='<option value="">Seleccionar banco</option>';const lista=pais==='BRASIL'?BANCOS_BRASIL:pais?BANCOS_COLOMBIA:[];lista.forEach(b=>{const opt=document.createElement('option');opt.value=b;opt.textContent=b;bancoSel.appendChild(opt);});toggleExtraFields();}
