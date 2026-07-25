@@ -258,6 +258,8 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 
 .card{display:flex;flex-direction:row;background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;transition:transform .3s var(--spring),box-shadow .24s var(--ease);animation:fadeUp .3s ease both;}
 .card:hover{transform:translateY(-3px);box-shadow:var(--shadow);}
+.card.card-hidden{opacity:.6;}
+.card.card-hidden:hover{opacity:1;}
 .card-media{width:104px;flex-shrink:0;background:var(--surface-2);overflow:hidden;position:relative;}
 .card-media img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease;}
 .card:hover .card-media img{transform:scale(1.04);}
@@ -560,6 +562,12 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
             <div class="field"><label>ID / SKU</label><div class="id-row"><input type="text" id="idInput" placeholder="Ej: SKU-0142" required><button type="button" class="btn btn-ghost btn-sm" id="genIdBtn">Generar</button></div><div class="error-msg" id="idError">Ya existe un producto con este ID.</div></div>
             <div class="field"><label>Categoría</label><input type="text" id="categoryInput" list="categoryList" placeholder="Ej: Belleza" required><datalist id="categoryList"><option value="Belleza"><option value="Salud y Bienestar"><option value="Cabello"><option value="Perfumes"><option value="Accesorios"><option value="Sex Shop"><option value="Mascotas"><option value="Bebé"><option value="Hogar"><option value="Otros"></datalist></div>
             <div class="field"><label>Ciudad de bodega</label><input type="text" id="cityInput" list="cityList" placeholder="Ej: Cali" required><datalist id="cityList"><option value="Cali"><option value="Bogotá"><option value="Medellín"><option value="Barranquilla"><option value="Cartagena"><option value="Bucaramanga"><option value="Pereira"></datalist></div>
+            <div class="field" style="margin-bottom:0;">
+              <label class="switch-row">
+                <div class="sw-text"><strong>Visible para vendedores</strong><p>Si lo apagas, el producto sigue en tu inventario pero desaparece del catálogo que ven los vendedores</p></div>
+                <span class="switch"><input type="checkbox" id="visibleVendedorToggle" checked><span class="switch-track"></span><span class="switch-thumb"></span></span>
+              </label>
+            </div>
 
             <div class="form-section-label">💰 Precios y comisiones</div>
             <div class="field-row">
@@ -860,7 +868,8 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 
   // ── SUPABASE DATA ──
   async function loadProducts(){const{data,error}=await db.from('products').select('*').eq('activo',true).order('created_at',{ascending:false});if(error){console.error('products:',error);showToast('⚠️ Error al cargar productos: '+error.message);return;}products=data||[];}
-  async function saveProduct(p){const row={id:p.id,name:p.name,category:p.category||'',city:p.city||'',price:p.price||0,stock:p.stock||0,commission:p.commission||0,margin:p.margin||0,copy:p.copy||'',image:p.image||'',shipping:p.shipping||0,in_stock:(p.stock||0)>0,oferta2_activa:!!p.oferta2_activa,oferta2_precio:p.oferta2_precio||0,oferta3_activa:!!p.oferta3_activa,oferta3_precio:p.oferta3_precio||0,activo:true,updated_at:new Date().toISOString()};const{error}=await db.from('products').upsert(row,{onConflict:'id'});if(error)throw error;}
+  async function saveProduct(p){const row={id:p.id,name:p.name,category:p.category||'',city:p.city||'',price:p.price||0,stock:p.stock||0,commission:p.commission||0,margin:p.margin||0,copy:p.copy||'',image:p.image||'',shipping:p.shipping||0,in_stock:(p.stock||0)>0,visible_vendedor:p.visible_vendedor!==false,oferta2_activa:!!p.oferta2_activa,oferta2_precio:p.oferta2_precio||0,oferta3_activa:!!p.oferta3_activa,oferta3_precio:p.oferta3_precio||0,activo:true,updated_at:new Date().toISOString()};const{error}=await db.from('products').upsert(row,{onConflict:'id'});if(error)throw error;}
+  async function setProductVisibility(id,visible){const{error}=await db.from('products').update({visible_vendedor:visible,updated_at:new Date().toISOString()}).eq('id',id);if(error)throw error;}
   async function deleteProduct(id){const{error}=await db.from('products').update({activo:false,updated_at:new Date().toISOString()}).eq('id',id);if(error)throw error;}
   async function loadVendors(){const{data,error}=await db.from('vendors').select('*').order('created_at',{ascending:true});if(error){console.error('vendors:',error);return;}vendors=data||[];}
   async function addVendor(name,pin){const{error}=await db.from('vendors').insert({name,pin});if(error)throw error;await loadVendors();}
@@ -1170,7 +1179,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   // ── FORM ──
   $('#genIdBtn').addEventListener('click',()=>{let id;do{id='SKU-'+Math.floor(1000+Math.random()*9000);}while(products.some(p=>p.id===id));$('#idInput').value=id;$('#idError').style.display='none';});
   $('#idInput').addEventListener('input',()=>{$('#idError').style.display='none';});
-  function resetForm(){$('#productForm').reset();mediaItems=[];renderMediaGallery();$('#copyInput').value='';$('#copyCount').textContent='0 / 500';editingId=null;$('#formTitle').textContent='Agregar producto';$('#saveBtn').textContent='Guardar producto';$('#cancelEditBtn').style.display='none';$('#idError').style.display='none';$('#idInput').disabled=false;$('#commissionInput').value=15;$('#marginInput').value=20;$('#envioToggle').checked=false;$('#envioValueWrap').style.display='none';$('#envioInput').value='';$('#calcEnvioRow').style.display='none';
+  function resetForm(){$('#productForm').reset();mediaItems=[];renderMediaGallery();$('#copyInput').value='';$('#copyCount').textContent='0 / 500';editingId=null;$('#formTitle').textContent='Agregar producto';$('#saveBtn').textContent='Guardar producto';$('#cancelEditBtn').style.display='none';$('#idError').style.display='none';$('#idInput').disabled=false;$('#commissionInput').value=15;$('#marginInput').value=20;$('#envioToggle').checked=false;$('#envioValueWrap').style.display='none';$('#envioInput').value='';$('#calcEnvioRow').style.display='none';$('#visibleVendedorToggle').checked=true;
     $('#oferta2Toggle').checked=false;$('#oferta2Preview').style.display='none';$('#calcOferta2Row').style.display='none';
     $('#oferta3Toggle').checked=false;$('#oferta3Preview').style.display='none';$('#calcOferta3Row').style.display='none';
     updateCalcPreview();
@@ -1183,6 +1192,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   $('#productForm').addEventListener('submit',async e=>{
     e.preventDefault();const name=$('#nameInput').value.trim(),id=$('#idInput').value.trim(),category=$('#categoryInput').value.trim();const city=$('#cityInput').value.trim(),price=parseFloat($('#priceInput').value),stock=parseInt($('#stockInput').value,10);const commission=parseFloat($('#commissionInput').value)||0,margin=parseFloat($('#marginInput').value)||0;const copy=$('#copyInput').value.trim();
     const shipping=$('#envioToggle').checked?(parseFloat($('#envioInput').value)||0):0;
+    const visibleVendedor=$('#visibleVendedorToggle').checked;
     if(!name||!id||!category||!city||isNaN(price)||isNaN(stock)){showToast('Completa todos los campos.');return;}
     if(products.some(p=>p.id===id&&p.id!==editingId)){$('#idError').style.display='block';return;}
     if(mediaItems.some(m=>m._uploading)){showToast('Espera a que terminen de subirse los creativos.');return;}
@@ -1194,7 +1204,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     const gananciaVendedor2 = prices2.publicPrice - prices2.vendorPrice - prices2.shipping;
     const oferta2precio = o2activa ? prices2.publicPrice + prices2.vendorPrice + gananciaVendedor2 : 0;
     const oferta3precio = o3activa ? oferta2precio + prices2.vendorPrice + gananciaVendedor2 : 0;
-    const productObj={id,name,category,city,price,stock,commission,margin,copy,image:imageData||'',shipping,oferta2_activa:o2activa,oferta2_precio:oferta2precio,oferta3_activa:o3activa,oferta3_precio:oferta3precio};setSaving(true);
+    const productObj={id,name,category,city,price,stock,commission,margin,copy,image:imageData||'',shipping,visible_vendedor:visibleVendedor,oferta2_activa:o2activa,oferta2_precio:oferta2precio,oferta3_activa:o3activa,oferta3_precio:oferta3precio};setSaving(true);
     try{
       await saveProduct(productObj);
       if(editingId!==null&&id!==editingId){await deleteProduct(editingId);await saveProductMedia(editingId,[]);}
@@ -1208,15 +1218,16 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   // ── ADMIN GRID ──
   function render(){const query=$('#searchInput').value.trim().toLowerCase();const filtered=products.filter(p=>!query||(p.name.toLowerCase().includes(query)||p.id.toLowerCase().includes(query)||(p.city||'').toLowerCase().includes(query)));const grid=$('#grid');grid.innerHTML='';filtered.forEach(p=>grid.appendChild(buildCard(p)));$('#emptyState').style.display=products.length===0?'block':'none';$('#resultCount').textContent=query?`${filtered.length} resultado(s)`:'';$('#statCount').textContent=products.length;$('#statCities').textContent=new Set(products.map(p=>(p.city||'').toLowerCase())).size;$('#statValue').textContent=currency.format(products.reduce((s,p)=>s+(p.price||0)*(p.stock||0),0));$('#statStock').textContent=products.reduce((s,p)=>s+(p.stock||0),0);}
   function buildCard(p){
-    const card=document.createElement('div');card.className='card';
+    const card=document.createElement('div');card.className='card'+(p.visible_vendedor===false?' card-hidden':'');
     const prices=calcPrices(p);
     const vendorGain = prices.publicPrice - prices.vendorPrice - prices.shipping;
     const stockBadge=(p.stock||0)<=0?`<span class="badge badge-out">Agotado</span>`:(p.stock||0)<=5?`<span class="badge badge-low">Quedan ${p.stock}</span>`:`<span class="badge badge-ok">Stock: ${p.stock}</span>`;
+    const hiddenBadge=p.visible_vendedor===false?`<span class="badge" style="background:rgba(60,60,67,.1);color:var(--ink-2);">🙈 Oculto</span>`:'';
     const imgHtml=p.image?`<img src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy">`:`<div class="noimg">🫙</div>`;
     card.innerHTML=`
       <div class="card-media">${imgHtml}</div>
       <div class="card-body">
-        <div class="card-badges"><span class="badge badge-cat">${esc(p.category||'Sin categoría')}</span>${stockBadge}</div>
+        <div class="card-badges"><span class="badge badge-cat">${esc(p.category||'Sin categoría')}</span>${stockBadge}${hiddenBadge}</div>
         <div class="card-name">${esc(p.name)}</div>
         <div class="card-id">#${esc(p.id)} · ${esc(p.city||'')}</div>
         <div class="card-price-grid">
@@ -1229,12 +1240,21 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     renderCardActions(card.querySelector('[data-actions]'),p);
     return card;
   }
-  function renderCardActions(container,p){if(deleteConfirmId===p.id){container.innerHTML=`<div class="confirm-row"><button class="btn btn-danger btn-sm" data-confirm-del="${p.id}">Eliminar</button><button class="btn btn-ghost btn-sm" data-cancel-del="${p.id}">Cancelar</button></div>`;}else{container.innerHTML=`<button class="btn btn-secondary btn-sm" data-edit="${p.id}">Editar</button><button class="btn btn-danger btn-sm" data-del="${p.id}">Eliminar</button>`;}}
-  $('#grid').addEventListener('click',async e=>{const editId=e.target.getAttribute('data-edit'),delId=e.target.getAttribute('data-del');const confirmDelId=e.target.getAttribute('data-confirm-del'),cancelDelId=e.target.getAttribute('data-cancel-del');if(editId!==null){const p=products.find(x=>x.id===editId);if(!p)return;editingId=p.id;$('#nameInput').value=p.name;$('#idInput').value=p.id;$('#categoryInput').value=p.category||'';$('#cityInput').value=p.city||'';$('#priceInput').value=p.price;$('#stockInput').value=p.stock??'';$('#commissionInput').value=p.commission??15;$('#marginInput').value=p.margin??20;
+  function renderCardActions(container,p){if(deleteConfirmId===p.id){container.innerHTML=`<div class="confirm-row"><button class="btn btn-danger btn-sm" data-confirm-del="${p.id}">Eliminar</button><button class="btn btn-ghost btn-sm" data-cancel-del="${p.id}">Cancelar</button></div>`;}else{const visBtnLabel=p.visible_vendedor===false?'👁️ Mostrar':'🙈 Ocultar';container.innerHTML=`<button class="btn btn-secondary btn-sm" data-edit="${p.id}">Editar</button><button class="btn btn-ghost btn-sm" data-toggle-vis="${p.id}">${visBtnLabel}</button><button class="btn btn-danger btn-sm" data-del="${p.id}">Eliminar</button>`;}}
+  $('#grid').addEventListener('click',async e=>{const editId=e.target.getAttribute('data-edit'),delId=e.target.getAttribute('data-del');const confirmDelId=e.target.getAttribute('data-confirm-del'),cancelDelId=e.target.getAttribute('data-cancel-del');const toggleVisId=e.target.getAttribute('data-toggle-vis');
+  if(toggleVisId!==null){
+    const p=products.find(x=>x.id===toggleVisId);if(!p)return;
+    const nuevoValor=!(p.visible_vendedor!==false);
+    try{await setProductVisibility(toggleVisId,nuevoValor);p.visible_vendedor=nuevoValor;render();showToast(nuevoValor?'👁️ Producto visible para vendedores.':'🙈 Producto oculto del catálogo de vendedores.');}
+    catch(err){showToast('❌ Error: '+err.message);}
+    return;
+  }
+  if(editId!==null){const p=products.find(x=>x.id===editId);if(!p)return;editingId=p.id;$('#nameInput').value=p.name;$('#idInput').value=p.id;$('#categoryInput').value=p.category||'';$('#cityInput').value=p.city||'';$('#priceInput').value=p.price;$('#stockInput').value=p.stock??'';$('#commissionInput').value=p.commission??15;$('#marginInput').value=p.margin??20;
     const shipping=p.shipping||0;
     $('#envioToggle').checked=shipping>0;
     $('#envioValueWrap').style.display=shipping>0?'block':'none';
     $('#envioInput').value=shipping>0?shipping:'';
+    $('#visibleVendedorToggle').checked=p.visible_vendedor!==false;
     $('#oferta2Toggle').checked=!!(p.oferta2_activa);
     $('#oferta2Preview').style.display=p.oferta2_activa?'block':'none';
     $('#calcOferta2Row').style.display=p.oferta2_activa?'flex':'none';
