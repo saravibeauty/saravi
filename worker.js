@@ -77,8 +77,16 @@ export default {
 <meta name="twitter:image" content="${escapeHtml(imagen)}">
 `;
 
-    return new HTMLRewriter()
+    const rewritten = new HTMLRewriter()
       .on('head', new HeadMetaInjector(tags))
       .transform(originResponse);
+
+    // Esta página cambia de contenido según el producto (?order=XXX), así que
+    // nunca debe quedar en caché — si no, Cloudflare podría servir la versión
+    // de un producto distinto, o una copia vieja sin las etiquetas.
+    const finalResponse = new Response(rewritten.body, rewritten);
+    finalResponse.headers.set('Cache-Control', 'no-store, must-revalidate');
+    finalResponse.headers.delete('CF-Cache-Status');
+    return finalResponse;
   }
 };
