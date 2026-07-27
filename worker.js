@@ -35,14 +35,26 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    // ── MARCA DE DIAGNÓSTICO TEMPORAL ──
+    // Este header aparece en TODAS las páginas mientras depuramos. Se quita
+    // apenas confirmemos que el Worker está corriendo correctamente.
+    const debugHeaders = { 'X-Saravi-Worker': 'v2-activo' };
+
     // Todo lo que NO sea pedido-inmediata.html se sirve tal cual, como antes.
     if (!url.pathname.endsWith('pedido-inmediata.html')) {
-      return env.ASSETS.fetch(request);
+      const passthroughResponse = await env.ASSETS.fetch(request);
+      const withDebug = new Response(passthroughResponse.body, passthroughResponse);
+      withDebug.headers.set('X-Saravi-Worker', 'v2-activo-passthrough');
+      return withDebug;
     }
 
     const originResponse = await env.ASSETS.fetch(request);
     const productId = url.searchParams.get('order');
-    if (!productId) return originResponse; // link sin producto, nada que inyectar
+    if (!productId) {
+      const r = new Response(originResponse.body, originResponse);
+      r.headers.set('X-Saravi-Worker', 'v2-activo-sin-order');
+      return r;
+    }
 
     let product = null;
     try {
@@ -53,10 +65,16 @@ export default {
       const rows = await res.json();
       product = rows && rows[0] ? rows[0] : null;
     } catch (err) {
-      return originResponse; // si Supabase falla, se entrega la página normal, sin romper nada
+      const r = new Response(originResponse.body, originResponse);
+      r.headers.set('X-Saravi-Worker', 'v2-activo-error-supabase');
+      return r; // si Supabase falla, se entrega la página normal, sin romper nada
     }
 
-    if (!product) return originResponse;
+    if (!product) {
+      const r = new Response(originResponse.body, originResponse);
+      r.headers.set('X-Saravi-Worker', 'v2-activo-sin-producto');
+      return r;
+    }
 
     const currency = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
     const precio = currency.format(calcPublicPrice(product));
@@ -87,6 +105,7 @@ export default {
     const finalResponse = new Response(rewritten.body, rewritten);
     finalResponse.headers.set('Cache-Control', 'no-store, must-revalidate');
     finalResponse.headers.delete('CF-Cache-Status');
+    finalResponse.headers.set('X-Saravi-Worker', 'v2-activo-tags-inyectados');
     return finalResponse;
   }
 };
