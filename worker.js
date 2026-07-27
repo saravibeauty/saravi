@@ -40,8 +40,9 @@ export default {
     // apenas confirmemos que el Worker está corriendo correctamente.
     const debugHeaders = { 'X-Saravi-Worker': 'v2-activo' };
 
-    // Todo lo que NO sea pedido-inmediata.html se sirve tal cual, como antes.
-    if (!url.pathname.endsWith('pedido-inmediata.html')) {
+    // Nota: en algunos casos Cloudflare sirve/redirige esta página sin la
+    // extensión ".html" — por eso revisamos ambas formas, no solo una.
+    if (!url.pathname.endsWith('pedido-inmediata.html') && !url.pathname.endsWith('/pedido-inmediata') && url.pathname !== '/pedido-inmediata') {
       const passthroughResponse = await env.ASSETS.fetch(request);
       const withDebug = new Response(passthroughResponse.body, passthroughResponse);
       withDebug.headers.set('X-Saravi-Worker', 'v2-activo-passthrough');
