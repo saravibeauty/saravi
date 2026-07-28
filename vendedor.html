@@ -599,11 +599,19 @@ button{font:inherit;}
         <div id="modalCopy" style="background:var(--accent-tint);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:12px 46px 12px 14px;font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word;"></div>
         <button id="modalCopyBtn" title="Copiar copy" style="position:absolute;top:8px;right:8px;display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.85);backdrop-filter:blur(6px);border:1px solid rgba(191,90,242,.18);color:var(--accent-ink);font-size:10.5px;font-weight:700;padding:5px 8px;border-radius:8px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.07);transition:background .2s var(--ease),transform .25s var(--spring);">📋</button>
       </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;">
+        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">¿A dónde lo compartes?</span>
+        <div class="stock-segment" id="shareDestinoSegment">
+          <button type="button" class="seg-btn" data-destino="estado">Estado</button>
+          <button type="button" class="seg-btn active" data-destino="chat">Chat</button>
+        </div>
+      </div>
       <div style="display:flex;flex-direction:column;gap:8px;">
-        <button id="modalShareBtn" class="btn btn-whatsapp btn-full" style="font-size:15px;">📲 Compartir creativo + copy</button>
+        <button id="modalShareBtn" class="btn btn-whatsapp btn-full" style="font-size:15px;">📲 Compartir a un chat</button>
         <button id="modalSendOrderBtn" class="btn btn-whatsapp btn-full btn-sm" style="font-size:14px;">🚀 Link Pedido Entrega Inmediata</button>
         <button id="modalSendCampanaBtn" class="btn btn-primary btn-full btn-sm" style="font-size:14px;">📅 Link Pedido Cierre de Campaña</button>
       </div>
+      <p style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center;" id="shareDestinoHint">El copy completo se envía tal cual, ideal para una conversación.</p>
       <div id="orderLinkBox" style="display:none;margin-top:12px;background:var(--green-tint);border:1px solid rgba(37,211,102,.25);border-radius:12px;padding:12px 14px;">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#1a9e4a;margin-bottom:6px;">🚀 Link · Entrega Inmediata</div>
         <div id="orderLinkText" style="font-size:12px;color:var(--ink-2);word-break:break-all;font-family:ui-monospace,'SF Mono',monospace;margin-bottom:8px;"></div>
@@ -936,8 +944,40 @@ button{font:inherit;}
     const canShare=!!(selected&&selected.url&&hasCopy);
     const btn=$('#modalShareBtn');
     btn.disabled=!canShare;btn.style.opacity=canShare?'1':'.4';
-    btn.textContent=selected&&selected.tipo==='video'?'📲 Compartir video + copy':'📲 Compartir foto + copy';
+    const tipoTxt=selected&&selected.tipo==='video'?'video':'foto';
+    btn.textContent=shareDestino==='estado'?`📲 Compartir ${tipoTxt} a Estado`:`📲 Compartir ${tipoTxt} a un chat`;
   }
+
+  // ── SELECTOR "¿A DÓNDE LO COMPARTES?" (Estado vs Chat) ──
+  // El copy completo (con gancho, viñetas, cierre) está pensado para una
+  // conversación uno-a-uno, donde el cliente ya tiene tiempo de leer. En un
+  // Estado de WhatsApp la gente pasa el dedo en segundos, así que ahí se
+  // manda un texto corto y directo: gancho + precio + un solo llamado a la
+  // acción claro apuntando al link de pedido (que además, en este modo, se
+  // incluye automático en el texto — antes había que ir a buscarlo aparte).
+  let shareDestino='chat';
+  function buildOrderLink(p){
+    const base=window.location.href.replace(/[^\/]*$/,'');
+    const vendorParam=currentVendor?'&v='+encodeURIComponent(currentVendor.id):'';
+    return base+'pedido-inmediata.html?order='+encodeURIComponent(p.id)+vendorParam;
+  }
+  function buildShareText(p,destino){
+    const copy=(p.copy&&p.copy.trim())?p.copy.trim():p.name;
+    if(destino!=='estado')return copy; // modo chat: copy completo, tal cual, sin cambios
+    const prices=calcPrices(p);
+    const gancho=copy.split('\n')[0].trim()||p.name;
+    const link=buildOrderLink(p);
+    return `${gancho}\n💰 ${currency.format(prices.publicPrice)}\n🛒 Toca el link y pide aquí 👇\n${link}`;
+  }
+  $('#shareDestinoSegment').addEventListener('click',e=>{
+    const btn=e.target.closest('.seg-btn');if(!btn)return;
+    shareDestino=btn.getAttribute('data-destino');
+    $('#shareDestinoSegment').querySelectorAll('.seg-btn').forEach(b=>b.classList.toggle('active',b===btn));
+    $('#shareDestinoHint').textContent=shareDestino==='estado'
+      ? 'Texto corto con gancho, precio y el link de pedido — pensado para que le den clic desde el Estado.'
+      : 'El copy completo se envía tal cual, ideal para una conversación.';
+    updateShareButtonState();
+  });
 
   // ── MODAL PRODUCTO ──
   async function openModal(p){
@@ -960,6 +1000,9 @@ button{font:inherit;}
     if(p.oferta3_activa)ofertasHtml+='<div style="background:var(--blue-tint);border:1px solid rgba(10,132,255,.2);border-radius:10px;padding:8px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;font-weight:700;color:var(--blue);">📦 Oferta x3</span><b style="color:var(--blue);font-size:14px;font-variant-numeric:tabular-nums;">'+currency.format(p.oferta3_precio||0)+'</b></div>';
     $('#modalOfertasBlock').innerHTML=ofertasHtml;
     $('#orderLinkBox').style.display='none';$('#campanaLinkBox').style.display='none';
+    shareDestino='chat';
+    $('#shareDestinoSegment').querySelectorAll('.seg-btn').forEach(b=>b.classList.toggle('active',b.getAttribute('data-destino')==='chat'));
+    $('#shareDestinoHint').textContent='El copy completo se envía tal cual, ideal para una conversación.';
 
     // Estado inicial mientras carga la galería: usa la portada (p.image) para que el modal no aparezca vacío.
     modalMediaItems=p.image?[{tipo:'imagen',url:p.image,etiqueta:''}]:[];
@@ -1047,7 +1090,7 @@ button{font:inherit;}
     try{
       const blob=await buildShareMedia(mediaItem.url);
       if(!blob){showToast('No se pudo preparar el archivo. Verifica la URL del creativo.');return;}
-      const text=(p.copy&&p.copy.trim())?p.copy.trim():p.name;
+      const text=buildShareText(p,shareDestino);
       const defaultExt=mediaItem.tipo==='video'?'mp4':'jpg';
       const ext=blob.type&&blob.type.includes('/')?blob.type.split('/')[1].replace('jpeg','jpg'):defaultExt;
       const file=new File([blob],(p.id||'producto')+'.'+ext,{type:blob.type||(mediaItem.tipo==='video'?'video/mp4':'image/jpeg')});
