@@ -594,11 +594,11 @@ button{font:inherit;}
         <div style="flex:1;background:var(--green-tint);border-radius:9px;padding:10px 12px;"><div style="font-size:10px;text-transform:uppercase;font-weight:700;color:#1a9e4a;margin-bottom:3px;">Tu ganancia</div><div id="modalEarn" style="font-size:15px;font-weight:700;color:#1a9e4a;font-variant-numeric:tabular-nums;"></div><div id="modalMargin" style="font-size:13px;font-weight:800;color:#1a9e4a;"></div></div>
       </div>
       <div id="modalOfertasBlock"></div>
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;">Copy de venta</div>
-      <div style="position:relative;margin-bottom:16px;">
-        <div id="modalCopy" style="background:var(--accent-tint);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:12px 46px 12px 14px;font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word;"></div>
-        <button id="modalCopyBtn" title="Copiar copy" style="position:absolute;top:8px;right:8px;display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.85);backdrop-filter:blur(6px);border:1px solid rgba(191,90,242,.18);color:var(--accent-ink);font-size:10.5px;font-weight:700;padding:5px 8px;border-radius:8px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.07);transition:background .2s var(--ease),transform .25s var(--spring);">📋</button>
+      <div id="modalDescriptionBlock" style="display:none;margin-bottom:16px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;">Detalles del producto</div>
+        <div id="modalDescription" style="background:var(--surface-2);border-radius:10px;padding:12px 14px;font-size:13.5px;color:var(--ink-2);line-height:1.65;white-space:pre-wrap;word-break:break-word;"></div>
       </div>
+      <button type="button" id="modalCopyBtn" title="Copiar texto de venta" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--accent-ink);font-size:12px;font-weight:700;padding:0 0 16px;cursor:pointer;">📋 Copiar texto de venta (para otras redes)</button>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;">
         <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);">¿A dónde lo compartes?</span>
         <div class="stock-segment" id="shareDestinoSegment">
@@ -994,7 +994,12 @@ button{font:inherit;}
     else{vb.style.display='none';vb.textContent='';}
     $('#modalEarn').textContent='+'+currency.format(earn);
     $('#modalMargin').textContent=(p.margin||0)+'%';
-    $('#modalCopy').textContent=p.copy||'(Sin copy de venta)';
+    if(p.description&&p.description.trim()){
+      $('#modalDescription').textContent=p.description.trim();
+      $('#modalDescriptionBlock').style.display='block';
+    }else{
+      $('#modalDescriptionBlock').style.display='none';
+    }
     let ofertasHtml='';
     if(p.oferta2_activa)ofertasHtml+='<div style="background:var(--blue-tint);border:1px solid rgba(10,132,255,.2);border-radius:10px;padding:8px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;font-weight:700;color:var(--blue);">📦 Oferta x2</span><b style="color:var(--blue);font-size:14px;font-variant-numeric:tabular-nums;">'+currency.format(p.oferta2_precio||0)+'</b></div>';
     if(p.oferta3_activa)ofertasHtml+='<div style="background:var(--blue-tint);border:1px solid rgba(10,132,255,.2);border-radius:10px;padding:8px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;font-weight:700;color:var(--blue);">📦 Oferta x3</span><b style="color:var(--blue);font-size:14px;font-variant-numeric:tabular-nums;">'+currency.format(p.oferta3_precio||0)+'</b></div>';
