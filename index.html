@@ -562,6 +562,12 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
               <div style="font-size:11px;color:var(--muted);margin-top:5px;display:flex;justify-content:space-between;"><span>Se envía junto con la imagen en WhatsApp</span><span id="copyCount">0 / 500</span></div>
             </div>
 
+            <div class="field">
+              <label>Descripción del producto <span style="font-weight:400;text-transform:none;font-size:11px;color:var(--accent-ink);">se muestra en la página de pedido</span></label>
+              <textarea id="descriptionInput" rows="5" placeholder="Ej: Secador de cabello profesional con tecnología iónica.&#10;&#10;Incluye: secador, 2 boquillas, difusor.&#10;Potencia: 2200W.&#10;Uso: cabello normal a grueso." style="width:100%;padding:12px 14px;background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:14px;resize:vertical;line-height:1.55;transition:border-color var(--ease),box-shadow var(--ease);"></textarea>
+              <p style="font-size:11px;color:var(--muted);margin-top:6px;">Información real del producto (qué es, qué incluye, características) — distinta del copy de venta. Se muestra completa en la landing de pedido, y también le ayuda al vendedor a entender qué está vendiendo. Respeta los saltos de línea que escribas aquí.</p>
+            </div>
+
             <div class="form-section-label">🏷️ Información del producto</div>
             <div class="field"><label>Nombre del producto</label><input type="text" id="nameInput" placeholder="Ej: Crema hidratante X200" required></div>
             <div class="field"><label>ID / SKU</label><div class="id-row"><input type="text" id="idInput" placeholder="Ej: SKU-0142" required><button type="button" class="btn btn-ghost btn-sm" id="genIdBtn">Generar</button></div><div class="error-msg" id="idError">Ya existe un producto con este ID.</div></div>
@@ -874,7 +880,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
 
   // ── SUPABASE DATA ──
   async function loadProducts(){const{data,error}=await db.from('products').select('*').eq('activo',true).order('created_at',{ascending:false});if(error){console.error('products:',error);showToast('⚠️ Error al cargar productos: '+error.message);return;}products=data||[];}
-  async function saveProduct(p){const row={id:p.id,name:p.name,category:p.category||'',city:p.city||'',price:p.price||0,stock:p.stock||0,commission:p.commission||0,margin:p.margin||0,copy:p.copy||'',image:p.image||'',shipping:p.shipping||0,in_stock:(p.stock||0)>0,visible_vendedor:p.visible_vendedor!==false,oferta2_activa:!!p.oferta2_activa,oferta2_precio:p.oferta2_precio||0,oferta3_activa:!!p.oferta3_activa,oferta3_precio:p.oferta3_precio||0,activo:true,updated_at:new Date().toISOString()};const{error}=await db.from('products').upsert(row,{onConflict:'id'});if(error)throw error;}
+  async function saveProduct(p){const row={id:p.id,name:p.name,category:p.category||'',city:p.city||'',price:p.price||0,stock:p.stock||0,commission:p.commission||0,margin:p.margin||0,copy:p.copy||'',description:p.description||'',image:p.image||'',shipping:p.shipping||0,in_stock:(p.stock||0)>0,visible_vendedor:p.visible_vendedor!==false,oferta2_activa:!!p.oferta2_activa,oferta2_precio:p.oferta2_precio||0,oferta3_activa:!!p.oferta3_activa,oferta3_precio:p.oferta3_precio||0,activo:true,updated_at:new Date().toISOString()};const{error}=await db.from('products').upsert(row,{onConflict:'id'});if(error)throw error;}
   async function setProductVisibility(id,visible){const{error}=await db.from('products').update({visible_vendedor:visible,updated_at:new Date().toISOString()}).eq('id',id);if(error)throw error;}
   async function deleteProduct(id){const{error}=await db.from('products').update({activo:false,updated_at:new Date().toISOString()}).eq('id',id);if(error)throw error;}
   async function loadVendors(){const{data,error}=await db.from('vendors').select('*').order('created_at',{ascending:true});if(error){console.error('vendors:',error);return;}vendors=data||[];}
@@ -1187,7 +1193,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   // ── FORM ──
   $('#genIdBtn').addEventListener('click',()=>{let id;do{id='SKU-'+Math.floor(1000+Math.random()*9000);}while(products.some(p=>p.id===id));$('#idInput').value=id;$('#idError').style.display='none';});
   $('#idInput').addEventListener('input',()=>{$('#idError').style.display='none';});
-  function resetForm(){$('#productForm').reset();mediaItems=[];renderMediaGallery();$('#copyInput').value='';$('#copyCount').textContent='0 / 500';editingId=null;$('#formTitle').textContent='Agregar producto';$('#saveBtn').textContent='Guardar producto';$('#cancelEditBtn').style.display='none';$('#idError').style.display='none';$('#idInput').disabled=false;$('#commissionInput').value=15;$('#marginInput').value=20;$('#envioToggle').checked=false;$('#envioValueWrap').style.display='none';$('#envioInput').value='';$('#calcEnvioRow').style.display='none';$('#visibleVendedorToggle').checked=true;
+  function resetForm(){$('#productForm').reset();mediaItems=[];renderMediaGallery();$('#copyInput').value='';$('#copyCount').textContent='0 / 500';editingId=null;$('#formTitle').textContent='Agregar producto';$('#saveBtn').textContent='Guardar producto';$('#cancelEditBtn').style.display='none';$('#idError').style.display='none';$('#idInput').disabled=false;$('#commissionInput').value=15;$('#marginInput').value=20;$('#envioToggle').checked=false;$('#envioValueWrap').style.display='none';$('#envioInput').value='';$('#calcEnvioRow').style.display='none';$('#visibleVendedorToggle').checked=true;$('#descriptionInput').value='';
     $('#oferta2Toggle').checked=false;$('#oferta2Preview').style.display='none';$('#calcOferta2Row').style.display='none';
     $('#oferta3Toggle').checked=false;$('#oferta3Preview').style.display='none';$('#calcOferta3Row').style.display='none';
     updateCalcPreview();
@@ -1198,7 +1204,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
   $('#productModalOverlay').addEventListener('click',e=>{if(e.target.id==='productModalOverlay')closeProductModal();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#productModalOverlay').classList.contains('show'))closeProductModal();});
   $('#productForm').addEventListener('submit',async e=>{
-    e.preventDefault();const name=$('#nameInput').value.trim(),id=$('#idInput').value.trim(),category=$('#categoryInput').value.trim();const city=$('#cityInput').value.trim(),price=parseFloat($('#priceInput').value),stock=parseInt($('#stockInput').value,10);const commission=parseFloat($('#commissionInput').value)||0,margin=parseFloat($('#marginInput').value)||0;const copy=$('#copyInput').value.trim();
+    e.preventDefault();const name=$('#nameInput').value.trim(),id=$('#idInput').value.trim(),category=$('#categoryInput').value.trim();const city=$('#cityInput').value.trim(),price=parseFloat($('#priceInput').value),stock=parseInt($('#stockInput').value,10);const commission=parseFloat($('#commissionInput').value)||0,margin=parseFloat($('#marginInput').value)||0;const copy=$('#copyInput').value.trim();const description=$('#descriptionInput').value.trim();
     const shipping=$('#envioToggle').checked?(parseFloat($('#envioInput').value)||0):0;
     const visibleVendedor=$('#visibleVendedorToggle').checked;
     if(!name||!id||!category||!city||isNaN(price)||isNaN(stock)){showToast('Completa todos los campos.');return;}
@@ -1212,7 +1218,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     const gananciaVendedor2 = prices2.publicPrice - prices2.vendorPrice - prices2.shipping;
     const oferta2precio = o2activa ? prices2.publicPrice + prices2.vendorPrice + gananciaVendedor2 : 0;
     const oferta3precio = o3activa ? oferta2precio + prices2.vendorPrice + gananciaVendedor2 : 0;
-    const productObj={id,name,category,city,price,stock,commission,margin,copy,image:imageData||'',shipping,visible_vendedor:visibleVendedor,oferta2_activa:o2activa,oferta2_precio:oferta2precio,oferta3_activa:o3activa,oferta3_precio:oferta3precio};setSaving(true);
+    const productObj={id,name,category,city,price,stock,commission,margin,copy,description,image:imageData||'',shipping,visible_vendedor:visibleVendedor,oferta2_activa:o2activa,oferta2_precio:oferta2precio,oferta3_activa:o3activa,oferta3_precio:oferta3precio};setSaving(true);
     try{
       await saveProduct(productObj);
       if(editingId!==null&&id!==editingId){await deleteProduct(editingId);await saveProductMedia(editingId,[]);}
@@ -1263,6 +1269,7 @@ textarea:focus{outline:none;border-color:var(--accent)!important;box-shadow:0 0 
     $('#envioValueWrap').style.display=shipping>0?'block':'none';
     $('#envioInput').value=shipping>0?shipping:'';
     $('#visibleVendedorToggle').checked=p.visible_vendedor!==false;
+    $('#descriptionInput').value=p.description||'';
     $('#oferta2Toggle').checked=!!(p.oferta2_activa);
     $('#oferta2Preview').style.display=p.oferta2_activa?'block':'none';
     $('#calcOferta2Row').style.display=p.oferta2_activa?'flex':'none';
