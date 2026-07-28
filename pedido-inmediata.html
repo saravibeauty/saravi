@@ -249,6 +249,11 @@ img{max-width:100%;display:block;}
     <div id="ofertaBtns"></div>
   </div>
 
+  <div class="section-card" id="descriptionCard" style="display:none;">
+    <div class="section-title">Detalles del producto</div>
+    <div id="productDescription" style="font-size:14px;color:var(--ink-2);line-height:1.7;white-space:pre-wrap;word-break:break-word;"></div>
+  </div>
+
   <div class="section-card">
     <div class="section-title">Tus datos</div>
     <div class="field"><label>Nombre completo</label><input type="text" id="fNombre" placeholder="¿Cómo te llamas?"><div class="field-err" id="eNombre">Ingresa tu nombre</div></div>
@@ -498,6 +503,13 @@ img{max-width:100%;display:block;}
     $('#productName').textContent=product.name;
     $('#ppAmount').textContent=currency.format(prices.publicPrice);
     $('#ppLabel').textContent='Precio'+(prices.shipping>0?' (envío incluido)':'');
+
+    if(product.description&&product.description.trim()){
+      $('#productDescription').textContent=product.description.trim();
+      $('#descriptionCard').style.display='block';
+    }else{
+      $('#descriptionCard').style.display='none';
+    }
 
     const antes=Math.round((prices.publicPrice*PRECIO_ANTES_FACTOR)/100)*100;
     $('#ppBefore').textContent=currency.format(antes);$('#ppBefore').style.display='inline';
