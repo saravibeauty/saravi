@@ -501,6 +501,7 @@ button{font:inherit;}
           <h3>📲 Mi WhatsApp de ventas</h3>
           <p style="font-size:12.5px;color:var(--muted);margin-bottom:12px;">Cuando un cliente confirme un pedido tuyo, va a poder avisarte directo por este número. Formato: indicativo de país + número, sin espacios ni "+" (ej: 573001234567).</p>
           <div class="inline-row"><input type="text" id="vendorWhatsappInput" placeholder="Ej: 573001234567" style="flex:1;min-width:180px;padding:13px 14px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:15px;color:var(--ink);"><button class="btn btn-primary btn-sm" id="saveVendorWhatsappBtn">Guardar</button></div>
+          <p style="font-size:11.5px;color:var(--muted);margin-top:8px;" id="vendorWhatsappStatus"></p>
         </div>
         <div class="banco-table-wrap">
           <div id="bancoLoading" style="text-align:center;padding:40px;color:var(--muted);font-size:13px;"><div class="spinner" style="margin:0 auto 10px;"></div>Cargando cuentas…</div>
@@ -681,6 +682,7 @@ button{font:inherit;}
     renderVendorCategories();renderVendorGrid();startVendorAutoRefresh();
     populateRetiroBancoSel();
     $('#vendorWhatsappInput').value=currentVendor.whatsapp||'';
+    updateVendorWhatsappStatus();
   }
   function showGate(){stopVendorAutoRefresh();currentVendor=null;$('#vendorScreen').style.display='none';$('#gateScreen').style.display='flex';$('#vendorNameInput').value='';$('#vendorPinInput').value='';$('#vendorLoginError').style.display='none';$('#walletAmount').innerHTML='<span class="wallet-loading">…</span>';}
   $('#vendorLogoutBtn').addEventListener('click',showGate);
@@ -720,9 +722,18 @@ button{font:inherit;}
     if(delBtn){const id=delBtn.getAttribute('data-del-id');if(confirm('¿Eliminar esta cuenta bancaria?')){try{await deleteCuentaBancaria(id);showToast('✅ Cuenta eliminada.');}catch(err){showToast('Error: '+err.message);}}}
   });
 
+  function updateVendorWhatsappStatus(){
+    const el=$('#vendorWhatsappStatus');if(!el)return;
+    el.textContent=(currentVendor&&currentVendor.whatsapp)?`Guardado: +${currentVendor.whatsapp} — puedes cambiarlo cuando quieras, solo escribe el nuevo y toca Guardar.`:'Aún no has guardado ningún número.';
+  }
   async function saveVendorWhatsapp(numero){
     if(!currentVendor)return;
-    const{error}=await db.from('vendors').update({whatsapp:numero}).eq('id',currentVendor.id);
+    // Límite de seguridad: si Supabase no responde en 10s (red lenta/caída),
+    // el botón se libera solo con un mensaje claro, en vez de quedarse
+    // "Guardando…" para siempre sin que el vendedor sepa qué pasó.
+    const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('Se demoró demasiado. Revisa tu conexión e intenta de nuevo.')),10000));
+    const update=db.from('vendors').update({whatsapp:numero}).eq('id',currentVendor.id).select();
+    const{error}=await Promise.race([update,timeout]);
     if(error)throw error;
     currentVendor.whatsapp=numero;
   }
@@ -730,8 +741,8 @@ button{font:inherit;}
     const numero=$('#vendorWhatsappInput').value.trim().replace(/[^0-9]/g,'');
     if(!numero||numero.length<10){showToast('⚠️ Ingresa un número válido con indicativo de país.');return;}
     const btn=$('#saveVendorWhatsappBtn');btn.disabled=true;btn.textContent='Guardando…';
-    try{await saveVendorWhatsapp(numero);showToast('✅ WhatsApp guardado.');}
-    catch(err){showToast('❌ Error: '+err.message);}
+    try{await saveVendorWhatsapp(numero);showToast('✅ WhatsApp guardado.');updateVendorWhatsappStatus();}
+    catch(err){console.error('saveVendorWhatsapp:',err);showToast('❌ '+(err.message||'No se pudo guardar. Intenta de nuevo.'));}
     finally{btn.disabled=false;btn.textContent='Guardar';}
   });
 
